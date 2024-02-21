@@ -1,0 +1,18 @@
+export default {
+  black: "#000000",
+  red: "#CC0000",
+  white: "#FFFFFF",
+  grey: "#6F7070",
+  grey1: "#D9D9D9",
+  grey2: "#707070",
+  grey3: "#737385",
+  greyPlaceholder: "#A8A8A8",
+  grey4: "#00000029",
+  grey5: "#DDDDDD",
+  grey6: "#B7B7B7",
+  grey7: "#E4E4E4",
+  grey8: "#E8E8E8",
+  grey9: "#B5B5B5",
+  grey10: "#B5B6B8",
+  grey11: "#A5A5A5",
+}
