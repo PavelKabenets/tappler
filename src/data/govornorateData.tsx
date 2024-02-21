@@ -1,0 +1,25 @@
+import { GovernorateItemType } from "types"
+
+export const governoratesData: GovernorateItemType[] = [
+  "asyut",
+  "red_sea",
+  "beni_suef",
+  "cairo",
+  "dakahlia",
+  "damietta",
+  "faiyum",
+  "gharbia",
+  "giza",
+  "ismailia",
+  "south_sinai",
+  "kafr_el_sheikh",
+  "luxor",
+  "matrouh",
+  "minya",
+  "monufia",
+  "port_said",
+  "qena",
+  "sohag",
+  "sharqia",
+  "north_sinai",
+]
