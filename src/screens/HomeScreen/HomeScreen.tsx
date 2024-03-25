@@ -1,10 +1,12 @@
 import React from "react"
 
 // Components
-import { DmText, DmView } from "components/UI"
+import { ActionBtn, DmText, DmView } from "components/UI"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 // Hooks & Redux
+import { useDispatch } from "react-redux"
+import { logout } from "store/auth/slice"
 
 // Helpers & Types
 import { RootStackScreenProps } from "navigation/types"
@@ -22,16 +24,21 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // State
   // Global Store
   // Variables
+  const dispatch = useDispatch()
   // Refs
   // Methods
   // Handlers
+  const handleLogOut = () => {
+    dispatch(logout())
+    navigation.replace("welcome")
+  }
   // Hooks
   // Listeners
   // Render Methods
 
   return (
-    <SafeAreaView>
-      <DmText>HomeScreen</DmText>
+    <SafeAreaView className="flex-1 justify-center px-[24]">
+      <ActionBtn title="Restart demo" onPress={handleLogOut} />
     </SafeAreaView>
   )
 }

@@ -8,6 +8,7 @@ import { openLegalLink } from "utils/linking"
 
 import styles from "./styles"
 import clsx from "clsx"
+import LogoIcon from 'assets/icons/logo.svg'
 
 interface Props {
   className?: string
@@ -28,8 +29,7 @@ const OnboardingFooter: React.FC<Props> = ({ className, isLogoVisible }) => {
     <DmView className={clsx("mt-[30] items-center", className)}>
       {isLogoVisible && (
         <DmView className="mb-[13]">
-          {/* @TO DO */}
-          <DmView className="w-[34] h-[34] bg-grey" />
+          <LogoIcon width={36} height={36} />
         </DmView>
       )}
       <DmView className="flex-row items-center justify-center">

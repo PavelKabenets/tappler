@@ -4,6 +4,10 @@ export const SCREEN_WIDTH = Dimensions.get("screen").width
 export const SCREEN_HEIGHT = Dimensions.get("screen").height
 export const emailRegExp = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$/
 
+export const isSmallPhone = SCREEN_WIDTH < 393
+
+export const isLittlePhone = SCREEN_WIDTH < 375
+
 export const hexToRGBA = (hexCode: string, opacity: number) => {
   let hex = hexCode.replace("#", "")
 
@@ -18,33 +22,67 @@ export const hexToRGBA = (hexCode: string, opacity: number) => {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`
 }
 
-const renderSansFontFamily = (className: string) => {
-  switch (className?.match(/custom(\d{3})/)![1]) {
+const renderSansFontFamily = (
+  className: string
+):
+  | {
+      fontFamily: string
+      lineHeight?: number
+    }
+  | undefined => {
+  let res = {}
+  switch (
+    className?.match(/custom(\d{3})/) &&
+    className?.match(/custom(\d{3})/)![1]
+  ) {
     // Add fonts here
     case "700":
-      return {
+      res = {
         fontFamily: "TheSans-Bold",
       }
+      break
 
     case "600":
-      return {
-        fontFamily: "TheSans-SemiBold",
+      res = {
+        fontFamily: "TheSans-Bold",
       }
+      break
 
     case "500":
-      return {
-        fontFamily: "TheSans-Regular",
+      res = {
+        fontFamily: "TheSans-Plain",
       }
+      break
 
     case "400":
-      return {
-        fontFamily: "TheSans-Regular",
+      res = {
+        fontFamily: "TheSans-Plain",
       }
+      break
+  }
+
+  if (
+    className?.match(/leading-\[(\d{1,2})px\]/) &&
+    className?.match(/leading-\[(\d{1,2})px\]/)![1]
+  ) {
+    res = {
+      ...res,
+      lineHeight:
+        Number(className?.match(/leading-\[(\d{1,2})px\]/)![1]) * 1.32,
+    }
+  }
+
+  return res as {
+    fontFamily: string
+    lineHeight?: number
   }
 }
 
 const renderMontserratFontFamily = (className: string) => {
-  switch (className?.match(/custom(\d{3})/)![1]) {
+  switch (
+    className?.match(/custom(\d{3})/) &&
+    className?.match(/custom(\d{3})/)![1]
+  ) {
     case "700":
       return {
         fontFamily: "Montserrat-Bold",
@@ -68,13 +106,9 @@ const renderMontserratFontFamily = (className: string) => {
 
 export const takeFontFamily = (font: string, lng: string) => {
   if (lng === "en") {
-    if (font.match(/custom(\d{3})/)) {
-      return renderMontserratFontFamily(font)
-    }
+    return renderMontserratFontFamily(font)
   }
   if (lng === "ar") {
-    if (font.match(/custom(\d{3})/)) {
-      return renderSansFontFamily(font)
-    }
+    return renderSansFontFamily(font)
   }
 }

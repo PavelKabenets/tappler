@@ -4,6 +4,7 @@ import { DmText, DmView } from "components/UI"
 
 import styles from "./styles"
 import clsx from "clsx"
+import { isSmallPhone } from "helpers/helpers"
 
 interface Props {
   currentStep: number
@@ -31,7 +32,14 @@ const RegisterFlowProgressBar: React.FC<Props> = ({
           {item}
         </DmText>
         {item === currentStep && (
-          <DmText className="ml-[5] text-12 text-white font-custom400 flex-1 text-center">
+          <DmText
+            className={clsx(
+              "ml-[5] text-12 leading-[15px] text-white font-custom400 flex-1 text-center",
+              titleCurrentStep.split(" ").length > 1 &&
+                isSmallPhone &&
+                "text-11 leading-[14px]"
+            )}
+          >
             {titleCurrentStep}
           </DmText>
         )}

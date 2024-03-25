@@ -15,4 +15,9 @@ export default {
   grey9: "#B5B5B5",
   grey10: "#B5B6B8",
   grey11: "#A5A5A5",
+  grey12: "#BFBFBF",
+  grey13: "#808080",
+  grey14: "#CBCBCB",
+  grey15: "#AFAFAF",
+  grey16: "#EFF0F2",
 }

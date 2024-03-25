@@ -5,21 +5,28 @@ import { ActionBtn, DmAuthInput, DmText, DmView } from "components/UI"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
 import OnboardingFooter from "components/OnboardingFooter"
+import MainModal from "components/MainModal"
 
 // Hooks & Redux
 import { useTranslation } from "react-i18next"
 import { useForm, Controller } from "react-hook-form"
+import { useProsSignUpMutation } from "services/api"
 
 // Helpers & Types
 import { RootStackScreenProps } from "navigation/types"
 import { HIT_SLOP_DEFAULT } from "styles/helpersStyles"
 import { emailRegExp } from "helpers/helpers"
+import { ErrorSignUpEmailType } from "types"
 
 // Libs & Utils
 
 // Styles & Assets
 import clsx from "clsx"
 import styles from "./styles"
+import ArrowBackIcon from "assets/icons/arrow-back.svg"
+import CheckIcon from "assets/icons/check-mark.svg"
+import CloseIcon from "assets/icons/cancel-big.svg"
+import { I18nManager } from "react-native"
 
 type Props = RootStackScreenProps<"sign-up-email">
 
@@ -27,6 +34,8 @@ const SignUpEmailScreen: React.FC<Props> = ({ navigation }) => {
   // Props
   // State
   const [isPasswordVisible, setPasswordVisible] = useState(true)
+  const [signUp, { isLoading }] = useProsSignUpMutation()
+  const [responseError, setResponseError] = useState<ErrorSignUpEmailType>()
 
   const {
     control,
@@ -55,13 +64,32 @@ const SignUpEmailScreen: React.FC<Props> = ({ navigation }) => {
   const handleGoBack = () => {
     navigation.goBack()
   }
-  // @TO DO
-  const onSubmit = () => {
-    navigation.navigate("update-email", { email: getValues("email") })
+
+  const onSubmit = async () => {
+    try {
+      await signUp({
+        email: getValues("email"),
+        password: getValues("password"),
+      }).unwrap()
+      navigation.navigate("email-verify", { email: getValues("email") })
+    } catch (e) {
+      console.log("Sign Up Error: ", e)
+      setResponseError(e as ErrorSignUpEmailType)
+    }
   }
 
-  const hadnleGoSignInEmail = () => {
+  const handleClearResponseError = () => {
+    setResponseError(undefined)
+  }
+
+  const handleGoSignInEmail = () => {
+    handleClearResponseError()
     navigation.navigate("sign-in-email")
+  }
+
+  const handleGoResetPassword = () => {
+    handleClearResponseError()
+    navigation.navigate("password-reset")
   }
 
   useEffect(() => {
@@ -84,13 +112,25 @@ const SignUpEmailScreen: React.FC<Props> = ({ navigation }) => {
       <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <DmView>
-          <DmView onPress={handleGoBack}>
-            {/* @TO DO */}
-            <DmView style={styles.emptyGoBack} hitSlop={HIT_SLOP_DEFAULT} />
+        <DmView className="mt-[24]">
+          <DmView>
+            <DmView hitSlop={HIT_SLOP_DEFAULT}>
+              <DmView
+                className={
+                  I18nManager.isRTL
+                    ? "rotate-[180deg] flex-row justify-end"
+                    : ""
+                }
+              >
+                <DmView hitSlop={HIT_SLOP_DEFAULT} onPress={handleGoBack}>
+                  <ArrowBackIcon width={14} height={14} />
+                </DmView>
+              </DmView>
+            </DmView>
           </DmView>
-          <DmText className="mt-[88] text-custom600 text-16">
+          <DmText className="mt-[88] text-custom600 text-16 leading-[19px]">
             {t("register_new_account")}
           </DmText>
           <DmView className="pr-[2]">
@@ -107,15 +147,7 @@ const SignUpEmailScreen: React.FC<Props> = ({ navigation }) => {
                   onChangeText={onChange}
                   wrapperClassName="mt-[24]"
                   error={errors.email?.message}
-                  Icon={
-                    !errors.email?.message &&
-                    !!value && (
-                      <DmView
-                        style={styles.emptyEye}
-                        hitSlop={HIT_SLOP_DEFAULT}
-                      />
-                    )
-                  }
+                  Icon={!errors.email?.message && !!value && <CheckIcon />}
                 />
               )}
               name="email"
@@ -125,10 +157,6 @@ const SignUpEmailScreen: React.FC<Props> = ({ navigation }) => {
               control={control}
               rules={{
                 required: { value: true, message: t("required_error") },
-                validate: {
-                  function: (value, formValues) =>
-                    value === formValues.repeatPassword || t("repeat_error"),
-                },
                 minLength: { value: 6, message: t("length_error") },
               }}
               render={({ field: { value, onChange } }) => (
@@ -144,15 +172,7 @@ const SignUpEmailScreen: React.FC<Props> = ({ navigation }) => {
                   secureTextEntry={isPasswordVisible}
                   subLabel={t("password_must_be_6_characters_minimum")}
                   error={errors.password?.message}
-                  Icon={
-                    !errors.password?.message &&
-                    !!value && (
-                      <DmView
-                        style={styles.emptyEye}
-                        hitSlop={HIT_SLOP_DEFAULT}
-                      />
-                    )
-                  }
+                  Icon={!errors.password?.message && !!value && <CheckIcon />}
                 />
               )}
               name="password"
@@ -174,20 +194,13 @@ const SignUpEmailScreen: React.FC<Props> = ({ navigation }) => {
                   placeholder={t("re_type_your_password")}
                   onChangeText={(val) => {
                     onChange(val)
-                    trigger("password")
                   }}
                   wrapperClassName="mt-[8]"
                   onIconPress={handleTogglePasswordVisible}
                   secureTextEntry={isPasswordVisible}
                   error={errors.repeatPassword?.message}
                   Icon={
-                    !errors.repeatPassword?.message &&
-                    !!value && (
-                      <DmView
-                        style={styles.emptyEye}
-                        hitSlop={HIT_SLOP_DEFAULT}
-                      />
-                    )
+                    !errors.repeatPassword?.message && !!value && <CheckIcon />
                   }
                 />
               )}
@@ -196,24 +209,43 @@ const SignUpEmailScreen: React.FC<Props> = ({ navigation }) => {
           </DmView>
           <DmView className="px-[34]">
             <ActionBtn
-              className="mt-[32] h-[41]"
+              className="mt-[32] h-[44]"
               onPress={() => handleSubmit(onSubmit)()}
               title={t("register_new_account")}
-              textClassName="text-13"
+              textClassName="text-13 leading-[19px] font-custom600"
+              isLoading={isLoading}
+              disable={isLoading}
             />
           </DmView>
-          <DmView className="mt-[24]" onPress={hadnleGoSignInEmail}>
-            <DmText className="text-12 font-custom400 text-center">
-              {t("dont_have_an_account")}
-              <DmText className="text-red text-12 font-custom400 ">
+          <DmView className="mt-[24]" onPress={handleGoSignInEmail}>
+            <DmText className="text-12 leading-[15px] font-custom400 text-center">
+              {t("already_have_an_account")}
+              <DmText className="text-red text-12 leading-[15px] font-custom400 ">
                 {" "}
                 {t("sign_in")}
               </DmText>
             </DmText>
           </DmView>
         </DmView>
-        <OnboardingFooter isLogoVisible />
+        <DmView className="mt-[100]">
+          <OnboardingFooter isLogoVisible />
+        </DmView>
       </KeyboardAwareScrollView>
+      <MainModal
+        isVisible={!!responseError}
+        onClose={handleClearResponseError}
+        isBtnsTwo
+        onPressSecond={handleGoResetPassword}
+        onPress={handleGoSignInEmail}
+        title={responseError?.data.validationErrors.email[0]}
+        titleBtn={t("login")}
+        titleBtnSecond={t("reset_password")}
+        classNameTitle="mt-[10] text-13 leading-[25px] font-custom500"
+        classNameBtnsWrapper="mt-[27]"
+        classNameBtns="h-[34] px-[0]"
+        className="px-[17] pt-[26]"
+        Icon={<CloseIcon />}
+      />
     </SafeAreaView>
   )
 }

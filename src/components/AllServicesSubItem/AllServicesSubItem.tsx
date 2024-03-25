@@ -4,16 +4,17 @@ import { DmText, DmView } from "components/UI"
 
 import { useTranslation } from "react-i18next"
 
-import { MockAllServicesSubItemType } from "data/mockData"
 import { HIT_SLOP_DEFAULT } from "styles/helpersStyles"
 
 import styles from "./styles"
+import CircleCheckBoxIcon from "assets/icons/circle-checkbox.svg"
+import { SubCategoryType } from "types"
 
 // @TO DO
 interface Props {
-  item: MockAllServicesSubItemType
-  onPress: (item: MockAllServicesSubItemType) => void
-  onPressDetail: () => void
+  item: SubCategoryType
+  onPress: (item: SubCategoryType) => void
+  onPressDetail: (item: SubCategoryType) => void
 }
 
 const AllServicesSubItem: React.FC<Props> = ({
@@ -28,14 +29,13 @@ const AllServicesSubItem: React.FC<Props> = ({
       onPress={() => onPress(item)}
     >
       <DmView className="flex-row items-center flex-1">
-        {/* @TO DO */}
-        <DmView className="w-[20] h-[20] rounded-full bg-grey" />
-        <DmText className="ml-[5] text-12 font-custom500 flex-1">
-          {item.title}
+        <CircleCheckBoxIcon />
+        <DmText className="ml-[5] text-12 leading-[15px] font-custom500 flex-1">
+          {item.name}
         </DmText>
       </DmView>
-      <DmView onPress={onPressDetail} hitSlop={HIT_SLOP_DEFAULT}>
-        <DmText className="ml-[14] font-custom400 text-red text-10">
+      <DmView onPress={() => onPressDetail(item)} hitSlop={HIT_SLOP_DEFAULT}>
+        <DmText className="ml-[14] font-custom400 text-red text-10 leading-[13px]">
           {t("service_details")}
         </DmText>
       </DmView>

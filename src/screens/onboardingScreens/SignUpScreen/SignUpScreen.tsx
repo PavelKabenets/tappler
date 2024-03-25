@@ -5,13 +5,16 @@ import { ActionBtn, DmInput, DmText, DmView } from "components/UI"
 import { SafeAreaView } from "react-native-safe-area-context"
 import HeaderOnboarding from "components/HeaderOnboarding"
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
+import GovornorateModal from "components/GovornorateModal"
 
 // Hooks & Redux
 import { useTranslation } from "react-i18next"
 import { useIsFocused } from "@react-navigation/native"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 // Helpers & Types
 import { RootStackScreenProps } from "navigation/types"
+import { GovernorateItemType, SubCategoryType } from "types"
 
 // Libs & Utils
 
@@ -19,9 +22,8 @@ import { RootStackScreenProps } from "navigation/types"
 import clsx from "clsx"
 import styles from "./styles"
 import colors from "styles/colors"
-import { MockAllServicesSubItemType } from "data/mockData"
-import GovornorateModal from "components/GovornorateModal"
-import { GovernorateItemType } from "types"
+import SearchRedIcon from "assets/icons/search-red.svg"
+import CheckMark from "assets/icons/check-mark.svg"
 
 type Props = RootStackScreenProps<"sign-up">
 
@@ -32,13 +34,14 @@ const SignUpScreen: React.FC<Props> = ({ route, navigation }) => {
     useState(false)
   // @TO DO
   const [searchForServiceValue, setSearchForServiceValue] =
-    useState<MockAllServicesSubItemType>()
+    useState<SubCategoryType>()
   // @TO DO
   const [governorateValue, setGovernorateValue] = useState("")
   // Global Store
   // Variables
   const { t } = useTranslation()
   const isFocused = useIsFocused()
+  const insets = useSafeAreaInsets()
   // Refs
   // Methods
   // Handlers
@@ -85,30 +88,28 @@ const SignUpScreen: React.FC<Props> = ({ route, navigation }) => {
     <SafeAreaView className="flex-1 bg-white">
       <HeaderOnboarding title={t("new_account")} className="px-[20]" />
       <KeyboardAwareScrollView
-        contentContainerStyle={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollView,
+          {
+            paddingBottom:
+              insets.bottom > 45 ? insets.bottom - 45 : 45 - insets.bottom,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <DmView>
           <DmText className="mt-[26] text-15 font-custom500">
             {t("what_service_do_you_offer")}
           </DmText>
-          {/* @TO DO */}
           <DmInput
             placeholder={t("search_for_service")}
             placeholderTextColor={colors.grey6}
             className="mt-[10]"
-            Icon={
-              !searchForServiceValue && (
-                <DmView className="w-[16] h-[16] bg-grey" />
-              )
-            }
-            IconRight={
-              !!searchForServiceValue?.title && (
-                <DmView className="w-[14] h-[14] bg-red" />
-              )
-            }
+            Icon={!searchForServiceValue && <SearchRedIcon />}
+            IconRight={!!searchForServiceValue?.name && <CheckMark />}
             onPress={handleGoAllService}
-            value={searchForServiceValue?.title}
+            value={searchForServiceValue?.name}
+            isAnimText={false}
           />
           <DmText className="mt-[26] text-15 font-custom500">
             {t("where_do_you_provide_your_service")}
@@ -119,14 +120,13 @@ const SignUpScreen: React.FC<Props> = ({ route, navigation }) => {
             className="mt-[10]"
             onPress={handleOpenGovornorateModal}
             value={governorateValue}
-            IconRight={
-              !!governorateValue && <DmView className="w-[14] h-[14] bg-red" />
-            }
+            IconRight={!!governorateValue && <CheckMark />}
+            isAnimText={false}
           />
         </DmView>
         <ActionBtn
           title={t("continue")}
-          className="rounded-4"
+          className="rounded-4 h-[47]"
           onPress={onSubmit}
           disable={!searchForServiceValue || !governorateValue}
         />

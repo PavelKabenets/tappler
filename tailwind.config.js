@@ -3,6 +3,7 @@
 // const  colors = require('./src/styles/colors')
 
 module.exports = {
+  rtl: process.env.USE_RTL === 'true',
   content: ["./src/App.tsx", "./src/**/**/*.{jsx,tsx}", "./src/**/**/**/*.{jsx,tsx}", "./src/**/**/**/*.{jsx,tsx}"],
   theme: {
     extend: {
@@ -12,9 +13,9 @@ module.exports = {
         montserrat500: "Montserrat-Medium",
         montserrat600: "Montserrat-SemiBold",
         montserrat700: "Montserrat-Bold",
-        sans400: "TheSans-Regular",
-        sans500: "TheSans-Regular",
-        sans600: "TheSans-SemiBold",
+        sans400: "TheSans-Plain",
+        sans500: "TheSans-Plain",
+        sans600: "TheSans-Bold",
         sans700: "TheSans-Bold",
       },
       colors: {
@@ -34,6 +35,11 @@ module.exports = {
         grey9: "#B5B5B5",
         grey10: "#B5B6B8",
         grey11: "#A5A5A5",
+        grey12: "#BFBFBF",
+        grey13: "#808080",
+        grey14: "#CBCBCB",
+        grey15: "#AFAFAF",
+        grey16: "#EFF0F2",
       },
       fontSize: {
         '9': [9, { lineHeight: "11px" }],
@@ -60,6 +66,7 @@ module.exports = {
       },
       borderRadius: {
         '0': 0,
+        '3': 3,
         '4': 4,
         '5': 5,
         '10': 10,

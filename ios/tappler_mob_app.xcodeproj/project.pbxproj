@@ -15,12 +15,11 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		7699B88040F8A987B510C191 /* libPods-tappler_mob_app-tappler_mob_appTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-tappler_mob_app-tappler_mob_appTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		8EA06D5508F14647B8C20A46 /* TheSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F7A50E972A194F198D313DE5 /* TheSans-Bold.ttf */; };
 		BC16F0BE6D74458F8BA61A90 /* Montserrat-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 386C47C9083B4D5896C77B3C /* Montserrat-Medium.ttf */; };
-		C41664777EC547D99856AAAA /* TheSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 83446AE15CB2427E9DDCA829 /* TheSans-Regular.ttf */; };
 		C989CDF835BC4334BF622BA0 /* Montserrat-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AF71978C9B524CF98E7FFFDB /* Montserrat-SemiBold.ttf */; };
-		DA298CE5C06A4A9F8E30CA54 /* TheSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 03D9708CC32643078A906646 /* TheSans-SemiBold.ttf */; };
 		DA87850CE7A8431D949BE310 /* Montserrat-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EA672B934389458EAEC1BF38 /* Montserrat-Regular.ttf */; };
+		DE4AACCE2B9F7102001A2AF5 /* TheSans-Plain.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5D850FB95A3B40D4918081A2 /* TheSans-Plain.ttf */; };
+		DE4AACCF2B9F710B001A2AF5 /* TheSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D4D1139B8ADC4ACBAEC0273C /* TheSans-Bold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,7 +36,6 @@
 		00E356EE1AD99517003FC87E /* tappler_mob_appTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tappler_mob_appTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* tappler_mob_appTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = tappler_mob_appTests.m; sourceTree = "<group>"; };
-		03D9708CC32643078A906646 /* TheSans-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "TheSans-SemiBold.ttf"; path = "../src/assets/fonts/TheSans-SemiBold.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* tappler_mob_app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tappler_mob_app.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = tappler_mob_app/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = tappler_mob_app/AppDelegate.mm; sourceTree = "<group>"; };
@@ -45,19 +43,19 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = tappler_mob_app/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = tappler_mob_app/main.m; sourceTree = "<group>"; };
 		19F6CBCC0A4E27FBF8BF4A61 /* libPods-tappler_mob_app-tappler_mob_appTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-tappler_mob_app-tappler_mob_appTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		386C47C9083B4D5896C77B3C /* Montserrat-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Medium.ttf"; path = "../src/assets/fonts/Montserrat-Medium.ttf"; sourceTree = "<group>"; };
+		386C47C9083B4D5896C77B3C /* Montserrat-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Medium.ttf"; path = "../src/assets/fonts/Montserrat-Medium.ttf"; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-tappler_mob_app.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-tappler_mob_app.debug.xcconfig"; path = "Target Support Files/Pods-tappler_mob_app/Pods-tappler_mob_app.debug.xcconfig"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-tappler_mob_app.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-tappler_mob_app.release.xcconfig"; path = "Target Support Files/Pods-tappler_mob_app/Pods-tappler_mob_app.release.xcconfig"; sourceTree = "<group>"; };
 		5B7EB9410499542E8C5724F5 /* Pods-tappler_mob_app-tappler_mob_appTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-tappler_mob_app-tappler_mob_appTests.debug.xcconfig"; path = "Target Support Files/Pods-tappler_mob_app-tappler_mob_appTests/Pods-tappler_mob_app-tappler_mob_appTests.debug.xcconfig"; sourceTree = "<group>"; };
+		5D850FB95A3B40D4918081A2 /* TheSans-Plain.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "TheSans-Plain.ttf"; path = "../src/assets/fonts/TheSans-Plain.ttf"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-tappler_mob_app.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-tappler_mob_app.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = tappler_mob_app/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		83446AE15CB2427E9DDCA829 /* TheSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "TheSans-Regular.ttf"; path = "../src/assets/fonts/TheSans-Regular.ttf"; sourceTree = "<group>"; };
-		83DA2ACF0CBD4D649ACD46A2 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Bold.ttf"; path = "../src/assets/fonts/Montserrat-Bold.ttf"; sourceTree = "<group>"; };
+		83DA2ACF0CBD4D649ACD46A2 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Bold.ttf"; path = "../src/assets/fonts/Montserrat-Bold.ttf"; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-tappler_mob_app-tappler_mob_appTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-tappler_mob_app-tappler_mob_appTests.release.xcconfig"; path = "Target Support Files/Pods-tappler_mob_app-tappler_mob_appTests/Pods-tappler_mob_app-tappler_mob_appTests.release.xcconfig"; sourceTree = "<group>"; };
-		AF71978C9B524CF98E7FFFDB /* Montserrat-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-SemiBold.ttf"; path = "../src/assets/fonts/Montserrat-SemiBold.ttf"; sourceTree = "<group>"; };
-		EA672B934389458EAEC1BF38 /* Montserrat-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Regular.ttf"; path = "../src/assets/fonts/Montserrat-Regular.ttf"; sourceTree = "<group>"; };
+		AF71978C9B524CF98E7FFFDB /* Montserrat-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-SemiBold.ttf"; path = "../src/assets/fonts/Montserrat-SemiBold.ttf"; sourceTree = "<group>"; };
+		D4D1139B8ADC4ACBAEC0273C /* TheSans-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "TheSans-Bold.ttf"; path = "../src/assets/fonts/TheSans-Bold.ttf"; sourceTree = "<group>"; };
+		EA672B934389458EAEC1BF38 /* Montserrat-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Regular.ttf"; path = "../src/assets/fonts/Montserrat-Regular.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		F7A50E972A194F198D313DE5 /* TheSans-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "TheSans-Bold.ttf"; path = "../src/assets/fonts/TheSans-Bold.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -168,14 +166,12 @@
 			children = (
 				83DA2ACF0CBD4D649ACD46A2 /* Montserrat-Bold.ttf */,
 				EA672B934389458EAEC1BF38 /* Montserrat-Regular.ttf */,
-				F7A50E972A194F198D313DE5 /* TheSans-Bold.ttf */,
-				83446AE15CB2427E9DDCA829 /* TheSans-Regular.ttf */,
 				386C47C9083B4D5896C77B3C /* Montserrat-Medium.ttf */,
 				AF71978C9B524CF98E7FFFDB /* Montserrat-SemiBold.ttf */,
-				03D9708CC32643078A906646 /* TheSans-SemiBold.ttf */,
+				D4D1139B8ADC4ACBAEC0273C /* TheSans-Bold.ttf */,
+				5D850FB95A3B40D4918081A2 /* TheSans-Plain.ttf */,
 			);
 			name = Resources;
-			path = "";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -271,15 +267,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE4AACCF2B9F710B001A2AF5 /* TheSans-Bold.ttf in Resources */,
+				DE4AACCE2B9F7102001A2AF5 /* TheSans-Plain.ttf in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				004EA57DB4F3450999CF6CBD /* Montserrat-Bold.ttf in Resources */,
 				DA87850CE7A8431D949BE310 /* Montserrat-Regular.ttf in Resources */,
-				8EA06D5508F14647B8C20A46 /* TheSans-Bold.ttf in Resources */,
-				C41664777EC547D99856AAAA /* TheSans-Regular.ttf in Resources */,
 				BC16F0BE6D74458F8BA61A90 /* Montserrat-Medium.ttf in Resources */,
 				C989CDF835BC4334BF622BA0 /* Montserrat-SemiBold.ttf in Resources */,
-				DA298CE5C06A4A9F8E30CA54 /* TheSans-SemiBold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -502,9 +497,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 15;
+				DEVELOPMENT_TEAM = 72HAUA5958;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = tappler_mob_app/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Tappler;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -515,8 +515,9 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.tappler.app;
 				PRODUCT_NAME = tappler_mob_app;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -529,8 +530,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 15;
+				DEVELOPMENT_TEAM = 72HAUA5958;
 				INFOPLIST_FILE = tappler_mob_app/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Tappler;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -541,8 +547,9 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.tappler.app;
 				PRODUCT_NAME = tappler_mob_app;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -617,10 +624,7 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -688,10 +692,7 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

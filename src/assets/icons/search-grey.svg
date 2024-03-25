@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="15.849" height="16.171" viewBox="0 0 15.849 16.171">
+  <g id="Magnifier" transform="translate(0 -1)">
+    <g id="Ellipse_29" data-name="Ellipse 29" transform="translate(0 1)" fill="none" stroke="#b5b5b5" stroke-width="1.5">
+      <ellipse cx="5.677" cy="5.735" rx="5.677" ry="5.735" stroke="none"/>
+      <ellipse cx="5.677" cy="5.735" rx="4.927" ry="4.985" fill="none"/>
+    </g>
+    <g id="Path_3134" data-name="Path 3134" transform="translate(9.679 11.969) rotate(-42)" fill="#fff">
+      <path d="M 1.5 6.500002384185791 L 0.5 6.500002384185791 L 0.5 0.2157134860754013 L 0.9846299886703491 -0.2414239645004272 L 1.5 0.2226180583238602 L 1.5 6.500002384185791 Z" stroke="none"/>
+      <path d="M 1 0.4452247619628906 L 1 6.000002384185791 L 1 0.4452247619628906 M 0.9767500162124634 -0.9213380813598633 L 2 2.384185791015625e-06 L 2 7.000001907348633 L 0 7.000001907348633 L 0 2.384185791015625e-06 L 0.9767500162124634 -0.9213380813598633 Z" stroke="none" fill="#b5b5b5"/>
+    </g>
+  </g>
+</svg>

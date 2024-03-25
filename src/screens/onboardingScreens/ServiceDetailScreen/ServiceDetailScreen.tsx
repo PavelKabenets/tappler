@@ -11,16 +11,18 @@ import ServiceDetailModal from "components/ServiceDetailModal"
 
 // Hooks & Redux
 import { useTranslation } from "react-i18next"
+import { useDispatch } from "react-redux"
 
 // Helpers & Types
 import { RootStackScreenProps } from "navigation/types"
-import { MockAllServicesSubItemType } from "data/mockData"
 
 // Libs & Utils
 
 // Styles & Assets
 import clsx from "clsx"
 import styles from "./styles"
+import { SubCategoryType } from "types"
+import { setSelectedCategoriesId } from "store/auth/slice"
 
 type Props = RootStackScreenProps<"service-detail">
 
@@ -28,18 +30,22 @@ const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
   // Props
   // State
   const [isDetailModalVisible, setDetailModalVisible] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<SubCategoryType>()
   // Global Store
   // Variables
   const { t } = useTranslation()
   const { service } = route.params
+  const dispatch = useDispatch()
   // Refs
   // Methods
   // Handlers
-  const handleSubItemPress = (item: MockAllServicesSubItemType) => {
+  const handleSubItemPress = (item: SubCategoryType) => {
     navigation.navigate("sign-up", { subItem: item })
+    dispatch(setSelectedCategoriesId([item?.id]))
   }
 
-  const handleOpenDetailModal = () => {
+  const handleOpenDetailModal = (item: SubCategoryType) => {
+    setSelectedItem(item)
     setDetailModalVisible(true)
   }
 
@@ -50,11 +56,7 @@ const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
   // Listeners
   // Render Methods
   // @TO DO
-  const renderListSubItem = ({
-    item,
-  }: {
-    item: MockAllServicesSubItemType
-  }) => {
+  const renderListSubItem = ({ item }: { item: SubCategoryType }) => {
     return (
       <>
         <AllServicesSubItem
@@ -62,34 +64,30 @@ const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
           onPress={handleSubItemPress}
           onPressDetail={handleOpenDetailModal}
         />
-        <ServiceDetailModal
-          isVisible={isDetailModalVisible}
-          onClose={handleCloseDetailModal}
-          title={item.title}
-          descr={item.descr}
-        />
       </>
     )
   }
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {/* @TO DO */}
-      <HeaderOnboarding
-        title={service?.title}
-        className="px-[20]"
-        Icon={<DmView className="w-[16] h-[16] bg-grey" />}
-      />
+      <HeaderOnboarding title={service?.name} className="px-[20]" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollView}
       >
         <FlatList
-          data={service.subItems}
+          data={service.categories}
           renderItem={renderListSubItem}
           scrollEnabled={false}
         />
       </ScrollView>
+      <ServiceDetailModal
+        isVisible={isDetailModalVisible}
+        onClose={handleCloseDetailModal}
+        title={selectedItem?.name || ""}
+        // @TO DO - descr
+        descr={selectedItem?.descriptionForPros || ""}
+      />
     </SafeAreaView>
   )
 }

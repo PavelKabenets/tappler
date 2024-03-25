@@ -9,8 +9,12 @@ export const ROUTES = {
   SignUpEmailScreen: "sign-up-email",
   AllServicesScreen: "all-services",
   ServiceDetailScreen: "service-detail",
-  UpdateEmailScreen: "update-email",
+  EmailVerifyScreen: "email-verify",
   RegistrationFlowScreen: "registration-flow",
+  TermsConditionScreen: "terms-conditions",
+  CongratulationScreen: "congratulation",
+  PasswordResetScreen: "password-reset",
+  RequestAddingServiceScreen: "request-adding-service",
 } as const
 
 type valueof<T> = T[keyof T]

@@ -6,6 +6,7 @@ const styles = StyleSheet.create({
     height: SCREEN_HEIGHT / 4.5,
     paddingBottom: 12,
     marginTop: 4,
+    textAlignVertical: "top",
   },
 })
 

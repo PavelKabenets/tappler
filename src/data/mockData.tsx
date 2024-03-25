@@ -14,7 +14,11 @@ export type MockSearchItemType = {
   id: string
   name: string
   area: string
-  govornorate: string
+  governorate: string
+  coords: {
+    lat: number
+    lon: number
+  }
 }
 
 export const subItems: MockAllServicesSubItemType[] = [
@@ -109,38 +113,31 @@ export const mockAllServicesData: MockAllServicesItemType[] = [
 export const mockGovornorateSearchData: MockSearchItemType[] = [
   {
     id: "0",
-    name: "Alshurook City",
-    govornorate: "cairo",
+    name: "new_cairo",
     area: "new_cairo",
+    governorate: "cairo",
+    coords: {
+      lat: 30.037874126070808,
+      lon: 31.329847479547986,
+    },
   },
   {
     id: "1",
-    name: "Alshurook City",
-    govornorate: "cairo",
-    area: "new_cairo",
-  },
-  {
-    id: "2",
-    name: "Alshurook City",
-    govornorate: "cairo",
-    area: "new_cairo",
-  },
-  {
-    id: "3",
-    name: "6th Neighborhood",
-    govornorate: "cairo",
-    area: "new_cairo",
-  },
-  {
-    id: "4",
-    name: "6th Neighborhood",
-    govornorate: "cairo",
-    area: "new_cairo",
-  },
-  {
-    id: "5",
-    name: "Alshurook City",
-    govornorate: "cairo",
-    area: "new_cairo",
+    name: "nasr_city",
+    area: "nasr_city",
+    governorate: "cairo",
+    coords: {
+      lat: 30.037874126070808,
+      lon: 31.476473034283032,
+    },
   },
 ]
+
+// {
+//   streetAddress: "19 Tripoli Street"
+//   unitNumber: "1105"
+//   city: "Alshurook City - new Cairo"
+//   governorate: "Cairo"
+//   longitude: 38.8951
+//   latitude: -77.0364
+// }
