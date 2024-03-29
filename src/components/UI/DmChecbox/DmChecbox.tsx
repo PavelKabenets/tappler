@@ -4,10 +4,6 @@ import { DmText, DmView } from "components/UI"
 
 import styles from "./styles"
 import clsx from "clsx"
-import RentangleChecBoxIcon from "assets/icons/rentangle-checkbox.svg"
-import RentangleChecBoxCheckedIcon from "assets/icons/rentangle-checkbox-checked.svg"
-import CircleCheckBoxIcon from "assets/icons/circle-checkbox.svg"
-import CircleCheckBoxCheckedIcon from "assets/icons/circle-checkbox-checked.svg"
 
 interface Props {
   isChecked?: boolean
@@ -15,7 +11,6 @@ interface Props {
   title?: string
   className?: string
   textClassName?: string
-  variant?: "circle" | "square"
 }
 
 const DmChecbox: React.FC<Props> = ({
@@ -24,7 +19,6 @@ const DmChecbox: React.FC<Props> = ({
   title,
   className,
   textClassName,
-  variant = "circle",
 }) => {
   return (
     <DmView
@@ -32,25 +26,17 @@ const DmChecbox: React.FC<Props> = ({
       onPress={onPress}
     >
       <DmView className="mr-[9]">
+        {/* @TO DO */}
         {!isChecked && (
-          <>
-            {variant === "circle" && <CircleCheckBoxIcon />}
-
-            {variant === "square" && <RentangleChecBoxIcon />}
-          </>
+          <DmView className="w-[22] h-[22] bg-grey rounded-full" />
         )}
-        {isChecked && (
-          <>
-            {variant === "circle" && <CircleCheckBoxCheckedIcon />}
-
-            {variant === "square" && <RentangleChecBoxCheckedIcon />}
-          </>
-        )}
+        {/* @TO DO */}
+        {isChecked && <DmView className="w-[22] h-[22] bg-red rounded-full" />}
       </DmView>
       {!!title && (
         <DmText
           className={clsx(
-            "text-15",
+            "text-15 flex-1",
             { "font-custom500": !textClassName?.match(/font-/) },
             textClassName
           )}

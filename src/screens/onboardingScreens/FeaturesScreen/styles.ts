@@ -8,9 +8,4 @@ export default StyleSheet.create({
     height: SCREEN_WIDTH,
     backgroundColor: colors.grey,
   },
-  img: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_WIDTH,
-  },
-  inverted: { flexDirection: "row-reverse", transform: [{ scaleX: -1 }] },
 })

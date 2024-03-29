@@ -12,15 +12,15 @@ interface Props {
 }
 
 const ChooseAccountType: React.FC<Props> = ({ onNextStep, onChangeResult }) => {
-  const [selectedType, setSelectedType] = useState<"individual" | "company">()
+  const [selectedType, setSelectedType] = useState<"individual" | "business">()
   const { t } = useTranslation()
 
-  const handleSelectCategory = (type: "individual" | "company") => {
+  const handleSelectCategory = (type: "individual" | "business") => {
     setSelectedType(type)
     onChangeResult({ accoutType: type })
     setTimeout(() => {
       onNextStep()
-    }, 10)
+    }, 500)
   }
 
   return (
@@ -35,24 +35,24 @@ const ChooseAccountType: React.FC<Props> = ({ onNextStep, onChangeResult }) => {
         <DmChecbox
           className="mt-[31]"
           title={t("individual_account")}
-          textClassName="text-13 leading-[16px] font-custom600 flex-1"
+          textClassName="text-13 leading-[16px] font-custom600"
           isChecked={selectedType === "individual"}
         />
-        <DmText className="mt-[10] text-11 leading-[14px] font-custom400">
+        <DmText className="mt-[10] text-11 font-custom400">
           {t("choose_this_account_descr")}
         </DmText>
       </DmView>
       <DmView
         className="px-[20] pb-[17]"
-        onPress={() => handleSelectCategory("company")}
+        onPress={() => handleSelectCategory("business")}
       >
         <DmChecbox
           className="mt-[31]"
           title={t("business_account")}
-          textClassName="text-13 leading-[16px] font-custom600 flex-1"
-          isChecked={selectedType === "company"}
+          textClassName="text-13 leading-[16px] font-custom600"
+          isChecked={selectedType === "business"}
         />
-        <DmText className="mt-[10] text-11 leading-[14px] font-custom400">
+        <DmText className="mt-[10] text-11 font-custom400">
           {t("choose_this_account_business_descr")}
         </DmText>
       </DmView>

@@ -3,25 +3,18 @@ import React, { useEffect, useMemo, useState } from "react"
 import { ActionBtn, DmChecbox, DmInput, DmText, DmView } from "components/UI"
 import Modal from "react-native-modal"
 import { FlatList, ScrollView } from "react-native"
-import GovornorateSearchItem from "components/GovornorateSearchItem"
 
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useTranslation } from "react-i18next"
 
-import { GeocoderResponse, GeocoderResultType, GovernorateItemType } from "types"
+import { GovernorateItemType } from "types"
 import { governoratesData } from "data/govornorateData"
-import { MockSearchItemType, mockGovornorateSearchData } from "data/mockData"
-
-import getGeolocationByName from "utils/getGeolocationByName"
 
 import styles from "./styles"
 import colors from "styles/colors"
 import clsx from "clsx"
-import CloseIcon from "assets/icons/close.svg"
-import SearchGrey from "assets/icons/search-grey.svg"
-import CityIcon from "assets/icons/city.svg"
-import LocationIcon from "assets/icons/location.svg"
-import ChevronDown from "assets/icons/chevron-down.svg"
+import { MockSearchItemType, mockGovornorateSearchData } from "data/mockData"
+import GovornorateSearchItem from "components/GovornorateSearchItem"
 
 interface Props {
   isVisible: boolean
@@ -45,8 +38,6 @@ const GovornorateModal: React.FC<Props> = ({
   const [selectedGovernorate, setSelectedGovernorate] = useState("")
   const [selectedCityArea, setSelectedCityArea] = useState("")
   const [isFullGoverDataVisiible, setFullGoverDataVisible] = useState(false)
-  // @TO DO
-  const [places, setPlaces] = useState<GeocoderResultType>()
 
   // @TO DO
   const governorateData = useMemo(() => {
@@ -79,11 +70,6 @@ const GovornorateModal: React.FC<Props> = ({
     setFilter("")
   }
 
-  const handleChangeFilterText = (val: string) => {
-    setFilter(val)
-    // getGeolocationByName({ name: val, updateState: setPlaces })
-  }
-
   useEffect(() => {
     if (filter) {
       setView("search")
@@ -107,7 +93,6 @@ const GovornorateModal: React.FC<Props> = ({
         className="mb-[13]"
         onPress={handlePressItem}
         title={t(item)}
-        textClassName="flex-1"
         isChecked={selectedGovernorate === item}
       />
     )
@@ -115,8 +100,8 @@ const GovornorateModal: React.FC<Props> = ({
 
   const renderSearchItem = ({ item }: { item: MockSearchItemType }) => {
     const handlePressSearchItem = () => {
+      setSelectedGovernorate(item.govornorate)
       setSelectedCityArea(item.area)
-      setSelectedGovernorate(item.governorate)
       setFilter("")
     }
     return <GovornorateSearchItem item={item} onPress={handlePressSearchItem} />
@@ -126,30 +111,19 @@ const GovornorateModal: React.FC<Props> = ({
     <Modal isVisible={isVisible} onBackdropPress={onClose} className="m-0">
       <DmView
         className="flex-1 bg-white"
-        style={{
-          paddingTop: insets.top + 16,
-          paddingBottom:
-            insets.bottom > 45
-              ? insets.bottom
-              : 45 - insets.bottom + insets.bottom,
-        }}
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
       >
         <DmView className="px-[16] pb-[16] flex-row items-center border-b-1 border-grey4">
-          <DmView
-            className="w-[25] h-[25] items-center justify-center"
-            onPress={onClose}
-          >
-            <CloseIcon width={14} height={14} />
-          </DmView>
+          <DmView className="w-[25] h-[25] bg-grey" onPress={onClose} />
           <DmView className="ml-[6] flex-1">
             <DmInput
+              inputClassName="h-[42]"
               placeholder={t("search_for_a_neighborhood_or_area")}
               placeholderTextColor={colors.grey9}
               // @TO DO
-              Icon={<SearchGrey />}
+              Icon={<DmView className="w-[16] h-[16] bg-grey" />}
               value={filter}
-              onChangeText={handleChangeFilterText}
-              isAnimText={false}
+              onChangeText={setFilter}
             />
           </DmView>
         </DmView>
@@ -159,7 +133,6 @@ const GovornorateModal: React.FC<Props> = ({
             !!filter && styles.paddingHorizontal0,
           ]}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
         >
           {view === "content" && (
             <DmView className="mt-[18]">
@@ -169,8 +142,9 @@ const GovornorateModal: React.FC<Props> = ({
                 )}
               >
                 <DmView className="flex-row items-center">
-                  <LocationIcon />
-                  <DmText className="ml-[9] text-16 leading-[19px] font-custom600 flex-1">
+                  {/* @TO DO */}
+                  <DmView className="w-[21] h-[21] bg-grey" />
+                  <DmText className="ml-[9] text-16 font-custom600 flex-1">
                     {t("governorate")}
                   </DmText>
                 </DmView>
@@ -180,8 +154,7 @@ const GovornorateModal: React.FC<Props> = ({
                   data={governorateData}
                   renderItem={renderGovornorateItem}
                 />
-                {/* {governoratesData.length > 2 && (
-                  <>
+                {governoratesData.length > 2 && (
                   <DmView
                     onPress={
                       isFullGoverDataVisiible
@@ -193,27 +166,10 @@ const GovornorateModal: React.FC<Props> = ({
                     <DmText className="font-custom600 text-red text-13">
                       {t(isFullGoverDataVisiible ? "hide" : "view_more")}
                     </DmText>
-                    <DmView>
-                      {isFullGoverDataVisiible && (
-                        <DmView className="rotate-[180deg]">
-                          <ChevronDown
-                            width={18}
-                            height={18}
-                            stroke={colors.red}
-                          />
-                        </DmView>
-                      )}
-                      {!isFullGoverDataVisiible && (
-                        <ChevronDown
-                          width={18}
-                          height={18}
-                          stroke={colors.red}
-                        />
-                      )}
-                    </DmView>
+                    {/* @TO DO */}
+                    <DmView className="ml-[6] w-[11] h-[7] bg-grey" />
                   </DmView>
-                  </>
-                )} */}
+                )}
               </DmView>
               {!!selectedGovernorate && (
                 <DmView
@@ -223,8 +179,9 @@ const GovornorateModal: React.FC<Props> = ({
                   )}
                 >
                   <DmView className="flex-row items-center">
-                    <CityIcon />
-                    <DmText className="ml-[9] text-16 leading-[19px] font-custom600 flex-1">
+                    {/* @TO DO */}
+                    <DmView className="w-[21] h-[21] bg-grey" />
+                    <DmText className="ml-[9] text-16 font-custom600 flex-1">
                       {t("city_area")}
                     </DmText>
                   </DmView>
@@ -233,14 +190,12 @@ const GovornorateModal: React.FC<Props> = ({
                     title={t("new_cairo")}
                     onPress={() => hadlePressCityArea("new_cairo")}
                     isChecked={selectedCityArea === "new_cairo"}
-                    textClassName="flex-1"
                   />
                   <DmChecbox
                     className="mt-[11]"
                     title={t("nasr_city")}
                     onPress={() => hadlePressCityArea("nasr_city")}
                     isChecked={selectedCityArea === "nasr_city"}
-                    textClassName="flex-1"
                   />
                 </DmView>
               )}
@@ -248,22 +203,20 @@ const GovornorateModal: React.FC<Props> = ({
           )}
           {view === "search" && (
             <FlatList
-              data={mockGovornorateSearchData?.filter((item) =>
-                t(item.name).toLowerCase().includes(filter.toLowerCase()))}
+              data={mockGovornorateSearchData}
               renderItem={renderSearchItem}
-              keyboardShouldPersistTaps="handled"
               scrollEnabled={false}
             />
           )}
         </ScrollView>
         {!!selectedCityArea && !!selectedGovernorate && (
-          <DmView className="px-[20] pt-[8] border-t-0.5 border-t-grey5">
+          <DmView className="px-[20] pb-[45] pt-[8] border-t-0.5 border-t-grey5">
             <DmView className={clsx("w-full", "flex-row")}>
               {!!filter && (
                 <ActionBtn
                   title={t("reset")}
                   onPress={handleReset}
-                  className="rounded-4 mr-[8] h-[47]"
+                  className="rounded-4 mr-[8]"
                   variant="bordered"
                   textClassName="font-custom600"
                 />
@@ -276,7 +229,7 @@ const GovornorateModal: React.FC<Props> = ({
                     cityArea: selectedCityArea,
                   })
                 }
-                className="rounded-4 flex-1 h-[47]"
+                className="rounded-4 flex-1"
                 textClassName="font-custom600"
               />
             </DmView>

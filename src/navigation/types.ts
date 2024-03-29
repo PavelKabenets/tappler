@@ -5,8 +5,10 @@ import type {
 } from "@react-navigation/native"
 import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { ROUTES } from "./routes"
-
-import { ServiceCategoryType, SubCategoryType } from "types"
+import {
+  MockAllServicesItemType,
+  MockAllServicesSubItemType,
+} from "data/mockData"
 
 export type RootStackParamList = {
   [ROUTES.HomeScreen]: undefined
@@ -14,17 +16,15 @@ export type RootStackParamList = {
   [ROUTES.FeaturesScreen]: undefined
   [ROUTES.AuthScreen]: undefined
   [ROUTES.LogInScreen]: { viewType: "sign-in" | "sign-up" } | undefined
-  [ROUTES.SignUpScreen]: { subItem: SubCategoryType } | undefined
+  // @TO DO
+  [ROUTES.SignUpScreen]: { subItem: MockAllServicesSubItemType } | undefined
   [ROUTES.SignInEmailScreen]: undefined
   [ROUTES.SignUpEmailScreen]: undefined
   [ROUTES.AllServicesScreen]: undefined
-  [ROUTES.ServiceDetailScreen]: { service: ServiceCategoryType }
-  [ROUTES.EmailVerifyScreen]: { email: string }
+  // @DO TO
+  [ROUTES.ServiceDetailScreen]: { service: MockAllServicesItemType }
+  [ROUTES.UpdateEmailScreen]: { email: string }
   [ROUTES.RegistrationFlowScreen]: undefined
-  [ROUTES.TermsConditionScreen]: undefined
-  [ROUTES.CongratulationScreen]: undefined
-  [ROUTES.PasswordResetScreen]: undefined
-  [ROUTES.RequestAddingServiceScreen]: undefined
 }
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

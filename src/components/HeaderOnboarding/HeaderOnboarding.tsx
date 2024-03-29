@@ -8,11 +8,9 @@ import { HIT_SLOP_DEFAULT } from "styles/helpersStyles"
 
 import styles from "./styles"
 import clsx from "clsx"
-import ArrowBackIcon from "assets/icons/arrow-back.svg"
-import { I18nManager } from "react-native"
 
 interface Props {
-  title?: string
+  title: string
   className?: string
   Icon?: React.ReactNode
   onPressIcon?: () => void
@@ -46,14 +44,13 @@ const HeaderOnboarding: React.FC<Props> = ({
         className
       )}
     >
+      {/* @TO DO */}
       {!onBackComponent && (
         <DmView
+          className="w-[14] h-[14] bg-grey"
           hitSlop={HIT_SLOP_DEFAULT}
           onPress={handleGoBack}
-          className={I18nManager.isRTL ? "rotate-[180deg]" : ""}
-        >
-          <ArrowBackIcon width={16} height={16} />
-        </DmView>
+        />
       )}
       {!!onBackComponent && (
         <DmView onPress={handleGoBack}>{onBackComponent}</DmView>
@@ -61,14 +58,14 @@ const HeaderOnboarding: React.FC<Props> = ({
       <DmView className="flex-1 px-[14]">
         <DmText
           className={clsx(
-            "text-center text-16 leading-[19px] font-custom600",
+            "text-center text-16 font-custom600",
             subTitle && "text-14 leading-[18px]"
           )}
         >
           {title}
         </DmText>
         {!!subTitle && (
-          <DmText className="mt-[8] text-13 leading-[16px] text-center font-custom400">
+          <DmText className="mt-[8] text-13 leading-[16px] text-center">
             {subTitle}
           </DmText>
         )}

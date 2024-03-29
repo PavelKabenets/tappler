@@ -2,7 +2,7 @@ import React, { useState } from "react"
 
 import { DmInput, DmText, DmView } from "components/UI"
 import GovornorateSearchItem from "components/GovornorateSearchItem"
-import { FlatList, Keyboard } from "react-native"
+import { FlatList } from "react-native"
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
 import Modal from "react-native-modal"
 
@@ -14,8 +14,6 @@ import { GovernorateItemType } from "types"
 
 import styles from "./styles"
 import colors from "styles/colors"
-import LocationRedIcon from "assets/icons/location-red.svg"
-import CloseIcon from "assets/icons/close.svg"
 
 interface Props {
   isVisible: boolean
@@ -23,14 +21,9 @@ interface Props {
   onSubmit: ({
     governorate,
     city,
-    coords,
   }: {
     governorate: GovernorateItemType
     city: string
-    coords: {
-      lat: number
-      lon: number
-    }
   }) => void
 }
 
@@ -43,12 +36,7 @@ const SelectCityModal: React.FC<Props> = ({ isVisible, onClose, onSubmit }) => {
   // @TO DO
   const renderSearchItem = ({ item }: { item: MockSearchItemType }) => {
     const handlePressSearchItem = () => {
-      onSubmit({
-        governorate: item.governorate,
-        city: item.name,
-        coords: item.coords,
-      })
-      Keyboard.dismiss()
+      onSubmit({ governorate: item.govornorate, city: item.name })
       setFilter("")
       onClose()
     }
@@ -58,40 +46,30 @@ const SelectCityModal: React.FC<Props> = ({ isVisible, onClose, onSubmit }) => {
     <Modal isVisible={isVisible} className="m-0">
       <DmView
         className="flex-1 bg-white"
-        style={{
-          paddingTop: insets.top ? insets.top : 16,
-          paddingBottom: insets.bottom,
-        }}
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
       >
         <DmView className="px-[16] pb-[16] flex-row items-center border-b-1 border-grey4">
           <DmView className="mr-[10] flex-1">
             <DmInput
+              inputClassName="h-[43]"
               placeholder={t("search_for_a_neighborhood_or_area")}
               placeholderTextColor={colors.grey9}
               // @TO DO
-              Icon={<LocationRedIcon />}
+              Icon={<DmView className="w-[16] h-[16] bg-grey" />}
               value={filter}
               onChangeText={setFilter}
             />
           </DmView>
-          <DmView
-            className="w-[25] h-[25] items-center justify-center"
-            onPress={onClose}
-          >
-            <CloseIcon />
-          </DmView>
+          {/* @TO DO */}
+          <DmView className="w-[25] h-[25] bg-grey" onPress={onClose} />
         </DmView>
         <KeyboardAwareScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollView}
-          keyboardShouldPersistTaps="handled"
         >
           <FlatList
-            data={mockGovornorateSearchData.filter((item) =>
-              t(item.name).toLowerCase().includes(filter.toLowerCase())
-            )}
+            data={mockGovornorateSearchData}
             renderItem={renderSearchItem}
-            keyboardShouldPersistTaps="always"
             scrollEnabled={false}
           />
         </KeyboardAwareScrollView>

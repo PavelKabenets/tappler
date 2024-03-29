@@ -1,7 +1,6 @@
-import React, { useEffect, useLayoutEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 
 import { ActionBtn, ActionBtnSmall, DmInput, DmView } from "components/UI"
-import { Keyboard } from "react-native"
 
 import { useForm, Controller } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -15,11 +14,13 @@ import ExampleModal from "components/ExampleModal"
 
 interface Props {
   result: ResultFlowDataType
+  onNextStep: () => void
   onChangeResult: (obj: ResultFlowDataType) => void
   step: number
 }
 
 const PersonalInfoPart2: React.FC<Props> = ({
+  onNextStep,
   onChangeResult,
   result,
   step,
@@ -30,7 +31,6 @@ const PersonalInfoPart2: React.FC<Props> = ({
     control,
     setValue,
     getValues,
-    watch,
     formState: { isValid },
   } = useForm({
     defaultValues: {
@@ -40,24 +40,18 @@ const PersonalInfoPart2: React.FC<Props> = ({
 
   const { t } = useTranslation()
 
+  const handleSubmitSecondStep = () => {
+    onChangeResult({ aboutMe: getValues("aboutMe") })
+    onNextStep()
+  }
+
   const handleSeeExample = () => {
     setExampleModalVisible(true)
-    Keyboard.dismiss()
   }
 
   const handleCloseExample = () => {
     setExampleModalVisible(false)
   }
-
-  useLayoutEffect(() => {
-    onChangeResult({ isValid })
-  }, [isValid])
-
-  useEffect(() => {
-    return () => {
-      onChangeResult({ aboutMe: getValues("aboutMe") })
-    }
-  }, [watch("aboutMe")])
 
   useEffect(() => {
     if (step === 2) {
@@ -70,16 +64,11 @@ const PersonalInfoPart2: React.FC<Props> = ({
   }, [step])
 
   return (
-    <DmView className="pb-[28] mt-[24] px-[14] flex-1 justify-between">
+    <DmView className="mt-[24] px-[14] flex-1 justify-between">
       <DmView>
         <TitleRegistrationFlow
-          title={
-            result?.accoutType === "company"
-              ? t("information_about_your_business")
-              : t("information_about_you")
-          }
+          title={t("information_about_you")}
           descr={t("information_about_you_descr")}
-          classNameDescr="leading-[20px]"
         />
         <DmView className="mt-[23] items-center">
           <ActionBtnSmall
@@ -92,7 +81,7 @@ const PersonalInfoPart2: React.FC<Props> = ({
           title={t("important_note")}
           descr={t("phone_numbers_or_emails_descr")}
           classNameTitle="text-13 leading-[16px] text-red"
-          classNameDescr="font-custom500 leading-[20px]"
+          classNameDescr="font-custom500"
         />
         <Controller
           control={control}
@@ -103,12 +92,7 @@ const PersonalInfoPart2: React.FC<Props> = ({
               className="mt-[20]"
               value={value}
               onChangeText={onChange}
-              placeholder={
-                result?.accoutType === "company"
-                  ? t("information_about_business")
-                  : t("type_the_information_about_you_here")
-              }
-              maxLength={299}
+              placeholder={t("type_the_information_about_you_here")}
               placeholderTextColor={colors.grey11}
               multiline
             />
@@ -116,6 +100,12 @@ const PersonalInfoPart2: React.FC<Props> = ({
           name="aboutMe"
         />
       </DmView>
+      <ActionBtn
+        className="rounded-5 mt-[27]"
+        title={t("next") + " - " + t("profile_photo")}
+        onPress={handleSubmitSecondStep}
+        disable={!isValid}
+      />
       <ExampleModal
         isVisible={isExampleModalVisible}
         onClose={handleCloseExample}

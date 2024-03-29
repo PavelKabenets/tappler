@@ -19,11 +19,15 @@
     },
     {
       "path": "src/assets/fonts/TheSans-Bold.ttf",
-      "sha1": "2daa1f042e3ac57c7714a4a4d557bf90bbc2ec89"
+      "sha1": "85cc8c48c8623102dd8986cd1db749e0d1d4a2fb"
     },
     {
-      "path": "src/assets/fonts/TheSans-Plain.ttf",
-      "sha1": "3a43be443b0a3da06937bc68c62cbde7e5496d08"
+      "path": "src/assets/fonts/TheSans-Regular.ttf",
+      "sha1": "a3c7f649a45679a1f0a31c29104cfe208c07c1bb"
+    },
+    {
+      "path": "src/assets/fonts/TheSans-SemiBold.ttf",
+      "sha1": "346265a4bc5fc51cb571cca831c7c1d484c8127e"
     }
   ]
 }

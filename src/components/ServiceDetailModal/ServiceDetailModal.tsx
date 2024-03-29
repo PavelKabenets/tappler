@@ -2,11 +2,9 @@ import React from "react"
 
 import { DmText, DmView } from "components/UI"
 import { useTranslation } from "react-i18next"
-import MainModal from "components/MainModal"
 
 import styles from "./styles"
-import DetailIcon from "assets/icons/service-def.svg"
-import { I18nManager } from "react-native"
+import MainModal from "components/MainModal"
 
 interface Props {
   isVisible: boolean
@@ -31,11 +29,7 @@ const ServiceDetailModal: React.FC<Props> = ({
       descr={descr}
       titleBtn={t("OK")}
       // @TO DO
-      Icon={
-        <DmView className={I18nManager.isRTL ? "ml-[32]" : "mr-[32]"}>
-          <DetailIcon />
-        </DmView>
-      }
+      Icon={<DmView className="w-[170] h-[112] bg-grey" />}
       classNameBtn="rounded-5"
       className="px-[12] pt-[30] pb-[30]"
     />

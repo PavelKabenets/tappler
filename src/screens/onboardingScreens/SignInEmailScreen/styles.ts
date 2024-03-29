@@ -11,9 +11,11 @@ export default StyleSheet.create({
   emptyGoBack: {
     width: 16,
     height: 16,
+    backgroundColor: colors.grey,
   },
   emptyEye: {
     width: 24,
     height: 24,
+    backgroundColor: colors.grey,
   },
 })

@@ -3,11 +3,9 @@ import React from "react"
 // Components
 import { ActionBtn, DmText, DmView } from "components/UI"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { Image } from "react-native"
 
 // Hooks & Redux
 import { useTranslation } from "react-i18next"
-import { useGetServicesQuery } from "services/api"
 
 // Helpers & Types
 import { RootStackScreenProps } from "navigation/types"
@@ -17,7 +15,6 @@ import { RootStackScreenProps } from "navigation/types"
 // Styles & Assets
 import clsx from "clsx"
 import styles from "./styles"
-import img from "assets/images/auth.png"
 
 type Props = RootStackScreenProps<"auth">
 
@@ -25,7 +22,6 @@ const AuthScreen: React.FC<Props> = ({ navigation }) => {
   // Props
   // State
   // Global Store
-  useGetServicesQuery()
   // Variables
   const { t } = useTranslation()
   // Refs
@@ -45,25 +41,26 @@ const AuthScreen: React.FC<Props> = ({ navigation }) => {
     <SafeAreaView className="flex-1 pt-[99] pb-[32] px-[24] justify-between bg-white">
       <DmView>
         <DmView className="items-center">
-          <Image source={img} style={styles.img} />
+          {/* @TO DO */}
+          <DmView style={styles.emptyImg} />
         </DmView>
-        <DmText className="mt-[8] px-[4] text-center font-custom400">
+        <DmText className="mt-[8] px-[4] text-center">
           {t("create_an_account_to_join_descr")}
         </DmText>
       </DmView>
       <DmView>
         <ActionBtn
-          title={t("login")}
-          onPress={handleGoLogInScreen}
-          className="rounded-5 h-[47]"
-          textClassName="uppercase text-13 font-custom400"
-          variant="white"
-        />
-        <ActionBtn
           title={t("create_free_account")}
           onPress={handleGoSignUpScreen}
-          className="mt-[10] rounded-5 h-[47]"
+          className="rounded-5"
           textClassName="uppercase text-15 font-custom500"
+        />
+        <ActionBtn
+          title={t("login")}
+          onPress={handleGoLogInScreen}
+          className="mt-[12] rounded-5"
+          textClassName="uppercase text-13 font-custom400"
+          variant="white"
         />
       </DmView>
     </SafeAreaView>

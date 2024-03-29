@@ -21,10 +21,6 @@ import { emailRegExp } from "helpers/helpers"
 // Styles & Assets
 import clsx from "clsx"
 import styles from "./styles"
-import ArrowBackIcon from "assets/icons/arrow-back.svg"
-import HideIcon from "assets/icons/hide-password.svg"
-import colors from "styles/colors"
-import { I18nManager } from "react-native"
 
 type Props = RootStackScreenProps<"sign-in-email">
 
@@ -57,9 +53,9 @@ const SignInEmailScreen: React.FC<Props> = ({ navigation }) => {
   const handleGoBack = () => {
     navigation.goBack()
   }
-
+  // @TO DO
   const handleForgotPassword = () => {
-    navigation.navigate("password-reset")
+    //
   }
   // @TO DO
   const onSubmit = () => {
@@ -87,25 +83,13 @@ const SignInEmailScreen: React.FC<Props> = ({ navigation }) => {
       <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
       >
-        <DmView className="mt-[18]">
-          <DmView>
-            <DmView>
-              <DmView
-                className={
-                  I18nManager.isRTL
-                    ? "rotate-[180deg] flex-row justify-end"
-                    : ""
-                }
-              >
-                <DmView hitSlop={HIT_SLOP_DEFAULT} onPress={handleGoBack}>
-                  <ArrowBackIcon width={14} height={14} />
-                </DmView>
-              </DmView>
-            </DmView>
+        <DmView>
+          <DmView onPress={handleGoBack}>
+            {/* @TO DO */}
+            <DmView style={styles.emptyGoBack} hitSlop={HIT_SLOP_DEFAULT} />
           </DmView>
-          <DmText className="mt-[88] text-custom600 text-16 leading-[19px]">
+          <DmText className="mt-[88] text-custom600 text-16">
             {t("log_in_to_your_account")}
           </DmText>
           <DmView className="pr-[2]">
@@ -135,12 +119,9 @@ const SignInEmailScreen: React.FC<Props> = ({ navigation }) => {
                   onIconPress={handleTogglePasswordVisible}
                   secureTextEntry={isPasswordVisible}
                   Icon={
-                    <HideIcon
-                      fill={
-                        !isPasswordVisible
-                          ? colors.black
-                          : colors.greyPlaceholder
-                      }
+                    <DmView
+                      style={styles.emptyEye}
+                      hitSlop={HIT_SLOP_DEFAULT}
                     />
                   }
                 />
@@ -149,21 +130,21 @@ const SignInEmailScreen: React.FC<Props> = ({ navigation }) => {
             />
           </DmView>
           <DmView className="mt-[21]" onPress={handleForgotPassword}>
-            <DmText className="font-custom400 text-red text-12 leading-[15px]">
+            <DmText className="font-custom400 text-red text-12">
               {t("forgot_your_password")}
             </DmText>
           </DmView>
           <DmView className="px-[34]">
             <ActionBtn
-              className="mt-[32] h-[44]"
+              className="mt-[32] h-[41]"
               onPress={() => handleSubmit(onSubmit, handleOpenErrorModal)()}
               title={t("log_In")}
             />
           </DmView>
           <DmView className="mt-[24]" onPress={handleGoSignUpEmail}>
-            <DmText className="text-12 leading-[15px] font-custom400 text-center">
+            <DmText className="text-12 font-custom400 text-center">
               {t("dont_have_an_account")}
-              <DmText className="text-red text-12 leading-[15px] font-custom400 ">
+              <DmText className="text-red text-12 font-custom400 ">
                 {" "}
                 {t("sign_up")}
               </DmText>

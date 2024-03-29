@@ -1,13 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useState } from "react"
 
-import {
-  Platform,
-  StyleProp,
-  TextInput,
-  TextInputProps,
-  TextStyle,
-  I18nManager,
-} from "react-native"
+import { StyleProp, TextInput, TextInputProps, TextStyle } from "react-native"
 import { DmText, DmView } from "components/UI"
 import Animated, {
   useAnimatedStyle,
@@ -17,7 +10,10 @@ import Animated, {
 
 import { useTranslation } from "react-i18next"
 
-import { isSmallPhone, takeFontFamily } from "helpers/helpers"
+import {
+  renderMontserratFontFamily,
+  renderSansFontFamily,
+} from "utils/renderFontFamily"
 
 import styles from "./styles"
 import clsx from "clsx"
@@ -34,13 +30,6 @@ interface Props extends TextInputProps {
   placeholderTextColor?: string
   subLabel?: string
   error?: string
-  containerClassName?: string
-  multiline?: boolean
-  errorClassName?: string
-}
-
-const withTimingConfig = {
-  duration: 100,
 }
 
 const DmAuthInput: React.FC<Props> = ({
@@ -54,28 +43,13 @@ const DmAuthInput: React.FC<Props> = ({
   placeholderTextColor,
   subLabel,
   error,
-  containerClassName,
-  multiline,
-  errorClassName,
   ...restProps
 }) => {
-  const [stylesFontFamilyState, setStylesFontFamilyState] = useState<
-    | {
-        fontFamily: string
-        lineHeight?: number
-      }
-    | undefined
-  >(undefined)
-  const [
-    stylesFontFamilyPlaceholderState,
-    setStylesFontFamilyPlaceholderState,
-  ] = useState<
-    | {
-        fontFamily: string
-        lineHeight?: number
-      }
-    | undefined
-  >(undefined)
+  const [stylesFontFamilyState, setStylesFontFamilyState] = useState<{
+    fontFamily: string
+  }>({
+    fontFamily: "Montserrat-Regular",
+  })
   const { i18n } = useTranslation()
 
   const textSize = useSharedValue(13)
@@ -83,7 +57,7 @@ const DmAuthInput: React.FC<Props> = ({
   const marginLeftBorder = useSharedValue(0)
 
   const classNameGuard = useMemo(() => {
-    let initialClassName = "leading-[16px] "
+    let initialClassName = ""
 
     if (inputClassName) {
       initialClassName += inputClassName.replace(/custom(\d{3})/, "")
@@ -94,7 +68,8 @@ const DmAuthInput: React.FC<Props> = ({
 
   const textSizeAnim = useAnimatedStyle(() => {
     return {
-      fontSize: withTiming(textSize.value, withTimingConfig),
+      fontSize: withTiming(textSize.value),
+      fontWeight: textSize.value === 11 ? "700" : "400",
     }
   })
 
@@ -102,7 +77,7 @@ const DmAuthInput: React.FC<Props> = ({
     return {
       transform: [
         {
-          translateY: withTiming(textTranslateY.value, withTimingConfig),
+          translateY: withTiming(textTranslateY.value),
         },
       ],
     }
@@ -110,13 +85,10 @@ const DmAuthInput: React.FC<Props> = ({
 
   const borderAnim = useAnimatedStyle(() => {
     return {
-      marginLeft: withTiming(marginLeftBorder.value, withTimingConfig),
+      marginLeft: withTiming(marginLeftBorder.value),
       transform: [
         {
-          translateY: withTiming(
-            marginLeftBorder.value ? -12 : 0,
-            withTimingConfig
-          ),
+          translateY: withTiming(marginLeftBorder.value ? -12 : 0),
         },
       ],
     }
@@ -127,43 +99,30 @@ const DmAuthInput: React.FC<Props> = ({
       inputClassName?.match(/custom(\d{3})/) &&
       !inputClassName?.match(/font/)
     ) {
-      setStylesFontFamilyState(takeFontFamily(inputClassName, i18n.language))
-      setStylesFontFamilyPlaceholderState(
-        takeFontFamily(inputClassName, i18n.language)
-      )
+      if (i18n.language === "en") {
+        // Add fonts here
+        renderMontserratFontFamily(inputClassName, setStylesFontFamilyState)
+      }
+      if (i18n.language === "ar") {
+        // Add fonts here
+        renderSansFontFamily(inputClassName, setStylesFontFamilyState)
+      }
     } else if (!inputClassName?.match(/font/)) {
-      setStylesFontFamilyState(
-        takeFontFamily("font-custom400 leading-[16px]", i18n.language)
-      )
-      setStylesFontFamilyPlaceholderState(
-        takeFontFamily("font-custom400 leading-[16px]", i18n.language)
-      )
+      if (i18n.language === "en") {
+        // Add fonts here
+        renderMontserratFontFamily("font-custom400", setStylesFontFamilyState)
+      }
+      if (i18n.language === "ar") {
+        // Add fonts here
+        renderSansFontFamily("font-custom400", setStylesFontFamilyState)
+      }
     }
   }, [i18n.language, inputClassName])
-
-  useLayoutEffect(() => {
-    if (value?.length) {
-      setStylesFontFamilyPlaceholderState(
-        takeFontFamily("font-custom700 leading-[16px]", i18n.language)
-      )
-    } else {
-      setStylesFontFamilyPlaceholderState(
-        takeFontFamily(
-          inputClassName || "font-custom400 leading-[16px]",
-          i18n.language
-        )
-      )
-    }
-  }, [!!value])
 
   useEffect(() => {
     if (value) {
       textSize.value = 11
-      if (!multiline) {
-        textTranslateY.value = -27
-      } else {
-        textTranslateY.value = -23
-      }
+      textTranslateY.value = -27
       marginLeftBorder.value = 10
     } else {
       textSize.value = 13
@@ -173,45 +132,26 @@ const DmAuthInput: React.FC<Props> = ({
   }, [value])
 
   return (
-    <DmView className={clsx(containerClassName)}>
-      <DmView
-        className={clsx(
-          !multiline && "justify-center",
-          multiline && Platform.OS === "ios" && "mt-[4]",
-          wrapperClassName
-        )}
-      >
+    <DmView>
+      <DmView className={clsx("justify-center", wrapperClassName)}>
         <Animated.View
           className="absolute flex-row items-center flex-wrap"
           style={textTranslateAnim}
         >
           <Animated.Text
-            className={clsx(
-              "text-13 text-greyPlaceholder",
-              Platform.OS === "android" && "ml-[4]",
-              multiline
-                ? Platform.OS === "android"
-                  ? "mt-[23]"
-                  : "mt-[13]"
-                : ""
-            )}
             style={[
               textSizeAnim,
-              stylesFontFamilyPlaceholderState,
+              stylesFontFamilyState,
               !value
                 ? { color: placeholderTextColor || colors.greyPlaceholder }
                 : { color: colors.black },
             ]}
+            className="text-13 text-greyPlaceholder"
           >
             {placeholder}
           </Animated.Text>
           {!value && (
-            <DmText
-              className={clsx(
-                "ml-[17] text-11 text-greyPlaceholder font-custom400",
-                isSmallPhone && "text-10"
-              )}
-            >
+            <DmText className="ml-[17] text-11 text-greyPlaceholder font-custom400">
               {subLabel}
             </DmText>
           )}
@@ -225,21 +165,12 @@ const DmAuthInput: React.FC<Props> = ({
             value={value}
             {...restProps}
             className={clsx(
-              "h-[56] text-black",
+              "leading-[16px] h-[56] text-black",
               classNameGuard,
               !!Icon && "flex-1"
             )}
-            style={[
-              I18nManager.isRTL && {
-                textAlign: "right",
-                writingDirection: "rtl",
-              },
-              style,
-              stylesFontFamilyState,
-              multiline && styles.multiline,
-            ]}
+            style={[style, stylesFontFamilyState]}
             placeholderTextColor={placeholderTextColor}
-            multiline={multiline}
           />
           {!!Icon && (
             <DmView className="ml-[12]" onPress={onIconPress}>
@@ -247,21 +178,15 @@ const DmAuthInput: React.FC<Props> = ({
             </DmView>
           )}
         </DmView>
-      </DmView>
-      <Animated.View
-        className={clsx("border-b-0.5 border-grey1", !!error && "border-b-red")}
-        style={borderAnim}
-      />
-      {!!error && (
-        <DmText
+        <Animated.View
           className={clsx(
-            "mt-[4] text-13 font-custom500 text-red",
-            errorClassName
+            "border-b-0.5 border-grey1",
+            !!error && "border-b-red"
           )}
-        >
-          {error}
-        </DmText>
-      )}
+          style={borderAnim}
+        />
+      </DmView>
+      {!!error && <DmText className="mt-[4] text-13 text-red">{error}</DmText>}
     </DmView>
   )
 }

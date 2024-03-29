@@ -9,7 +9,7 @@ import colors from "styles/colors"
 import { hexToRGBA } from "helpers/helpers"
 
 interface Props {
-  onPress?: () => void
+  onPress: () => void
   title: string
   className?: string
   disable?: boolean
@@ -18,8 +18,6 @@ interface Props {
   variant?: "white" | "bordered"
   descr?: string
   Icon?: React.ReactNode
-  isIconRight?: boolean
-  classNameTextWrapper?: string
 }
 
 const ActionBtn: React.FC<Props> = ({
@@ -32,39 +30,29 @@ const ActionBtn: React.FC<Props> = ({
   variant,
   descr,
   Icon,
-  isIconRight,
-  classNameTextWrapper,
 }) => {
   return (
     <DmView
       className={clsx(
         "rounded-28 bg-red h-[51] items-center justify-center",
         { "px-[28] flex-row justify-between": !!Icon },
+        className,
         { "bg-white border-0.5 border-grey2": variant === "white" },
-        { "bg-white border-0.5 border-red": variant === "bordered" },
-        className
+        { "bg-white border-0.5 border-red": variant === "bordered" }
       )}
       style={disable ? { backgroundColor: colors.grey7 } : {}}
       onPress={!disable ? onPress : undefined}
     >
-      {!!Icon && !isLoading && (
-        <DmView className={clsx(isIconRight && "opacity-0")}>{Icon}</DmView>
-      )}
+      {!!Icon && <DmView className="">{Icon}</DmView>}
       {!isLoading && (
-        <DmView
-          className={clsx(
-            "mx-[12] items-center justify-center",
-            !classNameTextWrapper?.match(/flex/) && "flex-1",
-            classNameTextWrapper
-          )}
-        >
+        <DmView className="mx-[12] items-center justify-center flex-1">
           <DmText
             className={clsx(
-              " text-16 text-white text-center leading-[19px]",
+              " text-16 text-white text-center",
               !textClassName?.match(/font/) && "font-custom500",
+              textClassName,
               { "text-black": variant === "white" },
-              { "text-red": variant === "bordered" },
-              textClassName
+              { "text-red": variant === "bordered" }
             )}
           >
             {title}
@@ -77,9 +65,7 @@ const ActionBtn: React.FC<Props> = ({
         </DmView>
       )}
       {isLoading && <ActivityIndicator color={colors.white} />}
-      {!!Icon && !isLoading && (
-        <DmView className={clsx(!isIconRight && "opacity-0")}>{Icon}</DmView>
-      )}
+      {!!Icon && <DmView className="opacity-0">{Icon}</DmView>}
     </DmView>
   )
 }

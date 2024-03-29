@@ -1,14 +1,14 @@
 import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 import * as RNLocalize from "react-native-localize"
+import "moment/locale/ru"
 
 import en from "./en.json"
-import ar from "./ar.json"
+
 import moment from "moment"
 
 const translates = {
   en,
-  ar,
 }
 
 const fallback = { languageTag: "en", isRTL: true }

@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next"
 import { MockSearchItemType } from "data/mockData"
 
 import styles from "./styles"
-import LocationGreeyIcon from "assets/icons/location-grey.svg"
 
 interface Props {
   item: MockSearchItemType
@@ -21,13 +20,14 @@ const GovornorateSearchItem: React.FC<Props> = ({ item, onPress }) => {
       className="pt-[10] pb-[13] px-[18] flex-row items-center border-b-0.5 border-grey5"
       onPress={onPress}
     >
-      <LocationGreeyIcon />
+      {/* @TO DO */}
+      <DmView className="w-[12] h-[12] bg-grey" />
       <DmView className="ml-[13] flex-1">
         <DmText className="text-13 font-custom600 leading-[16px] flex-1">
-          {t(item.name)}
+          {item.name}
         </DmText>
-        <DmText className="text-11 leading-[14px] font-custom400 flex-1">
-        {t(item.area)} - {t(item.governorate)}
+        <DmText className="text-11 font-custom400 flex-1">
+          {t(item.area)} - {t(item.govornorate)}
         </DmText>
       </DmView>
     </DmView>
