@@ -25,7 +25,6 @@ const LogoutModal: React.FC<Props> = ({ isVisible, onClose }) => {
 
   const handleLogout = () => {
     dispatch(logout())
-    navigation.navigate("auth")
     onClose()
   }
 

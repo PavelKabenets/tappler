@@ -1,0 +1,3 @@
+import NotificationsSwitchComponent from "./NotificationsSwitchComponent"
+
+export default NotificationsSwitchComponent

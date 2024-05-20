@@ -9,6 +9,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import styles from "./styles"
 import { ScrollView } from "react-native"
 import TitleRegistrationFlow from "components/TitleRegistrationFlow"
+import CloseIcon from "assets/icons/close.svg"
+import img from "assets/images/example.png"
+import { Image } from "react-native"
 
 interface Props {
   isVisible: boolean
@@ -21,17 +24,24 @@ const ExampleModal: React.FC<Props> = ({ isVisible, onClose }) => {
   return (
     <Modal isVisible={isVisible} className="m-0">
       <DmView
-        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+        style={{
+          paddingTop: insets.top ? insets.top : 16,
+          paddingBottom: insets.bottom,
+        }}
         className="flex-1 bg-white pt-[15] px-[24]"
       >
-        {/* @TO DO */}
-        <DmView className="w-[25] h-[25] bg-grey" onPress={onClose} />
+        <DmView
+          className="w-[25] h-[25] items-center justify-center"
+          onPress={onClose}
+        >
+          <CloseIcon />
+        </DmView>
         <ScrollView
           contentContainerStyle={styles.scrollView}
           showsVerticalScrollIndicator={false}
         >
           {/* @TO DO */}
-          <DmView className="w-[150] h-[150] bg-grey" />
+          <Image source={img} style={{ width: 150, height: 150 }} />
 
           <DmView className="w-full">
             <TitleRegistrationFlow

@@ -13,7 +13,11 @@ import { useTranslation } from "react-i18next"
 import { useDispatch } from "react-redux"
 import { setRegistrationFlowComleted } from "store/auth/slice"
 import { useTypedSelector } from "store"
-import { useProsRegFlowMutation } from "services/api"
+import {
+  usePostMultiPhotoMutation,
+  usePostProfilePhotoMutation,
+  useProsRegFlowMutation,
+} from "services/api"
 
 // Helpers & Types
 import { RootStackScreenProps } from "navigation/types"
@@ -26,6 +30,8 @@ import moment from "moment"
 import clsx from "clsx"
 import styles from "./styles"
 import { ErrorSignUpEmailType } from "types"
+import photoLinkToBlob from "utils/photoLinkToBlob"
+import { PostProfilePhotoResponse } from "services"
 
 type Props = RootStackScreenProps<"terms-conditions">
 
@@ -48,6 +54,8 @@ const TermsConditionScreen: React.FC<Props> = ({ navigation }) => {
   const dispatch = useDispatch()
 
   const [signUp] = useProsRegFlowMutation()
+  const [postProfilePhoto] = usePostProfilePhotoMutation()
+  const [postMultiPhoto] = usePostMultiPhotoMutation()
   // Refs
   // Methods
   // Handlers
@@ -70,67 +78,102 @@ const TermsConditionScreen: React.FC<Props> = ({ navigation }) => {
   const handleSubmit = async () => {
     setIsLoading(true)
     try {
+      const resPhoto = await postProfilePhoto(
+        registrationResult?.profilePhoto
+      ).unwrap()
+
+      let resPhotos: PostProfilePhotoResponse[] = []
+
+      if (registrationResult?.photos) {
+        resPhotos = await postMultiPhoto(registrationResult?.photos).unwrap()
+      }
+
       await signUp({
-        registeredName:
-          String(registrationResult?.personalInfo?.firstName) +
-          " " +
-          String(registrationResult?.personalInfo?.lastName),
-        proType: registrationResult?.accoutType,
-        mobileNumber: "+20" + String(registrationResult?.phone),
-        accountStatus: "active", // @TO DO
-        signupPlatform: "email", // @TO DO
-        informationAbout: registrationResult?.aboutMe,
-        dateOfBirth: "1990-11-28T15:59:20.598Z", // @TO DO
-        gender: registrationResult?.personalInfo?.gender as "male" | "female",
-        hours: registrationResult?.businessHours
-          ?.filter((item) => item.isSelected)
-          .map((item) => {
-            return {
-              dayOfWeek: item.title,
-              openingTime: moment(item.value.openAt)
-                .locale("en")
-                .format("HH:mm"),
-              closingTime: moment(item.value.closeAt)
-                .locale("en")
-                .format("HH:mm"),
-            }
-          }),
-        // @TO DO
-        socials: [
-          {
-            socialMedia: "facebook",
-            socialLink: "facebook.com/propage",
+        ...{
+          profilePhoto: resPhoto.storageKey,
+          registeredName:
+            String(registrationResult?.personalInfo?.firstName) +
+            " " +
+            String(registrationResult?.personalInfo?.lastName),
+          proType: registrationResult?.accoutType,
+          mobileNumber: "+20" + String(registrationResult?.phone),
+          signupPlatform: "email", // @TO DO
+          informationAbout: registrationResult?.aboutMe,
+          dateOfBirth: "1990-11-28T15:59:20.598Z", // @TO DO
+          gender: registrationResult?.personalInfo?.gender as "male" | "female",
+          hours: registrationResult?.businessHours
+            ?.filter((item) => item.isSelected)
+            .map((item) => {
+              return {
+                dayOfWeek: item.title,
+                openingTime: moment(item.value.openAt)
+                  .locale("en")
+                  .format("HH:mm"),
+                closingTime: moment(item.value.closeAt)
+                  .locale("en")
+                  .format("HH:mm"),
+              }
+            }),
+          // @TO DO
+          socials: [
+            {
+              socialMedia: "facebook",
+              socialLink: "facebook.com/propage",
+            },
+          ],
+          serviceCategories: [],
+          // @TO DO
+          address: {
+            streetAddress:
+              registrationResult?.personalInfo?.address ||
+              "19 Tripoli Street mock",
+            unitNumber: "1105",
+            city: t(String(registrationResult?.personalInfo?.city)),
+            governorate: t(
+              String(registrationResult?.personalInfo?.governorate)
+            ),
+            longitude: Number(registrationResult?.personalInfo?.coords?.lon),
+            latitude: Number(registrationResult?.personalInfo?.coords?.lat),
           },
-        ],
-        serviceCategories: selectedCategoriesId,
-        // @TO DO
-        address: {
-          streetAddress: "19 Tripoli Street mock",
-          unitNumber: "1105",
-          city: t(String(registrationResult?.personalInfo?.city)),
-          governorate: t(String(registrationResult?.personalInfo?.governorate)),
-          longitude: Number(registrationResult?.personalInfo?.coords?.lon),
-          latitude: Number(registrationResult?.personalInfo?.coords?.lat),
+          paymentMethods: registrationResult?.payments,
+          referral: registrationResult?.referral?.type,
+          // @TO DO
+          serviceLocation: {
+            locationType: "office",
+            isRemote: true,
+            cities: ["mock city name"],
+          },
+          userId: user?.id,
+          photosOfWork: (resPhotos || []).map((item) => item.storageKey).length
+            ? resPhotos.map((item) => item.storageKey)
+            : [],
         },
-        paymentMethods: registrationResult?.payments,
-        referral: registrationResult?.referral?.type,
-        // @TO DO
-        serviceLocation: {
-          locationType: "office",
-          isRemote: true,
-          cities: ["mock city name"],
-        },
-        userId: user?.id,
+        ...(registrationResult?.accoutType === "company"
+          ? { businessName: registrationResult.personalInfo?.businessName }
+          : {}),
       }).unwrap()
-      navigation.navigate("congratulation")
+      navigation.replace("congratulation")
       dispatch(setRegistrationFlowComleted(true))
     } catch (e) {
+      if (
+        Object.entries((e as ErrorSignUpEmailType)?.data?.validationErrors)
+          ?.map((item) => item[1][0])
+          .some((item) => item.includes("Pro user is already taken!"))
+      ) {
+        navigation.navigate("auth")
+        return dispatch(setRegistrationFlowComleted(true))
+      }
       console.log("Register Flow Sign Up Error: ", e)
-      if ((e as ErrorSignUpEmailType).data.message) {
+      if (
+        (e as ErrorSignUpEmailType)?.data?.message ||
+        (e as ErrorSignUpEmailType)?.data?.statusCode
+      ) {
         Alert.alert(
-          `${(e as ErrorSignUpEmailType).data.message}`,
-          `\n ${(e as ErrorSignUpEmailType).data.statusCode}
-          \n ${Object.entries((e as ErrorSignUpEmailType).data.validationErrors)
+          `${(e as ErrorSignUpEmailType)?.data?.message || ""}`,
+          `\n ${(e as ErrorSignUpEmailType)?.data?.statusCode}
+          \n ${Object.entries(
+            (e as ErrorSignUpEmailType)?.data?.validationErrors
+          )
             ?.map((item) => item[1][0])
             .join("\n\n")}`
         )

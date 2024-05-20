@@ -21,6 +21,12 @@ import { emailRegExp } from "helpers/helpers"
 // Styles & Assets
 import clsx from "clsx"
 import styles from "./styles"
+import ArrowBackIcon from "assets/icons/arrow-back.svg"
+import HideIcon from "assets/icons/hide-password.svg"
+import colors from "styles/colors"
+import { I18nManager } from "react-native"
+import { useAuthMutation, useLazyGetProsQuery } from "services/api"
+import { useTypedSelector } from "store"
 
 type Props = RootStackScreenProps<"sign-in-email">
 
@@ -29,11 +35,18 @@ const SignInEmailScreen: React.FC<Props> = ({ navigation }) => {
   // State
   const [isPasswordVisible, setPasswordVisible] = useState(true)
   const [isErrorModalVisible, setErrorModalVisible] = useState(false)
+  const [isLoading, setLoading] = useState(false)
+
+  const [auth] = useAuthMutation()
+  const [getPros] = useLazyGetProsQuery()
+
+  const { token, user } = useTypedSelector((store) => store.auth)
 
   const {
     control,
     handleSubmit,
     formState: { errors },
+    getValues,
   } = useForm({
     defaultValues: {
       email: "",
@@ -53,13 +66,32 @@ const SignInEmailScreen: React.FC<Props> = ({ navigation }) => {
   const handleGoBack = () => {
     navigation.goBack()
   }
-  // @TO DO
+
   const handleForgotPassword = () => {
-    //
+    navigation.navigate("password-reset")
   }
-  // @TO DO
-  const onSubmit = () => {
-    //
+
+  const onSubmit = async () => {
+    try {
+      setLoading(true)
+      await auth({
+        email: getValues("email").toLowerCase(),
+        password: getValues("password"),
+        // @TO DO
+        userType: "pro",
+        rememberMe: true,
+      }).unwrap()
+      const res = await getPros().unwrap()
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "dashboard", params: { userParams: res } }],
+      })
+    } catch (e) {
+      console.log("Auth Error: ", e)
+      setErrorModalVisible(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleOpenErrorModal = () => {
@@ -83,19 +115,31 @@ const SignInEmailScreen: React.FC<Props> = ({ navigation }) => {
       <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <DmView>
-          <DmView onPress={handleGoBack}>
-            {/* @TO DO */}
-            <DmView style={styles.emptyGoBack} hitSlop={HIT_SLOP_DEFAULT} />
+        <DmView className="mt-[18]">
+          <DmView>
+            <DmView>
+              <DmView
+                className={
+                  I18nManager.isRTL
+                    ? "rotate-[180deg] flex-row justify-end"
+                    : ""
+                }
+              >
+                <DmView hitSlop={HIT_SLOP_DEFAULT} onPress={handleGoBack}>
+                  <ArrowBackIcon width={14} height={14} />
+                </DmView>
+              </DmView>
+            </DmView>
           </DmView>
-          <DmText className="mt-[88] text-custom600 text-16">
+          <DmText className="mt-[88] font-custom600 text-16 leading-[19px]">
             {t("log_in_to_your_account")}
           </DmText>
           <DmView className="pr-[2]">
             <Controller
               control={control}
-              rules={{ required: true, pattern: emailRegExp }}
+              rules={{ required: true }}
               render={({ field: { value, onChange } }) => (
                 <DmAuthInput
                   value={value}
@@ -119,9 +163,12 @@ const SignInEmailScreen: React.FC<Props> = ({ navigation }) => {
                   onIconPress={handleTogglePasswordVisible}
                   secureTextEntry={isPasswordVisible}
                   Icon={
-                    <DmView
-                      style={styles.emptyEye}
-                      hitSlop={HIT_SLOP_DEFAULT}
+                    <HideIcon
+                      fill={
+                        !isPasswordVisible
+                          ? colors.black
+                          : colors.greyPlaceholder
+                      }
                     />
                   }
                 />
@@ -130,21 +177,23 @@ const SignInEmailScreen: React.FC<Props> = ({ navigation }) => {
             />
           </DmView>
           <DmView className="mt-[21]" onPress={handleForgotPassword}>
-            <DmText className="font-custom400 text-red text-12">
+            <DmText className="font-custom400 text-red text-12 leading-[15px]">
               {t("forgot_your_password")}
             </DmText>
           </DmView>
           <DmView className="px-[34]">
             <ActionBtn
-              className="mt-[32] h-[41]"
+              className="mt-[32] h-[44]"
               onPress={() => handleSubmit(onSubmit, handleOpenErrorModal)()}
               title={t("log_In")}
+              isLoading={isLoading}
+              disable={isLoading}
             />
           </DmView>
           <DmView className="mt-[24]" onPress={handleGoSignUpEmail}>
-            <DmText className="text-12 font-custom400 text-center">
+            <DmText className="text-12 leading-[15px] font-custom400 text-center">
               {t("dont_have_an_account")}
-              <DmText className="text-red text-12 font-custom400 ">
+              <DmText className="text-red text-12 leading-[15px] font-custom400 ">
                 {" "}
                 {t("sign_up")}
               </DmText>

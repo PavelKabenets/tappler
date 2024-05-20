@@ -8,13 +8,19 @@ import styles from "./styles"
 import clsx from "clsx"
 
 interface Props {
-  title: string
+  title?: string
   descr?: string
   descrArray?: string[]
   Icon?: React.ReactNode
   className?: string
   classNameDescr?: string
   classNameTitle?: string
+  descrRight?: string
+  IconRight?: React.ReactNode
+  onPress?: () => void
+  classNameDescrArr?: string
+  classNameDescrArrItem?: string
+  classNameDescrArrItemWrapper?: string
 }
 
 const TitleRegistrationFlow: React.FC<Props> = ({
@@ -25,48 +31,91 @@ const TitleRegistrationFlow: React.FC<Props> = ({
   classNameDescr,
   classNameTitle,
   descrArray,
+  descrRight,
+  IconRight,
+  onPress,
+  classNameDescrArr,
+  classNameDescrArrItem,
+  classNameDescrArrItemWrapper,
 }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const renderListItem = ({ item, index }: { item: string; index: number }) => {
     return (
-      <DmView key={index} className="mt-[7] flex-row items-center">
+      <DmView
+        key={index}
+        className={clsx(
+          "mt-[3] flex-row items-center",
+          index === 0 && "mt-[2]",
+          i18n.language === "ar" && "mt-[0]",
+          classNameDescrArrItemWrapper
+        )}
+      >
         <DmView className="w-[6] h-[6] bg-red rounded-full" />
-        <DmText className="ml-[3] text-12 leading-[20px] font-custom400 flex-1">
+        <DmText
+          className={clsx(
+            "ml-[3] text-12 leading-[20px] font-custom400 flex-1",
+            classNameDescrArrItem
+          )}
+        >
           {t(item)}
         </DmText>
       </DmView>
     )
   }
   return (
-    <DmView className={clsx("w-full", className)}>
-      <DmText
-        className={clsx(
-          "text-16 leading-[19px]",
-          !classNameTitle?.match(/font-/) && "font-custom600",
-          classNameTitle
-        )}
-      >
-        {title}
-      </DmText>
-      {descr && (
-        <DmView className="mt-[7] flex-row items-center">
-          {Icon}
-          <DmText
-            className={clsx(
-              "flex-1 text-12",
-              !classNameDescr?.match(/font-/) && "font-custom400",
-              !!Icon && "ml-[5]",
-              classNameDescr
-            )}
-          >
-            {descr}
-          </DmText>
+    <DmView className={clsx(className)} onPress={onPress}>
+      <DmView className="flex-row items-center justify-between">
+        <DmView className="flex-1">
+          {!!title && (
+            <DmText
+              className={clsx(
+                "text-16",
+                !classNameTitle?.match(/leading-/) && "leading-[19px]",
+                !classNameTitle?.match(/font-/) && "font-custom600",
+                classNameTitle
+              )}
+            >
+              {title}
+              {!!descrRight && (
+                <DmText
+                  className={clsx("ml-[5] text-16 leading-[19px] flex-1")}
+                >
+                  {" "}
+                  {descrRight}
+                </DmText>
+              )}
+            </DmText>
+          )}
+          {!!descr && (
+            <DmView
+              className={clsx(
+                "mt-[5] flex-row items-center",
+                i18n.language === "ar" && "mt-[0]"
+              )}
+            >
+              {Icon}
+              <DmText
+                className={clsx(
+                  "flex-1 text-12",
+                  !classNameDescr?.match(/leading-/) && "leading-[14px]",
+                  !classNameDescr?.match(/font-/) && "font-custom400",
+                  !!Icon && "ml-[5]",
+                  classNameDescr
+                )}
+              >
+                {descr}
+              </DmText>
+            </DmView>
+          )}
         </DmView>
-      )}
-      {!!descrArray &&
-        descrArray.map((item, index) => {
-          return renderListItem({ item, index })
-        })}
+        {IconRight && <DmView className="pl-[12]">{IconRight}</DmView>}
+      </DmView>
+      <DmView className={classNameDescrArr}>
+        {!!descrArray &&
+          descrArray.map((item, index) => {
+            return renderListItem({ item, index })
+          })}
+      </DmView>
     </DmView>
   )
 }

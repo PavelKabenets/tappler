@@ -23,7 +23,6 @@ const StopRegistrationModal: React.FC<Props> = ({ isVisible, onClose }) => {
 
   const handleLogout = () => {
     dispatch(logout())
-    navigation.navigate("auth")
     onClose()
   }
 
@@ -32,6 +31,9 @@ const StopRegistrationModal: React.FC<Props> = ({ isVisible, onClose }) => {
       isVisible={isVisible}
       onBackdropPress={onClose}
       className="m-0 px-[22]"
+      animationIn={"fadeIn"}
+      animationOut={"fadeOut"}
+      animationInTiming={400}
     >
       <DmView className="bg-white rounded-10 py-[28] px-[40]">
         <DmView className="items-center">

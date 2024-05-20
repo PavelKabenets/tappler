@@ -3,7 +3,7 @@ import React, { useEffect, useLayoutEffect, useState } from "react"
 import { ActionBtn, DmText, DmView } from "components/UI"
 import { useTranslation } from "react-i18next"
 import TitleRegistrationFlow from "components/TitleRegistrationFlow"
-import ImagePicker from "react-native-image-crop-picker"
+import ImagePicker, { ImageOrVideo } from "react-native-image-crop-picker"
 import { check, request, PERMISSIONS, RESULTS } from "react-native-permissions"
 
 import { ResultFlowDataType } from "types"
@@ -29,7 +29,7 @@ const Photos: React.FC<Props> = ({
   step,
   onScrollToBottom,
 }) => {
-  const [selectedPhotos, setSelectedPhotos] = useState<string[]>()
+  const [selectedPhotos, setSelectedPhotos] = useState<ImageOrVideo[]>()
   const [permission, setPermission] = useState("")
 
   const { t } = useTranslation()
@@ -60,8 +60,8 @@ const Photos: React.FC<Props> = ({
       }).then((images) => {
         setSelectedPhotos((prev) =>
           prev
-            ? [...prev, ...images.map((item) => item.path)]
-            : images.map((item) => item.path)
+            ? [...prev, ...images.map((item) => item)]
+            : images.map((item) => item)
         )
         setTimeout(() => {
           onScrollToBottom()
@@ -81,9 +81,9 @@ const Photos: React.FC<Props> = ({
     setPermission(permissionRequest)
   }
 
-  const handleItemPress = (item: string) => {
+  const handleItemPress = (item: ImageOrVideo) => {
     setSelectedPhotos((prev) =>
-      prev?.filter((filtelrItem) => filtelrItem !== item)
+      prev?.filter((filtelrItem) => filtelrItem.path !== item.path)
     )
   }
 
@@ -103,12 +103,19 @@ const Photos: React.FC<Props> = ({
     }
   }, [selectedPhotos])
 
-  const renderListItem = ({ item, index }: { item: string; index: number }) => {
+  const renderListItem = ({
+    item,
+    index,
+  }: {
+    item: ImageOrVideo
+    index: number
+  }) => {
     return (
       <SelectPhotosItem
         item={item}
-        onPress={handleItemPress}
-        className={clsx(
+        resizeMode="cover"
+        onDelete={handleItemPress}
+        wrapperClassName={clsx(
           "mx-[15]",
           (index + 1) % 3 === 0 && "mx-[0]",
           (index + 3) % 3 === 0 && "mx-[0]"

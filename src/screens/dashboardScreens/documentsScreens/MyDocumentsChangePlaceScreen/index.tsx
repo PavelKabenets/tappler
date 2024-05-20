@@ -1,0 +1,3 @@
+import MyDocumentsChangePlaceScreen from "./MyDocumentsChangePlaceScreen"
+
+export default MyDocumentsChangePlaceScreen

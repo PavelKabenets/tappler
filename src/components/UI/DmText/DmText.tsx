@@ -5,10 +5,7 @@ import { Pressable, StyleProp, Text, TextProps, TextStyle } from "react-native"
 
 import { useTranslation } from "react-i18next"
 
-import {
-  renderMontserratFontFamily,
-  renderSansFontFamily,
-} from "utils/renderFontFamily"
+import { takeArLineHeight, takeFontFamily, takeFontStyles } from "helpers/helpers"
 
 // Styles & Assets
 import clsx from "clsx"
@@ -27,16 +24,18 @@ const DmText: React.FC<Props> = ({
   ...restProps
 }) => {
   const Wrapper = onPress ? Pressable : React.Fragment
-  const [stylesFontFamilyState, setStylesFontFamilyState] = useState<{
-    fontFamily: string
-  }>({
-    fontFamily: "Montserrat-Regular",
-  })
+  const [stylesFontFamilyState, setStylesFontFamilyState] = useState<
+    | {
+        fontFamily?: string
+        lineHeight?: number
+      }
+    | undefined
+  >(undefined)
 
   const { i18n } = useTranslation()
 
   const classNameGuard = useMemo(() => {
-    let initialClassName = "text-14 text-black "
+    let initialClassName = "text-14 text-black text-left "
 
     if (className) {
       initialClassName += className.replace(/custom(\d{3})/, "")
@@ -46,18 +45,10 @@ const DmText: React.FC<Props> = ({
   }, [className, i18n.language])
 
   useLayoutEffect(() => {
-    if (className?.match(/custom(\d{3})/)) {
-      if (i18n.language === "en") {
-        // Add fonts here
-        renderMontserratFontFamily(className, setStylesFontFamilyState)
-      }
-      if (i18n.language === "ar") {
-        // Add fonts here
-        renderSansFontFamily(className, setStylesFontFamilyState)
-      }
-    }
+    setStylesFontFamilyState(
+      takeFontStyles(className || "font-custom400", i18n.language)
+    )
   }, [className, i18n.language])
-
   return (
     <Wrapper>
       <Text

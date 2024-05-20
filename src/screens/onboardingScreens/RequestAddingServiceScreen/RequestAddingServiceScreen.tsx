@@ -2,7 +2,7 @@ import React, { useState } from "react"
 
 // Components
 import { ActionBtn, DmAuthInput, DmText, DmView } from "components/UI"
-import { SafeAreaView } from "react-native-safe-area-context"
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
 // Hooks & Redux
 import { useTranslation } from "react-i18next"
@@ -20,6 +20,7 @@ import HeaderOnboarding from "components/HeaderOnboarding"
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
 import MainModal from "components/MainModal"
 import CheckMarkBig from "assets/icons/check-mark-big.svg"
+import { SCREEN_HEIGHT } from "helpers/helpers"
 
 type Props = RootStackScreenProps<"request-adding-service">
 
@@ -43,6 +44,7 @@ const RequestAddingServiceScreen: React.FC<Props> = ({ navigation }) => {
   // Global Store
   // Variables
   const { t } = useTranslation()
+  const insets = useSafeAreaInsets()
   // Refs
   // Methods
   // Handlers
@@ -64,104 +66,112 @@ const RequestAddingServiceScreen: React.FC<Props> = ({ navigation }) => {
   // Render Methods
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <HeaderOnboarding
-        title={t("request_for_adding_service")}
-        className="px-[20]"
-      />
-      <KeyboardAwareScrollView
-        contentContainerStyle={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        enableOnAndroid
-      >
-        <DmView>
-          <DmText className="mx-[14] text-12 leading-[20px] font-custom400">
-            {t("if_you_cannot_find_the_services_descr")}
-          </DmText>
-          <DmView className="mt-[20]">
-            <Controller
-              control={control}
-              rules={{
-                required: { value: true, message: t("required_error") },
-              }}
-              render={({ field: { value, onChange } }) => (
-                <DmAuthInput
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder={t("your_name")}
-                  wrapperClassName="ml-[20]"
-                  containerClassName="mr-[37]"
-                  error={errors.name?.message}
-                  errorClassName="mx-[24]"
-                />
-              )}
-              name="name"
-            />
-            <Controller
-              control={control}
-              rules={{
-                required: { value: true, message: t("required_error") },
-              }}
-              render={({ field: { value, onChange } }) => (
-                <DmAuthInput
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder={t("your_mobile_number")}
-                  wrapperClassName="ml-[20]"
-                  containerClassName="mt-[14] mr-[37]"
-                  keyboardType="numeric"
-                  error={errors.phone?.message}
-                  errorClassName="mx-[24]"
-                />
-              )}
-              name="phone"
-            />
-            <Controller
-              control={control}
-              rules={{
-                required: { value: true, message: t("required_error") },
-              }}
-              render={({ field: { value, onChange } }) => (
-                <DmAuthInput
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder={t("your_email_address")}
-                  wrapperClassName="ml-[20]"
-                  containerClassName="mt-[14] mr-[37]"
-                  error={errors.email?.message}
-                  errorClassName="mx-[24]"
-                />
-              )}
-              name="email"
-            />
-            <Controller
-              control={control}
-              rules={{
-                required: { value: true, message: t("required_error") },
-              }}
-              render={({ field: { value, onChange } }) => (
-                <DmAuthInput
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder={t("requested_service")}
-                  wrapperClassName="mx-[20]"
-                  containerClassName="mt-[14]"
-                  multiline
-                  error={errors.service?.message}
-                  errorClassName="mx-[24]"
-                />
-              )}
-              name="service"
-            />
-          </DmView>
-        </DmView>
-        <ActionBtn
-          title={t("send")}
-          onPress={() => handleSubmit(onSubmit)()}
-          className="mt-[24] rounded-5 mx-[20]"
-          textClassName="text-13 leading-[16px] font-custom600"
+    <SafeAreaView
+      className="flex-1 bg-white justify-between"
+      style={{ paddingBottom: insets.bottom > 45 ? 0 : 45 - insets.bottom }}
+    >
+      <DmView>
+        <HeaderOnboarding
+          title={t("request_for_adding_service")}
+          className="px-[20]"
         />
-      </KeyboardAwareScrollView>
+        <KeyboardAwareScrollView
+          contentContainerStyle={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          enableOnAndroid
+        >
+          <DmView>
+            <DmText className="mx-[14] text-12 leading-[20px] font-custom400">
+              {t("if_you_cannot_find_the_services_descr")}
+            </DmText>
+            <DmView className="mt-[20]">
+              <Controller
+                control={control}
+                rules={{
+                  required: { value: true, message: t("required_error") },
+                }}
+                render={({ field: { value, onChange } }) => (
+                  <DmAuthInput
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder={t("your_name")}
+                    wrapperClassName="ml-[20]"
+                    containerClassName="mr-[37]"
+                    error={errors.name?.message}
+                    errorClassName="mx-[24]"
+                  />
+                )}
+                name="name"
+              />
+              <Controller
+                control={control}
+                rules={{
+                  required: { value: true, message: t("required_error") },
+                }}
+                render={({ field: { value, onChange } }) => (
+                  <DmAuthInput
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder={t("your_mobile_number")}
+                    wrapperClassName="ml-[20]"
+                    containerClassName="mt-[14] mr-[37]"
+                    keyboardType="numeric"
+                    error={errors.phone?.message}
+                    errorClassName="mx-[24]"
+                  />
+                )}
+                name="phone"
+              />
+              <Controller
+                control={control}
+                rules={{
+                  required: { value: true, message: t("required_error") },
+                }}
+                render={({ field: { value, onChange } }) => (
+                  <DmAuthInput
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder={t("your_email_address")}
+                    wrapperClassName="ml-[20]"
+                    containerClassName="mt-[14] mr-[37]"
+                    error={errors.email?.message}
+                    errorClassName="mx-[24]"
+                  />
+                )}
+                name="email"
+              />
+              <Controller
+                control={control}
+                rules={{
+                  required: { value: true, message: t("required_error") },
+                }}
+                render={({ field: { value, onChange } }) => (
+                  <DmAuthInput
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder={t("requested_service")}
+                    wrapperClassName="mx-[20]"
+                    containerClassName={clsx("mt-[14] mr-[37]")}
+                    error={errors.service?.message}
+                    errorClassName="mx-[24]"
+                    maxLength={300}
+                    multiline
+                    multilineStartOneLine
+                    multilineHeight={SCREEN_HEIGHT / 5}
+                  />
+                )}
+                name="service"
+              />
+            </DmView>
+          </DmView>
+        </KeyboardAwareScrollView>
+      </DmView>
+      <ActionBtn
+        title={t("send")}
+        onPress={() => handleSubmit(onSubmit)()}
+        className="mt-[24] rounded-5 mx-[20]"
+        textClassName="text-13 leading-[16px] font-custom600"
+      />
       <MainModal
         isVisible={isModalVisible}
         onClose={hadnleCloseModal}

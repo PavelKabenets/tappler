@@ -7,7 +7,7 @@ import React, {
 } from "react"
 
 import { DmText, DmView } from "components/UI"
-import { TextInput } from "react-native"
+import { I18nManager, TextInput } from "react-native"
 import { Shadow } from "react-native-shadow-2"
 
 import { useTranslation } from "react-i18next"
@@ -87,7 +87,13 @@ const VerifyCodeInput: React.FC<Props> = ({
   }, [value])
 
   return (
-    <DmView className={clsx("flex-row justify-between w-full", className)}>
+    <DmView
+      className={clsx(
+        "flex-row justify-between w-full",
+        I18nManager.isRTL && "flex-row-reverse",
+        className
+      )}
+    >
       <Shadow
         style={styles.shadowRounded}
         startColor={hexToRGBA(colors.red, 0.35)}
@@ -98,7 +104,7 @@ const VerifyCodeInput: React.FC<Props> = ({
             ref={firstInputRef}
             style={[
               styles.input,
-              takeFontFamily("font-custom500", i18n.language),
+              takeFontFamily("font-custom500 leading-[26px]", i18n.language),
             ]}
             className={clsx("text-20")}
             value={value[0]}
@@ -106,6 +112,7 @@ const VerifyCodeInput: React.FC<Props> = ({
             textAlign="center"
             textAlignVertical="center"
             keyboardType="numeric"
+            returnKeyType={"done"}
           />
         </DmView>
       </Shadow>
@@ -119,7 +126,7 @@ const VerifyCodeInput: React.FC<Props> = ({
             ref={secondInputRef}
             style={[
               styles.input,
-              takeFontFamily("font-custom500", i18n.language),
+              takeFontFamily("font-custom500 leading-[26px]", i18n.language),
             ]}
             className={clsx("text-20")}
             value={value[1]}
@@ -140,7 +147,7 @@ const VerifyCodeInput: React.FC<Props> = ({
             ref={thirdInputRef}
             style={[
               styles.input,
-              takeFontFamily("font-custom500", i18n.language),
+              takeFontFamily("font-custom500 leading-[26px]", i18n.language),
             ]}
             className={clsx("text-20")}
             value={value[2]}
@@ -159,11 +166,11 @@ const VerifyCodeInput: React.FC<Props> = ({
         <DmView className="border-0.7 border-red rounded-5">
           <TextInput
             ref={fourInputRef}
+            className={clsx("text-20")}
             style={[
               styles.input,
-              takeFontFamily("font-custom500", i18n.language),
+              takeFontFamily("font-custom500 leading-[26px]", i18n.language),
             ]}
-            className={clsx("text-20")}
             value={value[3]}
             onChangeText={(val) => handleChangeValue(val, 3)}
             textAlign="center"

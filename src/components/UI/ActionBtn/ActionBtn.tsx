@@ -9,15 +9,20 @@ import colors from "styles/colors"
 import { hexToRGBA } from "helpers/helpers"
 
 interface Props {
-  onPress: () => void
+  onPress?: () => void
   title: string
   className?: string
   disable?: boolean
   isLoading?: boolean
   textClassName?: string
-  variant?: "white" | "bordered"
+  variant?: "white" | "bordered" | "grey"
   descr?: string
   Icon?: React.ReactNode
+  isIconRight?: boolean
+  classNameTextWrapper?: string
+  classNameIcon?: string
+  IconNearTitle?: React.ReactNode
+  titleSecond?: string
 }
 
 const ActionBtn: React.FC<Props> = ({
@@ -30,33 +35,73 @@ const ActionBtn: React.FC<Props> = ({
   variant,
   descr,
   Icon,
+  isIconRight,
+  classNameTextWrapper,
+  classNameIcon,
+  IconNearTitle,
+  titleSecond,
 }) => {
   return (
     <DmView
       className={clsx(
         "rounded-28 bg-red h-[51] items-center justify-center",
         { "px-[28] flex-row justify-between": !!Icon },
-        className,
         { "bg-white border-0.5 border-grey2": variant === "white" },
-        { "bg-white border-0.5 border-red": variant === "bordered" }
+        { "bg-white border-0.5 border-red": variant === "bordered" },
+        disable && variant !== "white" && "bg-grey7",
+        { "opacity-[0.4]": disable && variant === "white" },
+        { "bg-grey28": variant === "grey" },
+        className
       )}
-      style={disable ? { backgroundColor: colors.grey7 } : {}}
-      onPress={!disable ? onPress : undefined}
+      onPress={!disable && !isLoading ? onPress : undefined}
     >
-      {!!Icon && <DmView className="">{Icon}</DmView>}
+      {!!Icon && !isLoading && (
+        <DmView className={clsx(isIconRight && "opacity-0", classNameIcon)}>
+          {Icon}
+        </DmView>
+      )}
       {!isLoading && (
-        <DmView className="mx-[12] items-center justify-center flex-1">
-          <DmText
+        <DmView
+          className={clsx(
+            "mx-[12] items-center justify-center",
+            !classNameTextWrapper?.match(/flex/) && "flex-1",
+            classNameTextWrapper
+          )}
+        >
+          <DmView
             className={clsx(
-              " text-16 text-white text-center",
-              !textClassName?.match(/font/) && "font-custom500",
-              textClassName,
-              { "text-black": variant === "white" },
-              { "text-red": variant === "bordered" }
+              "flex-row items-center",
+              titleSecond && "w-full justify-between"
             )}
           >
-            {title}
-          </DmText>
+            <DmText
+              className={clsx(
+                " text-16 text-white text-center leading-[19px]",
+                !textClassName?.match(/font/) && "font-custom500",
+                { "text-black": variant === "white" },
+                { "text-red": variant === "bordered" },
+                textClassName
+              )}
+            >
+              {title}
+            </DmText>
+            {IconNearTitle && (
+              <DmView className="ml-[6]">{IconNearTitle}</DmView>
+            )}
+            {!!titleSecond && (
+              <DmText
+                className={clsx(
+                  " text-16 text-white text-center leading-[19px]",
+                  !textClassName?.match(/font/) && "font-custom500",
+                  { "text-black": variant === "white" },
+                  { "text-red": variant === "bordered" },
+                  textClassName
+                )}
+              >
+                {titleSecond}
+              </DmText>
+            )}
+          </DmView>
           {!!descr && (
             <DmText className="mt-[1] font-custom600 text-13 text-red text-center leading-[16px]">
               {descr}
@@ -65,7 +110,11 @@ const ActionBtn: React.FC<Props> = ({
         </DmView>
       )}
       {isLoading && <ActivityIndicator color={colors.white} />}
-      {!!Icon && <DmView className="opacity-0">{Icon}</DmView>}
+      {!!Icon && !isLoading && (
+        <DmView className={clsx(!isIconRight && "opacity-0", classNameIcon)}>
+          {Icon}
+        </DmView>
+      )}
     </DmView>
   )
 }

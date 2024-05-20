@@ -1,7 +1,7 @@
 import { SCREEN_WIDTH } from "helpers/helpers"
 import { StyleSheet } from "react-native"
 
-const inputSize = (SCREEN_WIDTH - 184) / 4
+const inputSize = (SCREEN_WIDTH - 175) / 4
 
 const styles = StyleSheet.create({
   shadowRounded: {

@@ -18,7 +18,7 @@ import { api } from "services/api"
 const persistConfig = {
   key: "tappler_mob_app-root-storage",
   storage,
-  whitelist: ["auth", "checkout"],
+  whitelist: ["auth"],
 }
 
 const reducers = combineReducers({

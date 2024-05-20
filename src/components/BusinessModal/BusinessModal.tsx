@@ -23,7 +23,7 @@ interface Props {
   onClose: () => void
   onSubmit: (value: BusinessHoursItemValueType) => void
   item?: BusinessHoursItemType
-  onSelectAll: (value: BusinessHoursItemValueType) => void
+  onSelectAll?: (value: BusinessHoursItemValueType) => void
 }
 
 const BusinessModal: React.FC<Props> = ({
@@ -70,6 +70,9 @@ const BusinessModal: React.FC<Props> = ({
       isVisible={isVisible}
       onBackdropPress={onClose}
       className="m-0 px-[22]"
+      animationIn={"fadeIn"}
+      animationOut={"fadeOut"}
+      animationInTiming={400}
     >
       <DmView className="bg-white rounded-10 pt-[46] pb-[20] px-[37]">
         <DmText className="text-center text-16 leading-[25px] font-custom500">
@@ -93,7 +96,11 @@ const BusinessModal: React.FC<Props> = ({
                 i18n.language !== "ar" && "leading-[26.4px]"
               )}
             >
-              {moment(selectedOpen).format("hh:mmA")}
+              {selectedOpen
+                ? moment(selectedOpen).format("hh:mmA")
+                : moment(moment("10:00", "hh:mm").toISOString()).format(
+                    "hh:mmA"
+                  )}
             </DmText>
           </DmView>
           <DmText
@@ -121,7 +128,11 @@ const BusinessModal: React.FC<Props> = ({
                 i18n.language !== "ar" && "leading-[26.4px]"
               )}
             >
-              {moment(selectedClose).format("hh:mmA")}
+              {selectedClose
+                ? moment(selectedClose).format("hh:mmA")
+                : moment(moment("10:00", "hh:mm").toISOString()).format(
+                    "hh:mmA"
+                  )}
             </DmText>
           </DmView>
         </DmView>
@@ -136,26 +147,28 @@ const BusinessModal: React.FC<Props> = ({
             })
           }
         />
-        <DmView
-          onPress={
-            isOpenDateAfter
-              ? undefined
-              : () =>
-                  onSelectAll({
-                    openAt: moment(selectedOpen).toISOString(),
-                    closeAt: moment(selectedClose).toISOString(),
-                  })
-          }
-        >
-          <DmText
-            className={clsx(
-              "mt-[12] text-center text-15 leading-[20px] font-custom500",
-              isOpenDateAfter && "text-grey1"
-            )}
+        {onSelectAll && (
+          <DmView
+            onPress={
+              isOpenDateAfter
+                ? undefined
+                : () =>
+                    onSelectAll({
+                      openAt: moment(selectedOpen).toISOString(),
+                      closeAt: moment(selectedClose).toISOString(),
+                    })
+            }
           >
-            {t("apply_all")}
-          </DmText>
-        </DmView>
+            <DmText
+              className={clsx(
+                "mt-[12] text-center text-15 leading-[20px] font-custom500",
+                isOpenDateAfter && "text-grey1"
+              )}
+            >
+              {t("apply_all")}
+            </DmText>
+          </DmView>
+        )}
       </DmView>
       <DatePicker
         locale={language}

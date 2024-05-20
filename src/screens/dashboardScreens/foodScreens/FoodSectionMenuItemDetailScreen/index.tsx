@@ -1,0 +1,3 @@
+import FoodSectionMenuItemDetailScreen from "./FoodSectionMenuItemDetailScreen"
+
+export default FoodSectionMenuItemDetailScreen

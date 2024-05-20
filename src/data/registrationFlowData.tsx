@@ -18,6 +18,14 @@ export const profileCompanyPhotoData: string[] = [
 
 export const businessHoursData: BusinessHoursItemType[] = [
   {
+    title: "sunday",
+    value: {
+      openAt: "2024-02-28T08:00:00.000Z",
+      closeAt: "2024-02-28T10:00:00.000Z",
+    },
+    isSelected: true,
+  },
+  {
     title: "monday",
     value: {
       openAt: "2024-02-28T08:00:00.000Z",
@@ -59,14 +67,6 @@ export const businessHoursData: BusinessHoursItemType[] = [
   },
   {
     title: "saturday",
-    value: {
-      openAt: "2024-02-28T08:00:00.000Z",
-      closeAt: "2024-02-28T10:00:00.000Z",
-    },
-    isSelected: true,
-  },
-  {
-    title: "sunday",
     value: {
       openAt: "2024-02-28T08:00:00.000Z",
       closeAt: "2024-02-28T10:00:00.000Z",

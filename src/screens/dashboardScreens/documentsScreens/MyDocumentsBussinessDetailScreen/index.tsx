@@ -1,0 +1,3 @@
+import MyDocumentsBussinessDetailScreen from "./MyDocumentsBussinessDetailScreen"
+
+export default MyDocumentsBussinessDetailScreen

@@ -1,6 +1,15 @@
 import React, { useEffect, useLayoutEffect, useMemo, useState } from "react"
 
-import { StyleProp, TextInput, TextInputProps, TextStyle } from "react-native"
+import {
+  Platform,
+  StyleProp,
+  TextInput,
+  TextInputProps,
+  TextStyle,
+  I18nManager,
+  KeyboardTypeOptions,
+  ReturnKeyType,
+} from "react-native"
 import { DmText, DmView } from "components/UI"
 import Animated, {
   useAnimatedStyle,
@@ -10,10 +19,7 @@ import Animated, {
 
 import { useTranslation } from "react-i18next"
 
-import {
-  renderMontserratFontFamily,
-  renderSansFontFamily,
-} from "utils/renderFontFamily"
+import { isSmallPhone, takeFontFamily, takeFontStyles } from "helpers/helpers"
 
 import styles from "./styles"
 import clsx from "clsx"
@@ -30,6 +36,25 @@ interface Props extends TextInputProps {
   placeholderTextColor?: string
   subLabel?: string
   error?: string
+  containerClassName?: string
+  multiline?: boolean
+  errorClassName?: string
+  multilineStartOneLine?: boolean
+  multilineHeight?: number
+  label?: string
+  isBorderVisible?: boolean
+  translateYStartPos?: number
+  onlyTextError?: boolean
+  placeholderClassName?: string
+  placeholderSize?: number
+  textAlign?: "left" | "center" | "right"
+  allTextAlign?: "left" | "center" | "right"
+  keyboardType?: KeyboardTypeOptions
+  returnKeyType?: ReturnKeyType
+}
+
+const withTimingConfig = {
+  duration: 100,
 }
 
 const DmAuthInput: React.FC<Props> = ({
@@ -43,33 +68,70 @@ const DmAuthInput: React.FC<Props> = ({
   placeholderTextColor,
   subLabel,
   error,
+  containerClassName,
+  multiline,
+  errorClassName,
+  multilineStartOneLine,
+  multilineHeight,
+  label,
+  isBorderVisible = true,
+  translateYStartPos,
+  onlyTextError,
+  placeholderClassName,
+  placeholderSize = 13,
+  textAlign,
+  allTextAlign,
+  keyboardType,
+  returnKeyType,
   ...restProps
 }) => {
-  const [stylesFontFamilyState, setStylesFontFamilyState] = useState<{
-    fontFamily: string
-  }>({
-    fontFamily: "Montserrat-Regular",
-  })
+  const [stylesFontFamilyState, setStylesFontFamilyState] = useState<
+    | {
+        fontFamily: string
+        lineHeight?: number
+      }
+    | undefined
+  >(undefined)
+  const [
+    stylesFontFamilyPlaceholderState,
+    setStylesFontFamilyPlaceholderState,
+  ] = useState<
+    | {
+        fontFamily: string
+        lineHeight?: number
+      }
+    | undefined
+  >(undefined)
+  const [styleFont, setFontStyle] = useState({ fontSize: 13 })
+
   const { i18n } = useTranslation()
 
-  const textSize = useSharedValue(13)
+  const textSize = useSharedValue(placeholderSize)
   const textTranslateY = useSharedValue(0)
   const marginLeftBorder = useSharedValue(0)
 
   const classNameGuard = useMemo(() => {
-    let initialClassName = ""
+    let initialClassName = inputClassName
 
     if (inputClassName) {
-      initialClassName += inputClassName.replace(/custom(\d{3})/, "")
+      if (inputClassName.match(/text-(\d+)/)?.length) {
+        const arr = [...inputClassName.match(/text-(\d+)/g) || []]
+        arr.map((item) =>
+          setFontStyle({ fontSize: Number(item.split("-")[1]) })
+        )
+        initialClassName = initialClassName?.replace(/text-(\d+)/g, "")
+      }
+      initialClassName = initialClassName?.replace(/custom(\d{3})/, "")
+      initialClassName = initialClassName?.replace(/leading-\[\d+px\]/g, "")
     }
 
     return initialClassName
   }, [inputClassName, i18n.language])
 
+
   const textSizeAnim = useAnimatedStyle(() => {
     return {
-      fontSize: withTiming(textSize.value),
-      fontWeight: textSize.value === 11 ? "700" : "400",
+      fontSize: withTiming(textSize.value, withTimingConfig),
     }
   })
 
@@ -77,7 +139,7 @@ const DmAuthInput: React.FC<Props> = ({
     return {
       transform: [
         {
-          translateY: withTiming(textTranslateY.value),
+          translateY: withTiming(textTranslateY.value, withTimingConfig),
         },
       ],
     }
@@ -85,73 +147,125 @@ const DmAuthInput: React.FC<Props> = ({
 
   const borderAnim = useAnimatedStyle(() => {
     return {
-      marginLeft: withTiming(marginLeftBorder.value),
+      marginLeft: withTiming(marginLeftBorder.value, withTimingConfig),
       transform: [
         {
-          translateY: withTiming(marginLeftBorder.value ? -12 : 0),
+          translateY: withTiming(
+            marginLeftBorder.value ? -12 : 0,
+            withTimingConfig
+          ),
         },
       ],
     }
   })
 
   useLayoutEffect(() => {
-    if (
-      inputClassName?.match(/custom(\d{3})/) &&
-      !inputClassName?.match(/font/)
-    ) {
-      if (i18n.language === "en") {
-        // Add fonts here
-        renderMontserratFontFamily(inputClassName, setStylesFontFamilyState)
-      }
-      if (i18n.language === "ar") {
-        // Add fonts here
-        renderSansFontFamily(inputClassName, setStylesFontFamilyState)
-      }
-    } else if (!inputClassName?.match(/font/)) {
-      if (i18n.language === "en") {
-        // Add fonts here
-        renderMontserratFontFamily("font-custom400", setStylesFontFamilyState)
-      }
-      if (i18n.language === "ar") {
-        // Add fonts here
-        renderSansFontFamily("font-custom400", setStylesFontFamilyState)
-      }
-    }
+    setStylesFontFamilyState(
+      takeFontStyles(
+        "font-custom400 leading-[16px] " + inputClassName,
+        i18n.language
+      )
+    )
+    setStylesFontFamilyPlaceholderState(
+      takeFontStyles(
+        "font-custom400 leading-[16px] " + inputClassName,
+        i18n.language
+      )
+    )
   }, [i18n.language, inputClassName])
 
+  useLayoutEffect(() => {
+    if (value?.length) {
+      setStylesFontFamilyPlaceholderState(
+        takeFontFamily(
+          "font-custom700 leading-[16px] " + placeholderClassName,
+          i18n.language
+        )
+      )
+    } else {
+      setStylesFontFamilyPlaceholderState(
+        takeFontFamily(
+          "font-custom400 leading-[16px] " +
+            inputClassName +
+            " " +
+            placeholderClassName,
+          i18n.language
+        )
+      )
+    }
+  }, [!!value])
+
   useEffect(() => {
-    if (value) {
+    if (value && !label) {
       textSize.value = 11
-      textTranslateY.value = -27
+      if (!multiline) {
+        textTranslateY.value = -27
+      } else {
+        textTranslateY.value = -23
+      }
       marginLeftBorder.value = 10
     } else {
-      textSize.value = 13
-      textTranslateY.value = 0
+      textSize.value = placeholderSize
+      textTranslateY.value = translateYStartPos || 0
       marginLeftBorder.value = 0
     }
-  }, [value])
+  }, [value, translateYStartPos])
 
   return (
-    <DmView>
-      <DmView className={clsx("justify-center", wrapperClassName)}>
+    <DmView className={clsx(containerClassName)}>
+      <DmView
+        className={clsx(
+          !multiline && "justify-center",
+          multiline && Platform.OS === "ios" && "mt-[12]",
+          wrapperClassName
+        )}
+      >
+        {!!label && (
+          <DmText
+            className={clsx(
+              "absolute top-[-4] text-11 leading-[14px] font-custom700",
+              multiline && "top-[-18]",
+              allTextAlign === "center" && "text-center w-full"
+            )}
+          >
+            {label}
+          </DmText>
+        )}
         <Animated.View
           className="absolute flex-row items-center flex-wrap"
           style={textTranslateAnim}
         >
           <Animated.Text
+            className={clsx(
+              "text-13 text-greyPlaceholder",
+              Platform.OS === "android" && "ml-[4]",
+              multiline
+                ? Platform.OS === "android"
+                  ? "mt-[32]"
+                  : "mt-[13]"
+                : "",
+              multilineStartOneLine && Platform.OS === "ios" && "mt-[4]",
+              multiline && label && "mt-[2]",
+              allTextAlign === "center" && "w-full text-center",
+              placeholderClassName
+            )}
             style={[
               textSizeAnim,
-              stylesFontFamilyState,
+              stylesFontFamilyPlaceholderState,
               !value
                 ? { color: placeholderTextColor || colors.greyPlaceholder }
                 : { color: colors.black },
             ]}
-            className="text-13 text-greyPlaceholder"
           >
-            {placeholder}
+            {!!label && !value ? placeholder : !label ? placeholder : ""}
           </Animated.Text>
           {!value && (
-            <DmText className="ml-[17] text-11 text-greyPlaceholder font-custom400">
+            <DmText
+              className={clsx(
+                "ml-[17] text-11 text-greyPlaceholder font-custom400",
+                isSmallPhone && "text-10"
+              )}
+            >
               {subLabel}
             </DmText>
           )}
@@ -165,12 +279,31 @@ const DmAuthInput: React.FC<Props> = ({
             value={value}
             {...restProps}
             className={clsx(
-              "leading-[16px] h-[56] text-black",
+              "h-[56] text-black",
               classNameGuard,
-              !!Icon && "flex-1"
+              !!Icon && "flex-1",
+              onlyTextError && error && "text-red"
             )}
-            style={[style, stylesFontFamilyState]}
+            style={[
+              I18nManager.isRTL && {
+                textAlign: "right",
+                writingDirection: "rtl",
+              },
+              styleFont,
+              style,
+              stylesFontFamilyState,
+              multiline && !!value && multilineStartOneLine && styles.multiline,
+              multiline &&
+                !!value &&
+                multilineStartOneLine &&
+                !!multilineHeight && { height: multilineHeight },
+            ]}
             placeholderTextColor={placeholderTextColor}
+            multiline={multiline}
+            keyboardType={keyboardType}
+            returnKeyType={keyboardType === "numeric" ? "done" : "default"}
+            autoCapitalize="none"
+            textAlign={textAlign || allTextAlign}
           />
           {!!Icon && (
             <DmView className="ml-[12]" onPress={onIconPress}>
@@ -178,15 +311,26 @@ const DmAuthInput: React.FC<Props> = ({
             </DmView>
           )}
         </DmView>
+      </DmView>
+      {isBorderVisible && (
         <Animated.View
           className={clsx(
             "border-b-0.5 border-grey1",
             !!error && "border-b-red"
           )}
-          style={borderAnim}
+          style={!label && borderAnim}
         />
-      </DmView>
-      {!!error && <DmText className="mt-[4] text-13 text-red">{error}</DmText>}
+      )}
+      {!!error && !onlyTextError && (
+        <DmText
+          className={clsx(
+            "mt-[4] text-13 font-custom500 text-red",
+            errorClassName
+          )}
+        >
+          {error}
+        </DmText>
+      )}
     </DmView>
   )
 }

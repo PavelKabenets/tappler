@@ -39,7 +39,7 @@ const BusinessHoursItem: React.FC<Props> = ({
           variant="square"
           textClassName={clsx(
             "text-13 leading-[16px] font-custom400 flex-1",
-            isSmallPhone && "text-12"
+            isSmallPhone && "text-11 leading-[14px]"
           )}
           className="flex-1"
           isChecked={isSelected}

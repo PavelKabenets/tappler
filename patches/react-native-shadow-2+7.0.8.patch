@@ -1,0 +1,22 @@
+diff --git a/node_modules/react-native-shadow-2/lib/index.js b/node_modules/react-native-shadow-2/lib/index.js
+index 40b1b4a..c9096b7 100644
+--- a/node_modules/react-native-shadow-2/lib/index.js
++++ b/node_modules/react-native-shadow-2/lib/index.js
+@@ -249,7 +249,7 @@ function getShadow({ safeRender, width, height, isRTL, distanceProp = 10, startC
+           </Defs>
+           <Rect width={distance} height={height} fill={`url(#end.${idSuffix})`} y={-sumDps(topEnd, bottomEnd)}/>
+         </Svg>)}
+-      {activeSides.top && (typeof width === 'number' ? width > topStart + topEnd : true) && (<Svg width={widthWithAdditional} height={distanceWithAdditional} style={Object.assign({ position: 'absolute', top: -distance, start: topStart }, (isRTL && rtlScaleX))}>
++      {activeSides.top && (typeof width === 'number' ? width > topStart + topEnd : true) && (<Svg width={widthWithAdditional} height={distanceWithAdditional} style={Object.assign({ position: 'absolute', top: -distance, start: topStart + (isRTL ? 1 : 0 ) }, (isRTL && rtlScaleX))}>
+           <Defs>
+             <LinearGradient id={`top.${idSuffix}`} x1='0' y1='1' x2='0' y2='0'>
+               {linearGradient}
+@@ -258,7 +258,7 @@ function getShadow({ safeRender, width, height, isRTL, distanceProp = 10, startC
+           <Rect width={width} height={distance} fill={`url(#top.${idSuffix})`} x={-sumDps(topStart, topEnd)}/>
+         </Svg>)}
+       {activeSides.bottom &&
+-            (typeof width === 'number' ? width > bottomStart + bottomEnd : true) && (<Svg width={widthWithAdditional} height={distanceWithAdditional} style={Object.assign({ position: 'absolute', top: height, start: bottomStart }, (isRTL && rtlScaleX))}>
++            (typeof width === 'number' ? width > bottomStart + bottomEnd : true) && (<Svg width={widthWithAdditional} height={distanceWithAdditional} style={Object.assign({ position: 'absolute', top: height, start: bottomStart + (isRTL ? 1 : 0 ) }, (isRTL && rtlScaleX))}>
+             <Defs>
+               <LinearGradient id={`bottom.${idSuffix}`} x1='0' y1='0' x2='0' y2='1'>
+                 {linearGradient}

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 
 // Components
 import { ActionBtn, DmText, DmView } from "components/UI"
@@ -17,21 +17,53 @@ import { RootStackScreenProps } from "navigation/types"
 import clsx from "clsx"
 import styles from "./styles"
 import congratulationsAnim from "assets/lottie/congratulations.json"
+import { useCreateProsServiceCategoriesMutation, useLazyGetProsQuery } from "services/api"
+import { useTypedSelector } from "store"
+import { useDispatch } from "react-redux"
+import { setSelectedCategoriesId } from "store/auth/slice"
 
 type Props = RootStackScreenProps<"congratulation">
 
 const CongratulationScreen: React.FC<Props> = ({ navigation }) => {
   // Props
   // State
+  const [isLoading, setLoading] = useState(false)
   // Global Store
   // Variables
+  const [getPros] = useLazyGetProsQuery()
+  const [postCategories] = useCreateProsServiceCategoriesMutation()
+  const { token, selectedCategoriesId } = useTypedSelector(
+    (store) => store.auth
+  )
+
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
+  const dispatch = useDispatch()
   // Refs
   // Methods
   // Handlers
-  const hadnleSubmit = () => {
-    navigation.navigate("home")
+  const hadnleSubmit = async () => {
+    try {
+      setLoading(true)
+      const response = await getPros().unwrap()
+      // if (selectedCategoriesId.length) {
+      //   await Promise.all(
+      //     selectedCategoriesId.map(async (item) => {
+      //       await postCategories({
+      //         serviceCategoryId: item,
+      //       }).unwrap()
+      //       return null
+      //     })
+      //   )
+      // }
+      dispatch(setSelectedCategoriesId([]))
+      navigation.navigate("dashboard", { userParams: response })
+    } catch (e) {
+      console.log("Get Pros Error: ", e)
+      navigation.navigate("dashboard")
+    } finally {
+      setLoading(false)
+    }
   }
   // Hooks
   // Listeners
@@ -66,6 +98,7 @@ const CongratulationScreen: React.FC<Props> = ({ navigation }) => {
         onPress={hadnleSubmit}
         className="rounded-5 h-[47]"
         textClassName="text-13 leading-[16px] font-custom600"
+        isLoading={isLoading}
       />
     </SafeAreaView>
   )

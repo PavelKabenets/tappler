@@ -6,6 +6,7 @@ import MainModal from "components/MainModal"
 import { useTranslation } from "react-i18next"
 
 import styles from "./styles"
+import CloseBigIcon from "assets/icons/cancel-big.svg"
 
 interface Props {
   isVisible: boolean
@@ -23,7 +24,7 @@ const ErrorModal: React.FC<Props> = ({ onClose, isVisible }) => {
       descr={t("we_could_not_log_you_descr")}
       titleBtn={t("re_enter_login_information")}
       onPress={onClose}
-      Icon={<DmView className="w-[46] h-[46] bg-grey" />}
+      Icon={<CloseBigIcon />}
     />
   )
 }

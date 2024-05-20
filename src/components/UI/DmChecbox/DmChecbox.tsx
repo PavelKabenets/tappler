@@ -1,9 +1,13 @@
-import React from "react"
+import React, { Children } from "react"
 
 import { DmText, DmView } from "components/UI"
 
 import styles from "./styles"
 import clsx from "clsx"
+import RentangleChecBoxIcon from "assets/icons/rentangle-checkbox.svg"
+import RentangleChecBoxCheckedIcon from "assets/icons/rentangle-checkbox-checked.svg"
+import CircleCheckBoxIcon from "assets/icons/circle-checkbox.svg"
+import CircleCheckBoxCheckedIcon from "assets/icons/circle-checkbox-checked.svg"
 
 interface Props {
   isChecked?: boolean
@@ -11,6 +15,8 @@ interface Props {
   title?: string
   className?: string
   textClassName?: string
+  variant?: "circle" | "square" | "custom"
+  children?: React.ReactNode
 }
 
 const DmChecbox: React.FC<Props> = ({
@@ -19,6 +25,8 @@ const DmChecbox: React.FC<Props> = ({
   title,
   className,
   textClassName,
+  variant = "circle",
+  children,
 }) => {
   return (
     <DmView
@@ -26,17 +34,35 @@ const DmChecbox: React.FC<Props> = ({
       onPress={onPress}
     >
       <DmView className="mr-[9]">
-        {/* @TO DO */}
         {!isChecked && (
-          <DmView className="w-[22] h-[22] bg-grey rounded-full" />
+          <>
+            {variant === "circle" && <CircleCheckBoxIcon />}
+
+            {variant === "square" && <RentangleChecBoxIcon />}
+
+            {variant === "custom" && (
+              <DmView className="w-[26] h-[26] rounded-full border-1 border-black" />
+            )}
+          </>
         )}
-        {/* @TO DO */}
-        {isChecked && <DmView className="w-[22] h-[22] bg-red rounded-full" />}
+        {isChecked && (
+          <>
+            {variant === "circle" && <CircleCheckBoxCheckedIcon />}
+
+            {variant === "square" && <RentangleChecBoxCheckedIcon />}
+
+            {variant === "custom" && (
+              <DmView className="w-[26] h-[26] rounded-full border-1 border-black items-center justify-center">
+                <DmView className="w-[16] h-[16] rounded-full bg-red" />
+              </DmView>
+            )}
+          </>
+        )}
       </DmView>
       {!!title && (
         <DmText
           className={clsx(
-            "text-15 flex-1",
+            "text-15",
             { "font-custom500": !textClassName?.match(/font-/) },
             textClassName
           )}
@@ -44,6 +70,7 @@ const DmChecbox: React.FC<Props> = ({
           {title}
         </DmText>
       )}
+      {children}
     </DmView>
   )
 }

@@ -20,6 +20,9 @@ const VerifySuccessModal: React.FC<Props> = ({ isVisible, onClose }) => {
       isVisible={isVisible}
       className="m-0 px-[19]"
       onBackdropPress={onClose}
+      animationIn={"fadeIn"}
+      animationOut={"fadeOut"}
+      animationInTiming={400}
     >
       <DmView className="bg-white rounded-12 py-[30] px-[39]">
         <DmView className="items-center">
