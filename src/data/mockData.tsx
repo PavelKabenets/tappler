@@ -1,3 +1,5 @@
+import { ImageOrVideo } from "react-native-image-crop-picker"
+
 export type MockAllServicesSubItemType = {
   title: string
   id: string
@@ -314,5 +316,263 @@ export const mockMyPoinstVouchersData: MyPointsVoucherItemMockType[] = [
     title: "5 Points Vouchers",
     cost: 5,
     expired_at: "22/12/2024",
+  },
+]
+
+export type MockMainNotificationsDataItemType = {
+  image?: ImageOrVideo | string
+  created_at: string
+  job_number?: string
+  title: string
+  subtitle: string
+  sender: string
+  isReaded?: boolean
+}
+
+export const mockMainNotificationsData: MockMainNotificationsDataItemType[] = [
+  {
+    image:
+      "https://wallpapers.com/images/hd/arabic-1778-x-1000-picture-oxoxkb6mb2664nsg.jpg",
+    created_at: "2024-06-04T08:30:00Z",
+    title: "Project Initiation",
+    subtitle: "Initial phase of the project",
+    sender: "Alice",
+    isReaded: false,
+  },
+  {
+    created_at: "2024-06-05T09:45:00Z",
+    title: "Design Phase",
+    job_number: "Job Number: 101",
+    subtitle: "Drafting designs and blueprints",
+    sender: "Bob",
+    isReaded: true,
+  },
+  {
+    created_at: "2024-06-06T11:00:00Z",
+    title: "Development Phase",
+    subtitle: "Coding and development",
+    sender: "Charlie",
+    isReaded: true,
+  },
+  {
+    created_at: "2024-06-07T14:15:00Z",
+    title: "Testing Phase",
+    subtitle: "Testing the product",
+    sender: "Dana",
+    isReaded: true,
+  },
+  {
+    created_at: "2024-06-08T16:30:00Z",
+    title: "Deployment",
+    subtitle: "Deploying the product to production",
+    sender: "Eve",
+    isReaded: true,
+  },
+]
+
+export type MockMessagesDataItemType = {
+  id: number
+  image?: ImageOrVideo | string
+  created_at: string
+  job_number?: string
+  title: string
+  subtitle: string
+  sender: string
+  isReaded?: boolean
+  text_message?: string | string[]
+  text_message_user?: string | string[]
+  time_message?: string
+  time_message_user?: string
+  status_offer?: boolean
+  price_offer?: string
+  is_my_message?: boolean
+  time_offer?: string
+  data_offer: string
+}
+
+export const mockMessagesData: MockMessagesDataItemType[] = [
+  {
+    image:
+      "https://wallpapers.com/images/hd/arabic-1778-x-1000-picture-oxoxkb6mb2664nsg.jpg",
+    created_at: "2024-06-10T08:30:00Z",
+    title: "Project Initiation",
+    subtitle: "Initial phase of the project",
+    sender: "Alice Baker",
+    text_message:
+      "شكرا لاختيارك لي وان شاء الله اكون عند حسن ظنك بس ممكن تقولي اسم المكان ايه؟ انا …",
+    isReaded: false,
+    status_offer: false,
+    price_offer: "80",
+    data_offer: "2022-08-22T12:26:00Z",
+    is_my_message: true,
+    id: 1,
+  },
+  {
+    created_at: "2024-06-11T09:45:00Z",
+    title: "Design Phase",
+    job_number: "Job Number: 101",
+    subtitle: "Drafting designs and blueprints",
+    sender: "Rob Martin",
+    text_message:
+      "شكرا لاختيارك لي وان شاء الله اكون عند حسن ظنك بس ممكن تقولي اسم المكان ايه؟ انا …",
+    isReaded: true,
+    status_offer: false,
+    price_offer: "90",
+    data_offer: "2022-08-22T12:26:00Z",
+    id: 2,
+  },
+  {
+    created_at: "2024-06-12T09:45:00Z",
+    title: "Design Phase",
+    subtitle: "Drafting designs and blueprints",
+    sender: "Alex Mercer",
+    text_message:
+      "شكرا لاختيارك لي وان شاء الله اكون عند حسن ظنك بس ممكن تقولي اسم المكان ايه؟ انا …",
+    isReaded: true,
+    status_offer: false,
+    price_offer: "75",
+    data_offer: "2022-08-22T12:26:00Z",
+    id: 3,
+  },
+  {
+    created_at: "2024-06-16T19:55:00Z",
+    title: "Design Phase",
+    subtitle: "Drafting designs and blueprints",
+    sender: "Alex Mercer",
+    text_message:
+      "شكرا لاختيارك لي وان شاء الله اكون عند حسن ظنك بس ممكن تقولي اسم المكان ايه؟ انا …",
+    isReaded: true,
+    status_offer: false,
+    price_offer: "75",
+    data_offer: "2022-08-22T12:26:00Z",
+    id: 4,
+  },
+  {
+    created_at: "2024-06-16T07:45:00Z",
+    title: "Design Phase",
+    subtitle: "Drafting designs and blueprints",
+    sender: "Alex Mercer",
+    text_message:
+      "شكرا لاختيارك لي وان شاء الله اكون عند حسن ظنك بس ممكن تقولي اسم المكان ايه؟ انا …",
+    isReaded: true,
+    status_offer: false,
+    price_offer: "75",
+    data_offer: "2022-08-22T12:26:00Z",
+    id: 5,
+  },
+  {
+    image:
+      "https://wallpapers.com/images/hd/arabic-1778-x-1000-picture-oxoxkb6mb2664nsg.jpg",
+    created_at: "2024-06-17T08:30:00Z",
+    title: "Project Initiation",
+    subtitle: "Initial phase of the project",
+    sender: "Alice Baker",
+    text_message:
+      "شكرا لاختيارك لي وان شاء الله اكون عند حسن ظنك بس ممكن تقولي اسم المكان ايه؟ انا …شكرا لاختيارك لي وان شاء الله اكون عند حسن ظنك بس ممكن تقولي اسم المكان ايه؟ انا …شكرا لاختيارك لي وان شاء الله اكون عند حسن ظنك بس ممكن تقولي اسم المكان ايه؟ انا …",
+    isReaded: true,
+    status_offer: true,
+    time_offer: "2024-06-13T12:00:00Z",
+    price_offer: "80",
+    data_offer: "2022-08-22T12:30:00Z",
+    is_my_message: true,
+    id: 6,
+  },
+]
+
+export type ProductDescriptionType = {
+  name: string
+  days: string
+  cost: string
+}
+
+export type MockSubscriptionDetailsDataItemType = {
+  id: number
+  order_number: string
+  created_at: string
+  service_type: string
+  category: string
+  vat_amount: string
+  payment_method: string
+  payment_ref: string
+  sales_person: string
+  product_description?: ProductDescriptionType[]
+}
+
+export const mockSubscriptionDetailsData: MockSubscriptionDetailsDataItemType[] =
+  [
+    {
+      id: 1,
+      order_number: "123456",
+      created_at: "2024-06-10T08:30:00Z",
+      service_type: "Account Upgrade",
+      category: "Stand in Line",
+      vat_amount: "98.25",
+      payment_method: "Visa ends with 4429",
+      payment_ref: "3344556677",
+      sales_person: "Ahmed Ali (0106414110)",
+      product_description: [
+        {
+          name: "Featured Pro",
+          days: "90",
+          cost: "500",
+        },
+        {
+          name: "Stickers - 24 Hours Service",
+          days: "90",
+          cost: "100",
+        },
+        {
+          name: "Stickers - 50% discount",
+          days: "90",
+          cost: "100",
+        },
+        {
+          name: "Stickers - Fast Delivery",
+          days: "90",
+          cost: "100",
+        },
+      ],
+    },
+  ]
+
+export type QuestionType = {
+  question: string
+  answer: string
+}
+
+export type ServiceLocationType = {
+  area_name: string
+  office_location: string
+  remote_service: string
+}
+
+export type mockServicesDataItemType = {
+  service: string
+  themeQuestion: string
+  questions: QuestionType[]
+  location: string
+  service_location: ServiceLocationType
+}
+
+export const mockServicesData: mockServicesDataItemType[] = [
+  {
+    service: "Service 1",
+    themeQuestion: "Useful info about this service",
+    questions: [
+      {
+        question: "Pro Question 1?",
+        answer: "Answer 1",
+      },
+      {
+        question: "Pro Question 2?",
+        answer: "Answer 2",
+      },
+    ],
+    location: "Service location",
+    service_location: {
+      area_name: '"Area name"',
+      office_location: "Office",
+      remote_service: "I provide my service remotely or online",
+    },
   },
 ]

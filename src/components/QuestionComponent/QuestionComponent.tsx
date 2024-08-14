@@ -13,6 +13,7 @@ import {
 } from "types"
 import BusinessModal from "components/BusinessModal"
 import moment from "moment"
+import { useIsFocused } from "@react-navigation/native"
 
 interface Props {
   item: CustomerQuestionsCategoriesType
@@ -55,6 +56,7 @@ const QuestionComponent: React.FC<Props> = ({
   const handleCloseBusinessModal = () => {
     setBusinessModalVisible(false)
   }
+  const isFocused = useIsFocused()
   const handleOpenBusinessModal = () => {
     setBusinessModalVisible(true)
   }
@@ -113,7 +115,10 @@ const QuestionComponent: React.FC<Props> = ({
           if (prev?.optionsIds?.includes(Number(selectedItem.id))) {
             onChangeAnswer(
               {
-                answer: selectedItem.value,
+                answer: prev.answer
+                  ?.split(", ")
+                  .filter((fItem) => fItem !== selectedItem.value)
+                  .join(", "),
                 questionId: item.id,
                 optionsIds: prev.optionsIds.filter(
                   (fItem) => fItem !== selectedItem.id
@@ -122,7 +127,10 @@ const QuestionComponent: React.FC<Props> = ({
               item.type
             )
             return {
-              answer: selectedItem.value,
+              answer: prev.answer
+                ?.split(", ")
+                .filter((fItem) => fItem !== selectedItem.value)
+                .join(", "),
               questionId: item.id,
               optionsIds: prev.optionsIds.filter(
                 (fItem) => fItem !== selectedItem.id
@@ -134,11 +142,15 @@ const QuestionComponent: React.FC<Props> = ({
           ...(prev?.optionsIds?.length ? prev.optionsIds : []),
           Number(selectedItem.id),
         ]
+
         onChangeAnswer(
           {
             questionId: item.id,
             optionsIds: newIds,
-            answer: selectedItem.value,
+            answer:
+              (prev?.answer || "") +
+              (prev?.answer?.length ? ", " : "") +
+              selectedItem.value,
             optionId: selectedItem.id,
           },
           item.type
@@ -165,7 +177,7 @@ const QuestionComponent: React.FC<Props> = ({
 
   useEffect(() => {
     setAnswer(answers?.filter((fItem) => fItem.questionId === item.id)[0])
-  }, [answers?.filter((fItem) => fItem.questionId === item.id)[0]])
+  }, [answers?.filter((fItem) => fItem.questionId === item.id)[0], isFocused])
 
   return (
     <DmView className="mb-[25] px-[14]">

@@ -1,0 +1,3 @@
+import AccountUpgradesMotivationStickersScreen from "./AccountUpgradesMotivationStickersScreen"
+
+export default AccountUpgradesMotivationStickersScreen

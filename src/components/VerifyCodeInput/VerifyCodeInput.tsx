@@ -16,6 +16,7 @@ import styles from "./styles"
 import colors from "styles/colors"
 import { hexToRGBA, takeFontFamily } from "helpers/helpers"
 import clsx from "clsx"
+import { fromArabic } from "arabic-digits"
 
 interface Props {
   className?: string
@@ -43,7 +44,7 @@ const VerifyCodeInput: React.FC<Props> = ({
       const newArr = prev.split("")
       newArr[idx] = val
 
-      return newArr.join("").length < 5 ? newArr.join("") : value
+      return fromArabic(newArr.join("").length < 5 ? newArr.join("") : value)
     })
   }
 
@@ -82,8 +83,8 @@ const VerifyCodeInput: React.FC<Props> = ({
           break
       }
     }
-    setPrevValue(value)
-    setCodeValue(value)
+    setPrevValue(fromArabic(value))
+    setCodeValue(fromArabic(value))
   }, [value])
 
   return (
@@ -111,7 +112,7 @@ const VerifyCodeInput: React.FC<Props> = ({
             onChangeText={(val) => handleChangeValue(val, 0)}
             textAlign="center"
             textAlignVertical="center"
-            keyboardType="numeric"
+            keyboardType="number-pad"
             returnKeyType={"done"}
           />
         </DmView>
@@ -133,7 +134,7 @@ const VerifyCodeInput: React.FC<Props> = ({
             onChangeText={(val) => handleChangeValue(val, 1)}
             textAlign="center"
             textAlignVertical="center"
-            keyboardType="numeric"
+            keyboardType="number-pad"
           />
         </DmView>
       </Shadow>
@@ -154,7 +155,7 @@ const VerifyCodeInput: React.FC<Props> = ({
             onChangeText={(val) => handleChangeValue(val, 2)}
             textAlign="center"
             textAlignVertical="center"
-            keyboardType="numeric"
+            keyboardType="number-pad"
           />
         </DmView>
       </Shadow>
@@ -175,7 +176,7 @@ const VerifyCodeInput: React.FC<Props> = ({
             onChangeText={(val) => handleChangeValue(val, 3)}
             textAlign="center"
             textAlignVertical="center"
-            keyboardType="numeric"
+            keyboardType="number-pad"
           />
         </DmView>
       </Shadow>

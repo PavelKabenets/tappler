@@ -13,6 +13,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import clsx from "clsx"
 import TitleRegistrationFlow from "components/TitleRegistrationFlow"
 import SettingsItem from "components/SettingsItem"
+import { useTypedSelector } from "store"
+import { ProfileSettingParamTypes } from "types"
 
 interface Props {
   navigation: NativeStackNavigationProp<
@@ -23,11 +25,12 @@ interface Props {
 }
 
 const UtilitiesView: React.FC<Props> = ({ navigation }) => {
+  const { user } = useTypedSelector((store) => store.auth)
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
 
   const handleViewProfile = () => {
-    //
+    navigation.navigate("view-my-profile")
   }
 
   const handleWatchVideos = () => {
@@ -35,15 +38,15 @@ const UtilitiesView: React.FC<Props> = ({ navigation }) => {
   }
 
   const handleUpgradeOptions = () => {
-    //
+    navigation.navigate("account-upgrades-select-options")
   }
 
   const handleUpgradeHistory = () => {
-    //
+    navigation.navigate("account-upgrades-history")
   }
 
   const handleTermsConditions = () => {
-    //
+    navigation.navigate("account-upgrades-terms-conditions")
   }
 
   const handleChatWithUs = () => {
@@ -77,7 +80,7 @@ const UtilitiesView: React.FC<Props> = ({ navigation }) => {
         <SettingsItem
           title={t("upgrades_history")}
           className="pl-[14]"
-          onPress={handleUpgradeOptions}
+          onPress={handleUpgradeHistory}
         />
         <SettingsItem
           title={t("terms_conditions")}

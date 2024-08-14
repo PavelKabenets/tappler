@@ -25,7 +25,12 @@ import ArrowBackIcon from "assets/icons/arrow-back.svg"
 import HideIcon from "assets/icons/hide-password.svg"
 import colors from "styles/colors"
 import { I18nManager } from "react-native"
-import { useAuthMutation, useLazyGetProsQuery } from "services/api"
+import {
+  useAuthMutation,
+  useLazyGetMyDocumentQuery,
+  useLazyGetProsQuery,
+  useLazyProsServiceCategoriesQuery,
+} from "services/api"
 import { useTypedSelector } from "store"
 
 type Props = RootStackScreenProps<"sign-in-email">
@@ -56,6 +61,8 @@ const SignInEmailScreen: React.FC<Props> = ({ navigation }) => {
   // Global Store
   // Variables
   const { t } = useTranslation()
+  const [getServices] = useLazyProsServiceCategoriesQuery()
+  const [getDocs] = useLazyGetMyDocumentQuery()
   // Refs
   // Methods
   // Handlers
@@ -82,6 +89,8 @@ const SignInEmailScreen: React.FC<Props> = ({ navigation }) => {
         rememberMe: true,
       }).unwrap()
       const res = await getPros().unwrap()
+      await getServices().unwrap()
+      await getDocs().unwrap()
       navigation.reset({
         index: 0,
         routes: [{ name: "dashboard", params: { userParams: res } }],

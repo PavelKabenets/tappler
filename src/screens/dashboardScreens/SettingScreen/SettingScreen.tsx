@@ -35,6 +35,8 @@ import GlobusIcon from "assets/icons/language.svg"
 import HelpIcon from "assets/icons/help.svg"
 import AboutAppIcon from "assets/icons/app.svg"
 import LogOutIcon from "assets/icons/sign-out.svg"
+import { useTypedSelector } from "store"
+import { ProfileSettingParamTypes } from "types"
 
 type Props = RootStackScreenProps<"setting">
 
@@ -45,6 +47,7 @@ const SettingScreen: React.FC<Props> = ({ navigation }) => {
   const [isChangeLanguageModalVisible, setChageLanguageModalVisible] =
     useState(false)
   // Global Store
+  const { user } = useTypedSelector((store) => store.auth)
   // Variables
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
@@ -64,15 +67,35 @@ const SettingScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   const handleLogOut = () => {
+    dispatch(setLoadingModalVisible(true))
     dispatch(logout())
   }
 
+  const initialProfileState: ProfileSettingParamTypes = {
+    proType: user?.proType,
+    informationAbout: user?.informationAbout,
+    photosOfWorks: user?.photosOfWork,
+    hours: user?.hours,
+    payment: user?.paymentMethods,
+    media: [
+      { media: "facebook", link: "facebook/com" },
+      { media: "instagram", link: "instagram/com" },
+      { media: "linkedin", link: "linkedin/com" },
+      { media: "tiktok", link: "tiktok/com" },
+      { media: "website", link: "website/com" },
+    ],
+    businessName: user?.businessName,
+    tradeLicenseNumber: "",
+    registrationOrRenewal: "",
+    credential: [],
+  }
+
   const handleGoProfile = () => {
-    //
+    navigation.navigate("my-profile", { profileParams: initialProfileState })
   }
 
   const handleGoMyAccount = () => {
-    //
+    navigation.navigate("my-account")
   }
 
   const handleGoMyPerfomance = () => {

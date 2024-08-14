@@ -57,11 +57,16 @@ const Photos: React.FC<Props> = ({
         width: 300,
         height: 400,
         multiple: true,
+        compressImageQuality: 0.3,
+        compressImageFormat: "jpeg",
+        maxFiles: 6 - (selectedPhotos?.length || 0),
       }).then((images) => {
         setSelectedPhotos((prev) =>
-          prev
-            ? [...prev, ...images.map((item) => item)]
-            : images.map((item) => item)
+          prev?.length
+            ? [...prev, ...images.map((item) => item)].filter(
+                (_, idx) => idx < 6
+              )
+            : images.map((item) => item).filter((_, idx) => idx < 6)
         )
         setTimeout(() => {
           onScrollToBottom()
@@ -85,6 +90,10 @@ const Photos: React.FC<Props> = ({
     setSelectedPhotos((prev) =>
       prev?.filter((filtelrItem) => filtelrItem.path !== item.path)
     )
+  }
+
+  const handleDelete = (idx: number) => {
+    setSelectedPhotos((prev) => prev?.filter((_, index) => idx !== index))
   }
 
   useEffect(() => {
@@ -111,17 +120,52 @@ const Photos: React.FC<Props> = ({
     index: number
   }) => {
     return (
-      <SelectPhotosItem
-        item={item}
-        resizeMode="cover"
-        onDelete={handleItemPress}
-        wrapperClassName={clsx(
-          "mx-[15]",
-          (index + 1) % 3 === 0 && "mx-[0]",
-          (index + 3) % 3 === 0 && "mx-[0]"
-        )}
-      />
+      <DmView onPress={() => handleDelete(index)}>
+        <SelectPhotosItem
+          item={item}
+          resizeMode="cover"
+          wrapperClassName={clsx(
+            "mx-[15]",
+            (index + 1) % 3 === 0 && "mx-[0]",
+            (index + 3) % 3 === 0 && "mx-[0]"
+          )}
+        />
+      </DmView>
     )
+  }
+
+  const photosWithFooter = [...selectedPhotos || [], { isFooter: true }]
+
+  const renderItem = ({
+    item,
+    index,
+  }: {
+    item: ImageOrVideo | { isFooter: boolean }
+    index: number
+  }) => {
+    if ("isFooter" in item && (selectedPhotos?.length || 0) < 6) {
+      return (
+        <DmView
+          className={clsx(
+            "px-[13] justify-center items-center border-1 border-grey31 rounded-10",
+            "mx-[15]",
+            (index + 1) % 3 === 0 && "mx-[0]",
+            (index + 3) % 3 === 0 && "mx-[0]"
+          )}
+          onPress={handleImgButtonPress}
+          style={styles.item}
+        >
+          <CameraIcon width={40} height={40} />
+          <DmText className="mt-[5] text-8 leading-[10px] text-center font-custom500">
+            {t("upload_photos")}
+          </DmText>
+        </DmView>
+      )
+    }
+    if (!("isFooter" in item)) {
+      return renderListItem({ item, index })
+    }
+    return null
   }
 
   return (
@@ -148,21 +192,12 @@ const Photos: React.FC<Props> = ({
           />
         </DmView>
         <FlatList
-          data={selectedPhotos}
-          renderItem={renderListItem}
+          data={photosWithFooter}
+          renderItem={renderItem}
           numColumns={3}
           scrollEnabled={false}
           contentContainerStyle={styles.contentContainerStyle}
-        />
-        <ActionBtn
-          variant="white"
-          title={t("upload_photos")}
-          className="mx-[14] mt-[29] rounded-4 border-1 border-black justify-center"
-          onPress={handleImgButtonPress}
-          Icon={<CameraIcon width={32} height={27} />}
-          textClassName="text-14"
-          isIconRight
-          classNameTextWrapper="flex-0"
+          columnWrapperStyle={{ flex: 1 }}
         />
       </DmView>
     </DmView>

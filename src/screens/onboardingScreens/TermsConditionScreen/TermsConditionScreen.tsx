@@ -114,13 +114,7 @@ const TermsConditionScreen: React.FC<Props> = ({ navigation }) => {
                   .format("HH:mm"),
               }
             }),
-          // @TO DO
-          socials: [
-            {
-              socialMedia: "facebook",
-              socialLink: "facebook.com/propage",
-            },
-          ],
+          socials: [],
           serviceCategories: [],
           // @TO DO
           address: {
@@ -155,6 +149,13 @@ const TermsConditionScreen: React.FC<Props> = ({ navigation }) => {
       navigation.replace("congratulation")
       dispatch(setRegistrationFlowComleted(true))
     } catch (e) {
+      console.log("Register Flow Sign Up Error: ", e)
+
+      if ((e as ErrorSignUpEmailType).status === 413) {
+        Alert.alert(
+          `Photos ${(e as ErrorSignUpEmailType)?.data?.message}` || ""
+        )
+      }
       if (
         Object.entries((e as ErrorSignUpEmailType)?.data?.validationErrors)
           ?.map((item) => item[1][0])
@@ -163,11 +164,7 @@ const TermsConditionScreen: React.FC<Props> = ({ navigation }) => {
         navigation.navigate("auth")
         return dispatch(setRegistrationFlowComleted(true))
       }
-      console.log("Register Flow Sign Up Error: ", e)
-      if (
-        (e as ErrorSignUpEmailType)?.data?.message ||
-        (e as ErrorSignUpEmailType)?.data?.statusCode
-      ) {
+      if ((e as ErrorSignUpEmailType)?.data?.statusCode) {
         Alert.alert(
           `${(e as ErrorSignUpEmailType)?.data?.message || ""}`,
           `\n ${(e as ErrorSignUpEmailType)?.data?.statusCode}

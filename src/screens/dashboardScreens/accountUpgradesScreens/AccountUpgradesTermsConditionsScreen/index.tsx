@@ -1,0 +1,3 @@
+import AccountUpgradesTermsConditionsScreen from "./AccountUpgradesTermsConditionsScreen"
+
+export default AccountUpgradesTermsConditionsScreen

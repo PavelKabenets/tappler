@@ -96,8 +96,7 @@ const MainModal: React.FC<Props> = ({
   const { isLogout } = useTypedSelector((store) => store.auth)
 
   useEffect(() => {
-    if (isLogout) {
-      dispatch(setLoadingModalVisible(true))
+    if (isLogout && isVisible) {
       const interval = setTimeout(() => {
         onClose()
       }, 1000)

@@ -8,8 +8,8 @@ import { useSwipeableItemParams } from "react-native-swipeable-item"
 
 interface Props {
   onDelete: () => void
-  isPressToggle: boolean
-  setPressToggle: Dispatch<SetStateAction<boolean>>
+  isPressToggle?: boolean
+  setPressToggle?: Dispatch<SetStateAction<boolean>>
 }
 
 const UnderlayLeftDelete: React.FC<Props> = ({
@@ -21,12 +21,11 @@ const UnderlayLeftDelete: React.FC<Props> = ({
   const { close } = useSwipeableItemParams()
 
   const handleDelete = () => {
-    close()
     onDelete()
   }
 
   useEffect(() => {
-    if (isPressToggle) {
+    if (isPressToggle && setPressToggle) {
       close()
       setPressToggle(false)
     }

@@ -1,0 +1,3 @@
+import AccountUpgardesMotivationStickersDetailScreen from "./AccountUpgardesMotivationStickersDetailScreen"
+
+export default AccountUpgardesMotivationStickersDetailScreen

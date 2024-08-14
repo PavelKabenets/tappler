@@ -18,6 +18,7 @@ import { RootStackScreenProps } from "navigation/types"
 import clsx from "clsx"
 import styles from "./styles"
 import CloseIcon from "assets/icons/close.svg"
+import DiscountRedIcon from "assets/icons/discount-red.svg"
 import { HIT_SLOP_DEFAULT } from "styles/helpersStyles"
 import { benefitsData } from "data/accountUpgradeData"
 
@@ -49,11 +50,18 @@ const AccountUpgradesSelectOptionsScreen: React.FC<Props> = ({
   const handleItemLearnMorePress = (
     type: "featured" | "motivational" | "promo"
   ) => {
-    //
+    switch (type) {
+      case "featured":
+        return navigation.navigate("account-upgrades-featured-pro")
+      case "motivational":
+        return navigation.navigate("account-upgrades-motivation-stickers")
+      case "promo":
+        return navigation.navigate("account-upgrades-promo-message")
+    }
   }
 
   const handleSubmit = () => {
-    //
+    navigation.navigate("account-upgrades-contact-details")
   }
   // Hooks
   // Listeners
@@ -66,34 +74,32 @@ const AccountUpgradesSelectOptionsScreen: React.FC<Props> = ({
     >
       <DmView>
         <DmView
-          className="mt-[14] px-[24]"
+          className="mt-[14] px-[14]"
           onPress={navigation.goBack}
           hitSlop={HIT_SLOP_DEFAULT}
         >
           <CloseIcon />
         </DmView>
         <TitleRegistrationFlow
-          title={t("select_upgrade_options")}
+          title={t("upgrade_options")}
           classNameTitle="text-18 leading-[22px]"
-          descr={t("select_one_or_more_from_the_upgrade_options")}
+          descr={t("tap_on_learn_more_to_view_the_details", {text: '"Learn more"'})}
           classNameDescr="text-13 leading-[20px]"
-          className="mt-[32] px-[14]"
+          className="mt-[32] px-[20]"
         />
         <AccountUpdateOptionsItem
-          className="mt-[27]"
+          className="mt-[13]"
           title={t("featured_pro")}
           descr={t("promote_your_account")}
           onPress={() => handleItemPress("featured")}
           onLearnMorePress={() => handleItemLearnMorePress("featured")}
           isFeatured
-          isChecked={selectedTypes.includes("featured")}
         />
         <AccountUpdateOptionsItem
           title={t("motivational_stickers")}
           descr={t("powerful_stickers_to_promote_your_business")}
           onPress={() => handleItemPress("motivational")}
           onLearnMorePress={() => handleItemLearnMorePress("motivational")}
-          isChecked={selectedTypes.includes("motivational")}
         >
           <DmView className="flex-1 flex-row items-center justify-between">
             <DmView className="flex-row items-center">
@@ -104,7 +110,7 @@ const AccountUpgradesSelectOptionsScreen: React.FC<Props> = ({
             </DmView>
             <DmView className="flex-row items-center">
               <DmText className="text-8 leading-[13px] font-custom700">
-                {t("number_hour_service", { number: 24 })}
+                {t("number_hour_service")}
               </DmText>
               <DmView className="ml-[3] w-[23] h-[21] bg-grey" />
             </DmView>
@@ -118,16 +124,15 @@ const AccountUpgradesSelectOptionsScreen: React.FC<Props> = ({
         </AccountUpdateOptionsItem>
         <AccountUpdateOptionsItem
           title={t("customized_promo_message")}
-          descr={t("Add customized message under your profile")}
+          descr={t("add_customized_message_under_your_profile")}
           onPress={() => handleItemPress("promo")}
           onLearnMorePress={() => handleItemLearnMorePress("promo")}
           isBorderVisible={false}
-          isChecked={selectedTypes.includes("promo")}
         >
           <DmView className="flex-1 items-center">
             <DmView className="flex-row items-center">
-              <DmView className="mr-[7] w-[18] h-[16] bg-grey" />
-              <DmText className="text-10 leading-[13px] font-custom700">
+              <DiscountRedIcon />
+              <DmText className="mx-[7] text-10 leading-[13px] font-custom700">
                 {t("example_number_off_your_service_on_tuesdays", {
                   number: 20,
                 })}
@@ -139,18 +144,11 @@ const AccountUpgradesSelectOptionsScreen: React.FC<Props> = ({
           classNameDescrArr="mt-[6]"
           title={t("upgrade_benefits")}
           descrArray={benefitsData}
-          className="mt-[20] px-[19]"
+          className="mt-[20] px-[20]"
           classNameDescrArrItem="text-13 leading-[16px] ml-[10]"
           classNameDescrArrItemWrapper="mt-[10]"
         />
       </DmView>
-      <ActionBtn
-        className="mx-[20] rounded-5 h-[47]"
-        title={t("continue")}
-        textClassName="text-13 leading-[16px] font-custom600"
-        onPress={handleSubmit}
-        disable={!selectedTypes.length}
-      />
     </SafeAreaView>
   )
 }

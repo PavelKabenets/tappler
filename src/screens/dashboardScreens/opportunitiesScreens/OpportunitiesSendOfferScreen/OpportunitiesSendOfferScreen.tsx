@@ -29,6 +29,8 @@ import { takeFontFamily } from "helpers/helpers"
 import colors from "styles/colors"
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
 import SendOfferModal from "components/SendOfferModal"
+import { api, usePostOpportunitiesOfferMutation } from "services/api"
+import { useDispatch } from "react-redux"
 
 type Props = RootStackScreenProps<"opportunities-send-offer">
 
@@ -42,8 +44,11 @@ const OpportunitiesSendOfferScreen: React.FC<Props> = ({
   const [isModalVisible, setModalVisible] = useState(false)
   const [isSendOfferModalVisible, setOfferModalVisible] = useState(false)
 
+  const [isLoading, setLoading] = useState(false)
+
   const {
     control,
+    getValues,
     formState: { isValid },
   } = useForm({
     defaultValues: {
@@ -55,6 +60,9 @@ const OpportunitiesSendOfferScreen: React.FC<Props> = ({
   // Variables
   const { t, i18n } = useTranslation()
   const insets = useSafeAreaInsets()
+  const dispatch = useDispatch()
+
+  const [sendOffer] = usePostOpportunitiesOfferMutation()
   // Refs
   // Methods
   // Handlers
@@ -72,6 +80,24 @@ const OpportunitiesSendOfferScreen: React.FC<Props> = ({
 
   const handleCloseOfferModal = () => {
     setOfferModalVisible(false)
+  }
+
+  const handleDoOffer = async () => {
+    try {
+      setLoading(true)
+      await sendOffer({
+        ratePerHour: Number(getValues("offer")),
+        opportunityNotes: getValues("message"),
+        jobId: job.id,
+      }).unwrap()
+      handleCloseOfferModal()
+      dispatch(api.util.resetApiState())
+      setTimeout(() => {
+        navigation.navigate("opportunities")
+      }, 400)
+    } catch (e) {
+      console.log("Send Offer Error: ", e)
+    }
   }
   // Hooks
   // Listeners
@@ -243,6 +269,8 @@ const OpportunitiesSendOfferScreen: React.FC<Props> = ({
         isVisible={isSendOfferModalVisible}
         job={job}
         onClose={handleCloseOfferModal}
+        onPress={handleDoOffer}
+        isLoading={isLoading}
       />
     </SafeAreaView>
   )

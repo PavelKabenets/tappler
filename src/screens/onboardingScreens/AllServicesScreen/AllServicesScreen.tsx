@@ -12,14 +12,16 @@ import AllServicesModal from "components/AllServicesModal"
 // Hooks & Redux
 import { useTranslation } from "react-i18next"
 import {
+  useCreateProsServiceCategoriesMutation,
   useGetServicesQuery,
   useLazyProsServiceCategoriesQuery,
+  useProsServiceCategoriesQuery,
 } from "services/api"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 // Helpers & Types
 import { RootStackScreenProps } from "navigation/types"
-import { ServiceCategoryType } from "types"
+import { ServiceCategoryType, SubCategoryType } from "types"
 
 // Libs & Utils
 
@@ -30,6 +32,11 @@ import SearchRedIcon from "assets/icons/search-red.svg"
 import CloseIcon from "assets/icons/close.svg"
 import colors from "styles/colors"
 import { ProsServicesCategoriesResponse } from "services"
+import ServiceDetailModal from "components/ServiceDetailModal"
+import { useDispatch } from "react-redux"
+import { setWaitAMomentModalPossibleVisible } from "store/auth/slice"
+import MainModal from "components/MainModal"
+import MaximumIcon from "assets/icons/maximum.svg"
 
 type Props = RootStackScreenProps<"all-services">
 
@@ -39,13 +46,21 @@ const AllServicesScreen: React.FC<Props> = ({ route, navigation }) => {
   const myServicesCategoriesDataParams = route.params?.myServicesCategoriesData
 
   const [isSearchModalVisible, setSearchModalVisible] = useState(false)
+  const [isDetailModalVisible, setDetailModalVisible] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<SubCategoryType>()
+  const [isLoading, setLoading] = useState(false)
+  const [isMaxModalVisible, setMaxModalVisible] = useState(false)
+
   const [myServicesCategoriesData, setMyServicesCategoriesData] = useState<
     ProsServicesCategoriesResponse[]
   >(myServicesCategoriesDataParams || [])
 
   const [getProsCategories] = useLazyProsServiceCategoriesQuery()
+  const [createServiceCategory] = useCreateProsServiceCategoriesMutation()
 
   const { t } = useTranslation()
+  const dispatch = useDispatch()
+  const { data: prosCategories } = useProsServiceCategoriesQuery()
 
   const insets = useSafeAreaInsets()
 
@@ -66,7 +81,52 @@ const AllServicesScreen: React.FC<Props> = ({ route, navigation }) => {
     })
   }
 
+  const handleCloseMaxModal = () => {
+    setMaxModalVisible(false)
+  }
+
+  const handleOpenMaxModal = () => {
+    setMaxModalVisible(true)
+  }
+
   const { data, isFetching } = useGetServicesQuery()
+
+  const handleAddToMyServices = async () => {
+    if (prosCategories?.length && prosCategories.length >= 3) {
+      handleCloseDetailModal()
+      setTimeout(() => {
+        handleOpenMaxModal()
+      }, 400)
+    } else {
+      if (selectedItem && type === "my-service") {
+        setLoading(true)
+        try {
+          const res = await createServiceCategory({
+            serviceCategoryId: selectedItem.id,
+          }).unwrap()
+          dispatch(setWaitAMomentModalPossibleVisible(false))
+          handleCloseDetailModal()
+          setTimeout(() => {
+            navigation.reset({
+              index: 0,
+              routes: [
+                { name: "dashboard" },
+                { name: "my-services" },
+                {
+                  name: "my-services-detail",
+                  params: { service: res, isFirstOpen: true },
+                },
+              ],
+            })
+          }, 400)
+        } catch (e) {
+          console.log("Create My Service Error: ", e)
+        } finally {
+          setLoading(false)
+        }
+      }
+    }
+  }
 
   const handleSearchPress = () => {
     setSearchModalVisible(true)
@@ -78,6 +138,15 @@ const AllServicesScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const handleGoRequestAddingService = () => {
     navigation.navigate("request-adding-service")
+  }
+
+  const handleCloseDetailModal = () => {
+    setDetailModalVisible(false)
+  }
+
+  const handleOpenDetailModal = (item: SubCategoryType) => {
+    setDetailModalVisible(true)
+    setSelectedItem(item)
   }
 
   useLayoutEffect(() => {
@@ -136,6 +205,27 @@ const AllServicesScreen: React.FC<Props> = ({ route, navigation }) => {
         onClose={hadnleCloseModal}
         myServicesCategoriesData={myServicesCategoriesData}
         type={type}
+        onOpenDetailModal={handleOpenDetailModal}
+      />
+      <ServiceDetailModal
+        isVisible={isDetailModalVisible}
+        onClose={handleCloseDetailModal}
+        title={selectedItem?.name || ""}
+        type={type}
+        isLoading={isLoading}
+        onPress={type === "my-service" ? handleAddToMyServices : undefined}
+        // @TO DO - descr
+        descr={selectedItem?.descriptionForPros || ""}
+      />
+      <MainModal
+        isVisible={isMaxModalVisible}
+        descr={t("you_have_reached_the_maximum", { number: 3 })}
+        onClose={handleCloseMaxModal}
+        className="pt-[42] px-[59]"
+        classNameDescr="mt-[24] text-13 leading-[20px] font-custom500"
+        classNameCloseBtn="mt-[26] mx-[16]"
+        isCloseBtn
+        Icon={<MaximumIcon />}
       />
     </SafeAreaView>
   )

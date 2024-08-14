@@ -1,0 +1,3 @@
+import MyServiceDetailDocumentsScreen from "./MyServiceDetailDocumentsScreen"
+
+export default MyServiceDetailDocumentsScreen

@@ -24,6 +24,7 @@ import { isSmallPhone, takeFontFamily, takeFontStyles } from "helpers/helpers"
 import styles from "./styles"
 import clsx from "clsx"
 import colors from "styles/colors"
+import { fromArabic } from "arabic-digits"
 
 interface Props extends TextInputProps {
   value?: string
@@ -51,6 +52,7 @@ interface Props extends TextInputProps {
   allTextAlign?: "left" | "center" | "right"
   keyboardType?: KeyboardTypeOptions
   returnKeyType?: ReturnKeyType
+  onChangeText?: (...event: any[]) => void
 }
 
 const withTimingConfig = {
@@ -83,6 +85,7 @@ const DmAuthInput: React.FC<Props> = ({
   allTextAlign,
   keyboardType,
   returnKeyType,
+  onChangeText,
   ...restProps
 }) => {
   const [stylesFontFamilyState, setStylesFontFamilyState] = useState<
@@ -128,7 +131,6 @@ const DmAuthInput: React.FC<Props> = ({
     return initialClassName
   }, [inputClassName, i18n.language])
 
-
   const textSizeAnim = useAnimatedStyle(() => {
     return {
       fontSize: withTiming(textSize.value, withTimingConfig),
@@ -168,11 +170,14 @@ const DmAuthInput: React.FC<Props> = ({
     )
     setStylesFontFamilyPlaceholderState(
       takeFontStyles(
-        "font-custom400 leading-[16px] " + inputClassName,
+        "font-custom400 leading-[16px] " +
+          inputClassName +
+          " " +
+          placeholderClassName,
         i18n.language
       )
     )
-  }, [i18n.language, inputClassName])
+  }, [i18n.language, inputClassName, placeholderClassName])
 
   useLayoutEffect(() => {
     if (value?.length) {
@@ -298,6 +303,13 @@ const DmAuthInput: React.FC<Props> = ({
                 multilineStartOneLine &&
                 !!multilineHeight && { height: multilineHeight },
             ]}
+            onChangeText={(val) => {
+              if (keyboardType === "numeric" || keyboardType === "number-pad") {
+                onChangeText?.(fromArabic(val))
+              } else {
+                onChangeText?.(val)
+              }
+            }}
             placeholderTextColor={placeholderTextColor}
             multiline={multiline}
             keyboardType={keyboardType}

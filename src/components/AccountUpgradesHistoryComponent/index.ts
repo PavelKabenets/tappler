@@ -1,0 +1,3 @@
+import AccountUpgradesHistoryComponent from "./AccountUpgradesHistoryComponent"
+
+export default AccountUpgradesHistoryComponent

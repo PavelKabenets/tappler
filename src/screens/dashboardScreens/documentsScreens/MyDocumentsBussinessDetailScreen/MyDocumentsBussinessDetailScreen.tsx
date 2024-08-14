@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 
 // Components
 import { ActionBtn, DmInput, DmText, DmView } from "components/UI"
@@ -10,15 +10,25 @@ import MainModal from "components/MainModal"
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
 import HeaderOnboarding from "components/HeaderOnboarding"
 import DatePicker from "react-native-date-picker"
+import PaymentMethodModal from "components/PaymentMethodModal"
+import AttentionModalComponent from "components/AttentionModalComponent"
 
 // Hooks & Redux
 import { useTranslation } from "react-i18next"
 import { Controller, useForm } from "react-hook-form"
 import { useTypedSelector } from "store"
+import {
+  useLazyGetMyDocumentQuery,
+  usePostProfilePhotoMutation,
+} from "services/api"
 
 // Helpers & Types
 import { RootStackScreenProps } from "navigation/types"
-import { AddressType } from "types"
+import {
+  AddressType,
+  AvailableTrustStickerType,
+  PaymentMethodType,
+} from "types"
 
 // Libs & Utils
 import moment from "moment"
@@ -31,17 +41,24 @@ import colors from "styles/colors"
 import EditIcon from "assets/icons/edit.svg"
 import AttentionIcon from "assets/icons/attention.svg"
 import CalendarIcon from "assets/icons/calendar.svg"
-import PaymentMethodModal from "components/PaymentMethodModal"
+import {
+  api,
+  useGetTrustStickersQuery,
+  usePostPaymentsTrustStickersMutation,
+} from "services/api"
+import WebView, { WebViewNavigation } from "react-native-webview"
+import { useDispatch } from "react-redux"
+import CloseIcon from "assets/icons/close.svg"
+import CameraIcon from "assets/icons/camera.svg"
+import { ImageOrVideo } from "react-native-image-crop-picker"
+import SelectPhotosItem from "components/SelectPhotosItem"
+import SelectDoPhotoModal from "components/SelectDoPhotoModal"
 
 type Props = RootStackScreenProps<"my-documents-bussiness-detail">
 
 type FormValuesType = {
-  firstName: string
-  lastName: string
-  address: AddressType
-  phone: string
-  date: string
-  descr?: string
+  file?: ImageOrVideo
+  notes?: string
 }
 
 const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
@@ -55,6 +72,10 @@ const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
   const [isAttentionModalVisible, setAttentionModalVisible] = useState(false)
   const [isDatePickerVisible, setDatePickerVisible] = useState(false)
   const [isPaymentModalVisible, setPaymantModalVisible] = useState(false)
+  const [isSelectPhotoModalVisible, setSelectPhotoModalVisible] =
+    useState(false)
+  const [currentTrustSticker, setCurrentTrustSticker] =
+    useState<AvailableTrustStickerType>()
 
   const {
     control,
@@ -63,30 +84,39 @@ const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
     watch,
     trigger,
     formState: { isValid, errors },
-  } = useForm<FormValuesType>({
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      phone: "",
-      address,
-      descr: "",
-    },
-  })
+  } = useForm<FormValuesType>()
 
   // Global Store
   const { language, user } = useTypedSelector((store) => store.auth)
   // Variables
+  const dispatch = useDispatch()
   const { t, i18n } = useTranslation()
   const insets = useSafeAreaInsets()
+  const [postTrustStickers] = usePostPaymentsTrustStickersMutation()
+  const { data } = useGetTrustStickersQuery()
+  const [responseUrl, setResponseUrl] = useState("")
+  const [postPhoto] = usePostProfilePhotoMutation()
+
+  const [getDocs] = useLazyGetMyDocumentQuery()
+
+  const webViewRef = useRef<WebView>(null)
   // Refs
   // Methods
   const lastChange = useMemo(() => {
-    return moment(moment().format("DD.MM.YYYY"), "DD.MM.YYYY").fromNow()
-  }, [moment().hours()])
+    return user?.address?.changedAt
+      ? moment(user?.address?.changedAt).format(
+          i18n.language === "ar" ? "YYYY/MM/DD hh.mmA" : "DD/MM/YYYY hh.mmA"
+        )
+      : t("never")
+  }, [user?.address?.changedAt])
   // Handlers
   const handleOpenSelectModal = () => {
     setSelectCityModalVisible(true)
     Keyboard.dismiss()
+  }
+
+  const handleSelectPhoto = (item: ImageOrVideo) => {
+    setValue("file", item, { shouldValidate: true })
   }
 
   const hadnleChangeCity = () => {
@@ -96,13 +126,68 @@ const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
   const handleCloseSelectModal = () => {
     setSelectCityModalVisible(false)
   }
+  let timeoutId: NodeJS.Timeout
 
-  const handleSubmitModal = (item: AddressType) => {
-    setValue("address", item, {
-      shouldValidate: true,
-      shouldTouch: true,
-    })
-    handleCloseSelectModal()
+  const handleWebViewNavigationStateChange = async (
+    newNavState: WebViewNavigation
+  ) => {
+    if (newNavState.url.includes("/acceptance/post_pay")) {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+
+      timeoutId = await setTimeout(async () => {
+        dispatch(api.util.resetApiState())
+        setResponseUrl("")
+      }, 4000)
+
+      const response = await getDocs().unwrap()
+
+      navigation.navigate("wait", {
+        headerTitle: t("trust_stickers"),
+        title: t("we_have_received_your_request"),
+        descr: t("our_team_members_will_contact_descr"),
+        customTimeTitle: t("this_process_may_take_business", {
+          number1: 1,
+          number2: 2,
+        }),
+        startHours: 2,
+        endHours: 4,
+        documents: response,
+      })
+    }
+  }
+
+  const handlePressPayment = async (type: PaymentMethodType) => {
+    if (currentTrustSticker) {
+      try {
+        handleClosePayment()
+
+        let resPhoto
+        if (watch("file")) {
+          resPhoto = await postPhoto(getValues("file")).unwrap()
+        }
+        if (resPhoto) {
+          const res = await postTrustStickers({
+            paymentMethod: type,
+            id: currentTrustSticker?.id,
+            photo: resPhoto?.storageKey,
+            note: getValues("notes"),
+          }).unwrap()
+          setResponseUrl(res.paymentUrl)
+        }
+      } catch (e) {
+        console.log("Post trust error: ", e)
+      }
+    }
+  }
+
+  const handleImgButtonPress = () => {
+    setSelectPhotoModalVisible(true)
+  }
+
+  const handleCloseSelectPhotoModal = () => {
+    setSelectPhotoModalVisible(false)
   }
 
   const handleOpenAttentionModal = () => {
@@ -128,19 +213,18 @@ const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
   const handleGoChangeLocatinScreen = () => {
     handleCloseAttentionModal()
 
-    setTimeout(() => {
-      navigation.navigate("my-documents-change-place", {
-        address: getValues("address"),
-      })
-    }, 500)
-  }
-
-  const handleChangeDate = (date: Date) => {
-    setValue("date", moment(date).toISOString(), {
-      shouldValidate: true,
-      shouldTouch: true,
-    })
-    handleCloseDatePicker()
+    if (user?.address) {
+      setTimeout(() => {
+        navigation.navigate("my-account-new-address", {
+          data: {
+            address: user?.address!.streetAddress,
+            city: user?.address!.city,
+            governorate: user?.address!.governorate,
+          },
+          onSubmitGoBack: true,
+        })
+      }, 500)
+    }
   }
 
   const handleClosePayment = () => {
@@ -151,10 +235,21 @@ const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
     setPaymantModalVisible(true)
   }
 
+  const handleDeletePhoto = () => {
+    setValue("file", undefined, { shouldValidate: true })
+  }
+
   // Hooks
+
   useEffect(() => {
-    setValue("address", address)
-  })
+    const trust = data?.data?.filter(
+      (fItem) => fItem.type === "trust" && fItem.descriptionEn === "Verified Business Seal"
+    )
+    
+    if (trust?.length) {
+      setCurrentTrustSticker(trust[0])
+    }
+  }, [data])
 
   // Listeners
   // Render Methods
@@ -164,230 +259,158 @@ const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
       className="flex-1 bg-white"
       style={{ paddingBottom: insets.bottom > 45 ? 0 : 45 - insets.bottom }}
     >
-      <HeaderOnboarding
-        title={t("trust_stickers")}
-        isChevron
-        className="px-[12]"
-      />
-      <KeyboardAwareScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <DmView className="px-[14]">
-          <DmText className="mt-[20] text-20 leading-[24px] font-custom600">
-            {t("business_details")}
-          </DmText>
-          <TitleRegistrationFlow
-            title={t("business_name")}
-            className="mt-[15] px-[10]"
-            descr={user?.businessName || "mock Name"}
-            classNameTitle="text-11 leading-[14px] font-custom700"
-            classNameDescr="mt-[0] text-13 leading-[16px] font-custom500"
+      {!responseUrl && (
+        <>
+          <HeaderOnboarding
+            title={t("verified_nusiness")}
+            isChevron
+            className="px-[14] border-0 pb-[0]"
+            classNameTitle="text-14 leading-[18px]"
+            onBackComponent={<CloseIcon />}
           />
-          <DmView className="mt-[15] flex-row items-center">
-            <Controller
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { onChange, value } }) => (
-                <DmInput
-                  className="flex-1 mr-[5]"
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder={t("first_name")}
-                  placeholderTextColor={colors.grey11}
-                />
-              )}
-              name="firstName"
-            />
-            <Controller
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { onChange, value } }) => (
-                <DmInput
-                  className="flex-1 ml-[5]"
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder={t("last_name")}
-                  placeholderTextColor={colors.grey11}
-                />
-              )}
-              name="lastName"
-            />
-          </DmView>
-
-          <Controller
-            control={control}
-            rules={{ required: true, minLength: 11 }}
-            render={({ field: { onChange, value } }) => (
-              <DmInput
-                className="mt-[10]"
-                value={value}
-                onChangeText={(val) => {
-                  onChange(val)
-                  trigger("phone")
-                }}
-                placeholder={t("mobile_number")}
-                placeholderTextColor={colors.grey11}
-                keyboardType="numeric"
-                maxLength={11}
-                error={errors.phone?.type}
-              />
-            )}
-            name="phone"
-          />
-
-          <Controller
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, value } }) => (
-              <DmInput
-                className="mt-[10]"
-                value={value}
-                onChangeText={onChange}
-                placeholder={t("business_address")}
-                placeholderTextColor={colors.grey11}
-                IconRight={<EditIcon />}
-                onPress={handleOpenAttentionModal}
-              />
-            )}
-            name="address.streetAddress"
-          />
-          <DmView className="mt-[10] flex-row items-center justify-between">
-            <Controller
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { onChange, value } }) => (
-                <DmInput
-                  className="flex-1 mr-[5]"
-                  value={t(value)}
-                  placeholder={t("city")}
-                  placeholderTextColor={colors.grey11}
-                  editable={false}
-                  inputClassName="text-black"
-                />
-              )}
-              name="address.city"
-            />
-            <Controller
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { onChange, value } }) => (
-                <DmInput
-                  className="ml-[5] flex-1"
-                  value={t(value)}
-                  placeholder={t("governorate")}
-                  placeholderTextColor={colors.grey11}
-                  editable={false}
-                  inputClassName="text-black"
-                />
-              )}
-              name="address.governorate"
-            />
-          </DmView>
-          <TitleRegistrationFlow
-            title={t("date_of_visit")}
-            className="mt-[25]"
-            descr={t("select_the_date_of_visit_to_your_businessLocation")}
-            classNameTitle="text-20 leading-[24px]"
-            classNameDescr="mt-[0] text-13 leading-[16px]"
-          />
-          <Controller
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { value, onChange } }) => (
-              <DmInput
-                editable={false}
-                className="mt-[9]"
-                value={
-                  value ? moment(value).format("DD/MM/YYYY") : "DD/MM/YYYY"
-                }
-                inputClassName={clsx(
-                  !value && "text-grey9 text-13 leading-[16px] font-custom500"
+          <KeyboardAwareScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingHorizontal: 14,
+              justifyContent: "space-between",
+            }}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <DmView>
+              <DmText
+                className={clsx(
+                  "mt-[33] text-16 leading-[19px] font-custom600",
+                  i18n.language === "ar" && "mt-[23]"
                 )}
-                onPress={handleOpenDatePicker}
-                placeholder={t("select_a_date")}
-                Icon={<CalendarIcon />}
+              >
+                {t("your_business_address")}
+              </DmText>
+              <DmText className="mt-[9] text-13 leading-[16px] font-custom500">
+                {user?.address?.streetAddress}
+              </DmText>
+              <DmText className="mt-[7] text-13 leading-[16px] font-custom500">
+                {user?.address?.city}, {user?.address?.governorate}
+              </DmText>
+              <DmView
+                className="mt-[10] flex-row items-center"
+                onPress={handleOpenAttentionModal}
+              >
+                <DmText className="text-12 leading-[15px] font-custom400 text-grey2">
+                  {t("last_update")} {lastChange}
+                </DmText>
+                <DmText className="ml-[10] text-13 leading-[16px] font-custom600 text-red">
+                  [{t("change")}]
+                </DmText>
+              </DmView>
+              <DmText
+                className={clsx(
+                  "mt-[30] text-16 leading-[19px] font-custom600",
+                  i18n.language === "ar" && "mt-[20]"
+                )}
+              >
+                {t("location_photo")}
+              </DmText>
+              <DmText className="mt-[5] text-13 leading-[16px] font-custom400">
+                {t("upload_a_photo_of_your_business_location")}
+              </DmText>
+              <Controller
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange } }) => (
+                  <DmView className={clsx("mt-[20] flex-row", i18n.language === "ar" && "mt-[10]")}>
+                    {!value && (
+                      <DmView
+                        className={clsx(
+                          "px-[13] justify-center items-center border-1 border-grey31 rounded-10"
+                        )}
+                        onPress={handleImgButtonPress}
+                        style={styles.item}
+                      >
+                        <CameraIcon width={40} height={40} />
+                        <DmText className="mt-[5] text-8 leading-[10px] text-center font-custom500">
+                          {t("upload_photos")}
+                        </DmText>
+                      </DmView>
+                    )}
+                    {!!value && (
+                      <SelectPhotosItem
+                        item={value}
+                        onDelete={handleDeletePhoto}
+                        className="mb-[0]"
+                      />
+                    )}
+                  </DmView>
+                )}
+                name="file"
               />
-            )}
-            name="date"
-          />
-          <Controller
-            control={control}
-            render={({ field: { onChange, value } }) => (
-              <DmInput
-                className="mt-[10] flex-1"
-                value={value}
-                onChangeText={onChange}
-                isTextAnimAlways
-                placeholder={t("notes")}
-                staticPlaceholder={t("enter_notes_here")}
-                placeholderTextColor={colors.grey11}
-                multiline
-                multilineHeight={93}
+              <DmText
+                className={clsx(
+                  "mt-[30] text-15 leading-[19px] font-custom600",
+                  i18n.language === "ar" && "mt-[20]"
+                )}
+              >
+                {t("add_notes_optional")}
+              </DmText>
+              <DmText className="mt-[6] text-13 leading-[20px] font-custom400">
+                {t("you_can_add_more_details_descr")}
+              </DmText>
+              <Controller
+                control={control}
+                render={({ field: { value, onChange } }) => (
+                  <DmInput
+                    className="mt-[10]"
+                    value={value}
+                    onChangeText={onChange}
+                    multiline
+                  />
+                )}
+                name="notes"
               />
+            </DmView>
+            {isValid && (
+              <DmView className="mt-[25] px-[6]">
+                <ActionBtn
+                  className="rounded-5 px-[0]"
+                  title={t("make_payment")}
+                  onPress={handleSubmit}
+                  textClassName="text-14 leading-[17px] font-custom600"
+                />
+              </DmView>
             )}
-            name="descr"
-          />
-        </DmView>
-      </KeyboardAwareScrollView>
-      {isValid && (
-        <DmView className="mt-[5] px-[20]">
-          <ActionBtn
-            className="rounded-5 px-[0]"
-            title={t("make_payment")}
-            titleSecond={`500 ${t("EGP")}`}
-            onPress={handleSubmit}
-            textClassName="text-13 leading-[16px] font-custom600"
-          />
-        </DmView>
-      )}
-      <DatePicker
-        date={moment(watch("date")).toDate()}
-        open={isDatePickerVisible}
-        onConfirm={handleChangeDate}
-        onCancel={handleCloseDatePicker}
-        modal
-        mode="date"
-        confirmText={t("OK")}
-        cancelText={t("cancel")}
-        locale={language}
-        title={t("select_date")}
-      />
-      <SelectCityModal
-        isVisible={isSelectCityModalVisible}
-        onClose={handleCloseSelectModal}
-        onSubmit={handleSubmitModal as (item: Partial<AddressType>) => void}
-      />
-      <PaymentMethodModal
-        isVisible={isPaymentModalVisible}
-        onClose={handleClosePayment}
-      />
+          </KeyboardAwareScrollView>
 
-      <MainModal
-        isVisible={isAttentionModalVisible}
-        Icon={<AttentionIcon />}
-        onClose={handleCloseAttentionModal}
-        title={t("attention")}
-        className="px-[5] pt-[18] pb-[25]"
-        classNameTitle="mt-[10] text-20 leading-[24px] font-custom700"
-        classNameDescr="mt-[10] text-12 leading-[15px] font-custom400"
-        titleBtn={t("OK")}
-        classNameBtnsWrapper="mx-[30]"
-        classNameBtn="mt-[25]"
-        onPress={handleGoChangeLocatinScreen}
-        descr={t("you_can_change_your_address_only_number_time_per_year", {
-          number: 1,
-        })}
-      >
-        <DmText className="mt-[10] text-12 leading-[15px] font-custom400 text-center">
-          {t("last_address_change")}:{" "}
-          {!Number.isNaN(Number(lastChange.split(" ")[0])) && (
-            <DmText className="text-12 leading-[15px] font-custom700 capitalize text-red">
-              {lastChange.split(" ")[0]}{" "}
-            </DmText>
-          )}
-          <DmText className="text-12 leading-[15px] font-custom400 capitalize">
-            {lastChange.split(" ").slice(1).join(" ")}
-          </DmText>
-        </DmText>
-      </MainModal>
+          <PaymentMethodModal
+            isVisible={isPaymentModalVisible}
+            onClose={handleClosePayment}
+            onPress={handlePressPayment}
+          />
+
+          <SelectDoPhotoModal
+            isVisible={isSelectPhotoModalVisible}
+            onClose={handleCloseSelectPhotoModal}
+            selectedPhoto={watch("file")}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            setSelectedPhoto={handleSelectPhoto}
+          />
+
+          <AttentionModalComponent
+            isVisible={isAttentionModalVisible}
+            Icon={<AttentionIcon />}
+            onClose={handleCloseAttentionModal}
+            onPress={handleGoChangeLocatinScreen}
+          />
+        </>
+      )}
+      {!!responseUrl && (
+        <WebView
+          ref={webViewRef}
+          source={{ uri: responseUrl }}
+          style={{ flex: 1 }}
+          onNavigationStateChange={handleWebViewNavigationStateChange}
+        />
+      )}
     </SafeAreaView>
   )
 }

@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "490101077987",
+    "project_id": "tappler-9c099",
+    "storage_bucket": "tappler-9c099.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:490101077987:android:34c4110b4844c4f70a92d6",
+        "android_client_info": {
+          "package_name": "com.tappler_mob_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "490101077987-878smc8nlg23ga3d9j2967j0aqnrc2nk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tappler_mob_app",
+            "certificate_hash": "a5d41383a7f9fbffc9c4c950533dbdb78475cad8"
+          }
+        },
+        {
+          "client_id": "490101077987-et36jfsqhiaoi8jhqsitn9n0aq702rcs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7rokmzgcdNy5uHJDiEsHk-1GQO-e6i7c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "490101077987-et36jfsqhiaoi8jhqsitn9n0aq702rcs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "490101077987-o006vehjh2i244ivlft70c2rpv88hjde.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tappler.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

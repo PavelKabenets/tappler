@@ -7,13 +7,25 @@ import { useTranslation } from "react-i18next"
 
 import styles from "./styles"
 import BigCheckIcon from "assets/icons/check-mark-big.svg"
+import clsx from "clsx"
 
 interface Props {
   isVisible: boolean
+  textSuccess?: string
+  classNameTitle?: string
+  classNameTextSuccess?: string
+  title: string
   onClose: () => void
 }
 
-const VerifySuccessModal: React.FC<Props> = ({ isVisible, onClose }) => {
+const VerifySuccessModal: React.FC<Props> = ({
+  isVisible,
+  onClose,
+  title,
+  classNameTitle,
+  textSuccess,
+  classNameTextSuccess,
+}) => {
   const { t } = useTranslation()
   return (
     <Modal
@@ -28,8 +40,18 @@ const VerifySuccessModal: React.FC<Props> = ({ isVisible, onClose }) => {
         <DmView className="items-center">
           <BigCheckIcon />
         </DmView>
-        <DmText className="mt-[7] text-13 leading-[27px] font-custom500 text-center">
-          {t("your_mobile_number_has_been_verified")}
+        {textSuccess && (
+          <DmText className="mt-[11] text-20 leading-[24px] font-custom600 text-center">
+            {textSuccess}
+          </DmText>
+        )}
+        <DmText
+          className={clsx(
+            "mt-[7] text-13 leading-[27px] font-custom500 text-center",
+            classNameTitle
+          )}
+        >
+          {title}
         </DmText>
         <ActionBtn
           className="mt-[17] h-[41]"

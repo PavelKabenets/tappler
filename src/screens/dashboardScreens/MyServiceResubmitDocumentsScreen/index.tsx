@@ -1,0 +1,3 @@
+import MyServiceResubmitDocumentsScreen from "./MyServiceResubmitDocumentsScreen"
+
+export default MyServiceResubmitDocumentsScreen

@@ -1,0 +1,3 @@
+import MyProfilePhotosOfMyWorksScreen from "./MyProfilePhotosOfMyWorksScreen"
+
+export default MyProfilePhotosOfMyWorksScreen

@@ -35,6 +35,8 @@ interface Props {
   cropping?: boolean
   width?: number
   height?: number
+  maxPhotos?: number
+  isPdfOnly?: boolean
 }
 
 const SelectDoPhotoModal: React.FC<Props> = ({
@@ -48,6 +50,8 @@ const SelectDoPhotoModal: React.FC<Props> = ({
   isPdf,
   width = 400,
   height = 400,
+  maxPhotos,
+  isPdfOnly,
 }) => {
   const [isCameraPermissionGranded, setCameraPermissionGranded] = useState(true)
   const [isGalleryPermissionGranded, setGalleryPermissionGranded] =
@@ -123,6 +127,7 @@ const SelectDoPhotoModal: React.FC<Props> = ({
             cropping,
             multiple: isMultiple,
             cropperToolbarTitle: cropTitle,
+            maxFiles: maxPhotos,
           }).then((image: unknown) => {
             if (isMultiple) {
               setSelectedPhoto(
@@ -155,10 +160,12 @@ const SelectDoPhotoModal: React.FC<Props> = ({
           mode: "open",
           type: [types.pdf],
         })
+
         const res = {
           mime: result.type,
           filename: result.name,
           path: result.uri,
+          size: result.size
         } as Partial<ImageOrVideo>
 
         setSelectedPhoto(
@@ -215,27 +222,31 @@ const SelectDoPhotoModal: React.FC<Props> = ({
               : 24 - insets.bottom,
         }}
       >
-        <TitleRegistrationFlow
-          className="pl-[14] pb-[28]"
-          title={t("take_a_photo")}
-          descr={t("take_a_photo_by_your_phone")}
-          IconRight={<CameraRedIcon />}
-          onPress={onCameraRequest}
-        />
-        <TitleRegistrationFlow
-          className={clsx(
-            "pl-[14] py-[28] border-t-1 border-grey32",
-            isPdf && "border-b-1"
-          )}
-          title={t("photos_gallery")}
-          descr={t("choose_a_photo_from_your_photos_gallery")}
-          IconRight={<GalleryIcon />}
-          onPress={onGaleryRequest}
-        />
-        {isPdf && (
+        {!isPdfOnly && (
+          <>
+            <TitleRegistrationFlow
+              className="pl-[14] pb-[28]"
+              title={t("take_a_photo")}
+              descr={t("take_a_photo_by_your_phone")}
+              IconRight={<CameraRedIcon />}
+              onPress={onCameraRequest}
+            />
+            <TitleRegistrationFlow
+              className={clsx(
+                "pl-[14] py-[28] border-t-1 border-grey32",
+                isPdf && "border-b-1"
+              )}
+              title={t("photos_gallery")}
+              descr={t("choose_a_photo_from_your_photos_gallery")}
+              IconRight={<GalleryIcon />}
+              onPress={onGaleryRequest}
+            />
+          </>
+        )}
+        {(isPdf || isPdfOnly) && (
           <TitleRegistrationFlow
             descr={t("upload_PDF_file")}
-            className="pl-[14] py-[28]"
+            className={clsx("pl-[14] py-[28]", isPdfOnly && "pt-[0]")}
             title={t("choose_file")}
             IconRight={<ChooseFile />}
             onPress={docPicker}

@@ -14,10 +14,11 @@ interface Props {
   titleBtn?: string
   classNameBtn?: string
   classNameTitle?: string
+  classNameSubtitle?: string
   classNameDescr?: string
   className?: string
   onPress?: () => void
-  btnVariant?: "white" | "bordered" | "grey"
+  btnVariant?: "white" | "bordered" | "grey" | "yellow"
   disable?: boolean
   isDoneIconVisible?: boolean
   isCenterIcon?: boolean
@@ -41,6 +42,7 @@ const MyServiceDetailItem: React.FC<Props> = ({
   isCenterIcon,
   classNameDescr,
   classNameTitle,
+  classNameSubtitle,
   RightIcon,
   IconDone,
   subTitle,
@@ -83,7 +85,12 @@ const MyServiceDetailItem: React.FC<Props> = ({
           </DmText>
           <DmView>
             {!!subTitle && !isDoneIconVisible && (
-              <DmText className="ml-[4] text-13 leading-[16px] font-custom400">
+              <DmText
+                className={clsx(
+                  "ml-[4] text-13 leading-[16px] font-custom400",
+                  classNameSubtitle
+                )}
+              >
                 {subTitle}
               </DmText>
             )}

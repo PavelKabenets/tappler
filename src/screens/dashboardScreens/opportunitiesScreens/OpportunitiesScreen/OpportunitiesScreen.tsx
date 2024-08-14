@@ -8,15 +8,23 @@ import FilterModal from "screens/dashboardScreens/filterScreens/FilterScreen"
 import SortModal from "components/SortModal"
 import OppourtunitiesModal from "components/OppourtunitiesModal"
 import { Shadow } from "react-native-shadow-2"
+import { ActivityIndicator, FlatList } from "react-native"
+import OpportunityItem from "components/OpportunityItem"
+import DeleteOpportunityModal from "components/DeleteOpportunityModal"
 
 // Hooks & Redux
 import { useTranslation } from "react-i18next"
 import { useLazyGetJobsQuery } from "services/api"
+import { useIsFocused } from "@react-navigation/native"
+import { useTypedSelector } from "store"
+import { useDispatch } from "react-redux"
+import { addIgnoredJob } from "store/auth/slice"
 
 // Helpers & Types
 import { RootStackScreenProps } from "navigation/types"
 import { hexToRGBA } from "helpers/helpers"
 import { GetJobsResponse } from "services"
+import { JobType } from "types"
 
 // Libs & Utils
 
@@ -27,19 +35,12 @@ import FilterIcon from "assets/icons/filter.svg"
 import SortIcon from "assets/icons/sort.svg"
 import BulbIcon from "assets/icons/bulb-yellow.svg"
 import colors from "styles/colors"
-import { ActivityIndicator, FlatList } from "react-native"
-import { JobType } from "types"
-import OpportunityItem from "components/OpportunityItem"
-import { useIsFocused } from "@react-navigation/native"
-import DeleteOpportunityModal from "components/DeleteOpportunityModal"
-import { useTypedSelector } from "store"
-import { useDispatch } from "react-redux"
-import { addIgnoredJob } from "store/auth/slice"
 
 type Props = RootStackScreenProps<"opportunities">
 
-const OpportunitiesScreen: React.FC<Props> = ({ navigation }) => {
+const OpportunitiesScreen: React.FC<Props> = ({ route, navigation }) => {
   // Props
+  const filterParams = route.params
   // State
   const [isSortModalVisible, setSortModalVisible] = useState(false)
   const [infoModalVisible, setInfoModalVisible] = useState(false)
@@ -71,7 +72,7 @@ const OpportunitiesScreen: React.FC<Props> = ({ navigation }) => {
   // Methods
   // Handlers
   const handleOpenFilter = () => {
-    navigation.navigate("filter")
+    navigation.navigate("filter", { ...filterParams })
   }
 
   const handleOpenSortModal = () => {
@@ -100,7 +101,13 @@ const OpportunitiesScreen: React.FC<Props> = ({ navigation }) => {
       (jobsData ? jobsData?.data?.length < jobsData?.total : true)
     ) {
       try {
-        const res = await getJobs({ page: page + 1, sort: sortType }).unwrap()
+        const res = await getJobs({
+          page: page + 1,
+          sort: sortType,
+          categoryId: filterParams?.selectedCategory?.id,
+          city: t(filterParams?.selectedAddress?.name || ""),
+          keywords: filterParams?.keyword,
+        }).unwrap()
         setPage(res.page)
         if (!jobsData) {
           setJobsData(res)
@@ -132,13 +139,19 @@ const OpportunitiesScreen: React.FC<Props> = ({ navigation }) => {
 
   // Hooks
   useEffect(() => {
+    setPage(0)
+    setJobsData(undefined)
+  }, [sortType, filterParams])
+
+  useEffect(() => {
     onGetJobsData()
   }, [])
 
   useEffect(() => {
-    setPage(0)
-    setJobsData(undefined)
-  }, [sortType])
+    if (jobsData === undefined) {
+      onGetJobsData()
+    }
+  }, [jobsData])
 
   useEffect(() => {
     if (isFocused) {

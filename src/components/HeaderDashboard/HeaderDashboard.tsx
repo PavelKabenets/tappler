@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useMemo } from "react"
 
 import { DmText, DmView } from "components/UI"
 
@@ -11,6 +11,7 @@ import clsx from "clsx"
 import SettingsIcon from "assets/icons/gear.svg"
 import BellIcon from "assets/icons/bell.svg"
 import colors from "styles/colors"
+import { useGetNotitficationsQuery } from "services/api"
 
 interface Props {
   className?: string
@@ -20,13 +21,18 @@ interface Props {
 const HeaderDashboard: React.FC<Props> = ({ className, title }) => {
   const { t } = useTranslation()
   const navigation = useNavigation()
+  const { data } = useGetNotitficationsQuery({ page: 1 })
+
+  const unreaded = useMemo(() => {
+    return data?.data.reduce((sum, curr) => sum + (!curr.readAt ? 1 : 0), 0)
+  }, [data])
 
   const handleSettings = () => {
     navigation.navigate("setting")
   }
 
   const handleNotifications = () => {
-    // navigation.navigate("notifications")
+    navigation.navigate("main-notifications")
   }
 
   return (
@@ -58,6 +64,16 @@ const HeaderDashboard: React.FC<Props> = ({ className, title }) => {
         <DmView className="flex-row items-center">
           <DmView onPress={handleNotifications}>
             <BellIcon fill={!title ? colors.white : colors.grey2} />
+            {!!unreaded && (
+              <DmView className="absolute top-[-8] right-[-8] bg-red rounded-full w-[20] h-[20] items-center justify-center">
+                <DmText className="text-13 leading-[16px] text-white font-custom700 text-right">
+                  {data?.data.reduce(
+                    (sum, curr) => sum + (!curr.readAt ? 1 : 0),
+                    0
+                  )}
+                </DmText>
+              </DmView>
+            )}
           </DmView>
           <DmView className="ml-[24]" onPress={handleSettings}>
             <SettingsIcon fill={!title ? colors.white : colors.grey30} />

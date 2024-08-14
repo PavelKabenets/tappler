@@ -75,7 +75,7 @@ const FoodCategoryScreen: React.FC<Props> = ({ route, navigation }) => {
           index === 0 && "border-t-0"
         )}
         onPress={() => handlePressItem(item)}
-        title={item}
+        title={t(item)}
         variant="square"
         isChecked={selectedCategories.includes(item)}
         textClassName="flex-1 text-13 leading-[16px] font-custom400"
@@ -100,7 +100,7 @@ const FoodCategoryScreen: React.FC<Props> = ({ route, navigation }) => {
         <DmView className="flex-1 mt-[20]">
           <FlatList
             contentContainerStyle={{ flexGrow: 1 }}
-            data={foodCategoriesData(t)}
+            data={foodCategoriesData}
             renderItem={renderListItem}
             showsVerticalScrollIndicator={false}
           />

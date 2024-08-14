@@ -1,0 +1,3 @@
+import MyAccountChangedAddressScreen from "./MyAccountChangedAddressScreen"
+
+export default MyAccountChangedAddressScreen

@@ -1,0 +1,3 @@
+import AccountUpgradesHistoryScreen from "./AccountUpgradesHistoryScreen"
+
+export default AccountUpgradesHistoryScreen

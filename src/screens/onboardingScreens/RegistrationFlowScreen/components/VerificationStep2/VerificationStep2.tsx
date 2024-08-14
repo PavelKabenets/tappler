@@ -153,8 +153,10 @@ const VerificationStep2: React.FC<Props> = ({
         </DmView>
       </DmView>
       <VerifySuccessModal
+        title={t("your_mobile_number_has_been_verified")}
         isVisible={isVerifyModalVisible}
         onClose={handleCloseVerifyModal}
+        title={t("your_mobile_number_has_been_verified")}
       />
     </DmView>
   )

@@ -3,10 +3,10 @@ import React from "react"
 // Components
 import { ActionBtn, DmText, DmView } from "components/UI"
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
-
+import HeaderOnboarding from "components/HeaderOnboarding"
 // Hooks & Redux
 import { useTranslation } from "react-i18next"
-
+import { useTypedSelector } from "store"
 // Helpers & Types
 import { RootStackScreenProps } from "navigation/types"
 
@@ -16,15 +16,24 @@ import { RootStackScreenProps } from "navigation/types"
 import clsx from "clsx"
 import styles from "./styles"
 import ClockIcon from "assets/icons/clock-red-big.svg"
-import HeaderOnboarding from "components/HeaderOnboarding"
-import { useTypedSelector } from "store"
 
 type Props = RootStackScreenProps<"wait">
 
 const WaitScreen: React.FC<Props> = ({ route, navigation }) => {
   // Props
-  const { title, startHours, endHours, descr, headerTitle, documents } =
-    route.params
+  const {
+    title,
+    startHours,
+    endHours,
+    descr,
+    headerTitle,
+    documents,
+    noneBorder,
+    isBorder,
+    text13,
+    onPressBack,
+    customTimeTitle,
+  } = route.params
   // State
   // Global Store
   const { documents: documentsRedux } = useTypedSelector((store) => store.auth)
@@ -53,7 +62,11 @@ const WaitScreen: React.FC<Props> = ({ route, navigation }) => {
       <DmView>
         <HeaderOnboarding
           title={headerTitle}
-          className="px-[12]"
+          className={clsx(
+            "px-[12]",
+            { "border-b-0": noneBorder },
+            { "border-b-1 border-grey4": isBorder }
+          )}
           onBackComponent={<DmView />}
           onGoBackPress={() => null}
         />
@@ -66,21 +79,28 @@ const WaitScreen: React.FC<Props> = ({ route, navigation }) => {
             {descr || t("we_will_verify_the_information_descr")}
           </DmText>
           <DmText className="mt-[8] text-13 leading-[16px] text-center text-red font-custom400">
-            {startHours && endHours
-              ? t("this_process_may_take_minues_to_hours", {
-                  hours1: startHours || 2,
-                  hours2: endHours || 4,
-                })
-              : t("this_process_may_take_up_to_hours_hours", {
-                  hours: endHours,
-                })}
+            {customTimeTitle || (
+              <>
+                {startHours && endHours
+                  ? t("this_process_may_take_minues_to_hours", {
+                      hours1: startHours || 2,
+                      hours2: endHours || 4,
+                    })
+                  : t("this_process_may_take_up_to_hours_hours", {
+                      hours: endHours,
+                    })}
+              </>
+            )}
           </DmText>
         </DmView>
       </DmView>
       <ActionBtn
         className="rounded-5 mx-[20]"
+        textClassName={clsx("", {
+          "text-13 leading-[16px] font-custom600": text13,
+        })}
         title={t("close")}
-        onPress={onPress}
+        onPress={onPressBack || onPress}
       />
     </SafeAreaView>
   )

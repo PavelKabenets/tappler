@@ -1,0 +1,3 @@
+import MyProfileSettingsCheckboxComponent from "./MyProfileSettingsCheckboxComponent"
+
+export default MyProfileSettingsCheckboxComponent

@@ -1,0 +1,3 @@
+import MyProfileQualificationCredentialsScreen from "./MyProfileQualificationCredentialsScreen"
+
+export default MyProfileQualificationCredentialsScreen

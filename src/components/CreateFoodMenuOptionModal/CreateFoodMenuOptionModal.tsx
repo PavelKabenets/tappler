@@ -111,7 +111,9 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
         choices: getValues("choices").map((item) => ({
           ...item,
           price: Number(item.price),
-          discountPrice: Number(item.discountPrice),
+          discountPrice: Number(item.discountPrice)
+            ? Number(item.discountPrice)
+            : 0,
         })),
       })
     } else {
@@ -123,7 +125,9 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
         choices: getValues("choices").map((item) => ({
           ...item,
           price: Number(item.price),
-          discountPrice: Number(item.discountPrice),
+          discountPrice: Number(item.discountPrice)
+            ? Number(item.discountPrice)
+            : 0,
         })),
       })
     }
@@ -161,7 +165,13 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
 
   useEffect(() => {
     if (isVisible && currentOption) {
-      reset(currentOption)
+      reset({
+        ...currentOption,
+        choices: currentOption.choices.map((item) => ({
+          ...item,
+          discountPrice: item.discountPrice || "",
+        })),
+      })
       setRequiredVisible(true)
     }
     if (!isVisible) {
@@ -215,6 +225,7 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
                 </DmText>
               )}
             </DmView>
+            <DmView />
           </DmView>
           <KeyboardAwareScrollView
             keyboardShouldPersistTaps="handled"
@@ -239,12 +250,13 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
                       wrapperClassName="ml-[14]"
                       containerClassName="mr-[14.5]"
                       inputClassName={clsx(
-                        "h-[50]",
+                        "h-[50] text-13 leading-[16px]",
                         currentOption && "text-16 leading-[19px]"
                       )}
+                      placeholderSize={11}
                       onChangeText={onChange}
                       isBorderVisible={!currentOption}
-                      translateYStartPos={7}
+                      // translateYStartPos={7}
                     />
                   </DmView>
                 )}
@@ -255,7 +267,7 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
                 render={({ field: { value } }) => (
                   <DmView
                     className={clsx(
-                      "px-[14] py-[24] flex-row items-center border-b-0.5 border-grey1",
+                      "pl-[14] mr-[14] py-[24] flex-row items-center border-b-0.5 border-grey1",
                       currentOption && "mt-[16]"
                     )}
                   >
@@ -301,12 +313,15 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
                   }}
                   control={control}
                   render={({ field: { value, onChange } }) => (
-                    <DmView className="flex-1">
+                    <DmView
+                      className={clsx(
+                        fields.length > 1 ? "flex-[0.8]" : "flex-[0.89]"
+                      )}
+                    >
                       <DmAuthInput
                         placeholder={t("enter_minimum_qty")}
                         keyboardType="numeric"
                         label={t("minimum_qty")}
-                        allTextAlign="center"
                         editable={watch("isRequired") || !isRequiredVisible}
                         value={value.toString()}
                         wrapperClassName="ml-[14]"
@@ -321,7 +336,7 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
                         isBorderVisible={false}
                         error={errors.minQty?.type || ""}
                         placeholderSize={11}
-                        translateYStartPos={7}
+                        // translateYStartPos={7}
                         onlyTextError
                       />
                     </DmView>
@@ -331,6 +346,7 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
                 <Controller
                   rules={{
                     required: true,
+                    min: 1,
                     validate: {
                       function: (value, formValues) => {
                         if (
@@ -353,7 +369,6 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
                         label={t("maximum_qty")}
                         value={value.toString()}
                         inputClassName="h-[50] text-11 leading-[16px]"
-                        allTextAlign="center"
                         onChangeText={(val) => {
                           onChange(val)
                           trigger("maxQty")
@@ -363,7 +378,7 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
                         isBorderVisible={false}
                         placeholderSize={11}
                         onlyTextError
-                        translateYStartPos={7}
+                        // translateYStartPos={7}
                       />
                     </DmView>
                   )}
@@ -395,7 +410,6 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
                                 isBorderVisible={false}
                                 placeholderSize={11}
                                 translateYStartPos={7}
-                                style={{ textAlign: "auto" }}
                               />
                             </DmView>
                           </DmView>
@@ -421,18 +435,18 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
                                 translateYStartPos={7}
                                 placeholderSize={11}
                                 isBorderVisible={false}
+                                style={{ textAlign: "center" }}
                               />
                             </DmView>
                           )}
                           name={`choices.${idx}.price`}
                         />
                         <Controller
-                          rules={{ required: true }}
                           control={control}
                           render={({ field: { value, onChange } }) => (
                             <DmView className="flex-1">
                               <DmAuthInput
-                                placeholder={t("enter_price")}
+                                placeholder={t("optional")}
                                 label={t("sale_price")}
                                 value={value?.toString()}
                                 inputClassName="h-[50] text-11 leading-[16px]"
@@ -443,6 +457,7 @@ const CreateFoodMenuOptionModal: React.FC<Props> = ({
                                 placeholderSize={11}
                                 keyboardType="numeric"
                                 isBorderVisible={false}
+                                style={{ textAlign: "center" }}
                               />
                             </DmView>
                           )}

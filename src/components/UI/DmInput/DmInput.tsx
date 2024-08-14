@@ -24,6 +24,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated"
 import colors from "styles/colors"
+import { fromArabic } from "arabic-digits"
 
 interface Props extends TextInputProps {
   value?: string
@@ -46,6 +47,8 @@ interface Props extends TextInputProps {
   error?: string
   keyboardType?: KeyboardTypeOptions
   returnKeyType?: ReturnKeyType
+  classNameOnPressWrapper?: string
+  onChangeText?: (...event: any[]) => void
 }
 
 const withTimingConfig = {
@@ -73,6 +76,8 @@ const DmInput: React.FC<Props> = ({
   error,
   keyboardType,
   returnKeyType,
+  classNameOnPressWrapper,
+  onChangeText,
   ...restProps
 }) => {
   const [stylesFontFamilyState, setStylesFontFamilyState] = useState<
@@ -82,6 +87,7 @@ const DmInput: React.FC<Props> = ({
       }
     | undefined
   >(undefined)
+  const [styleFont, setFontStyle] = useState({ fontSize: 13 })
 
   const [
     stylesFontFamilyPlaceholderState,
@@ -117,10 +123,18 @@ const DmInput: React.FC<Props> = ({
   })
 
   const classNameGuard = useMemo(() => {
-    let initialClassName = ""
+    let initialClassName = inputClassName
 
     if (inputClassName) {
-      initialClassName += inputClassName.replace(/custom(\d{3})/, "")
+      if (inputClassName.match(/text-(\d+)/)?.length) {
+        const arr = [...inputClassName.match(/text-(\d+)/g) || []]
+        arr.map((item) =>
+          setFontStyle({ fontSize: Number(item.split("-")[1]) })
+        )
+        initialClassName = initialClassName?.replace(/text-(\d+)/g, "")
+      }
+      initialClassName = initialClassName?.replace(/custom(\d{3})/, "")
+      initialClassName = initialClassName?.replace(/leading-\[\d+px\]/g, "")
     }
 
     return initialClassName
@@ -129,7 +143,7 @@ const DmInput: React.FC<Props> = ({
   useLayoutEffect(() => {
     setStylesFontFamilyState(
       takeFontStyles(
-        inputClassName || " font-custom400 leading-[16px]",
+        "font-custom400 leading-[16px] " + inputClassName,
         i18n.language
       )
     )
@@ -139,7 +153,7 @@ const DmInput: React.FC<Props> = ({
     if (isTextAnimAlways) {
       setStylesFontFamilyPlaceholderState(
         takeFontStyles(
-          inputClassName + " font-custom700 leading-[16px]",
+          "font-custom700 leading-[16px] " + inputClassName,
           i18n.language
         )
       )
@@ -148,14 +162,14 @@ const DmInput: React.FC<Props> = ({
       if (value) {
         setStylesFontFamilyPlaceholderState(
           takeFontStyles(
-            inputClassName + " font-custom700 leading-[16px]",
+            "font-custom700 leading-[16px] " + inputClassName,
             i18n.language
           )
         )
       } else {
         setStylesFontFamilyPlaceholderState(
           takeFontStyles(
-            inputClassName + " font-custom400 leading-[16px]",
+            "font-custom400 leading-[16px] " + inputClassName,
             i18n.language
           )
         )
@@ -200,6 +214,7 @@ const DmInput: React.FC<Props> = ({
       }
     }
   }, [value])
+  
 
   return (
     <DmView
@@ -260,10 +275,10 @@ const DmInput: React.FC<Props> = ({
             value={value}
             placeholderTextColor={placeholderTextColor}
             className={clsx(
-              "h-[55] text-13 leading-[16px] z-10",
+              "h-[55] z-10",
               !isAnimText && "h-[39]",
               !isAnimText && I18nManager.isRTL && "mt-[9]",
-              (!!value && !!isAnimText) || isTextAnimAlways
+              (!!value && !!isAnimText && !!placeholder) || (isTextAnimAlways && placeholder)
                 ? Platform.OS === "android"
                   ? "pt-[25]"
                   : "pt-[20]"
@@ -277,6 +292,13 @@ const DmInput: React.FC<Props> = ({
             maxLength={multiline ? 299 : maxLength || 49}
             autoCapitalize="none"
             keyboardType={keyboardType}
+            onChangeText={(val) => {
+              if (keyboardType === "numeric" || keyboardType === "number-pad") {
+                onChangeText?.(fromArabic(val))
+              } else {
+                onChangeText?.(val)
+              }
+            }}
             returnKeyType={keyboardType === "numeric" ? "done" : "default"}
             style={[
               I18nManager.isRTL && {
@@ -285,6 +307,7 @@ const DmInput: React.FC<Props> = ({
               },
               style,
               stylesFontFamilyState,
+              styleFont,
               multiline && styles.multiline,
               !!multilineHeight && { height: multilineHeight },
             ]}
@@ -310,12 +333,13 @@ const DmInput: React.FC<Props> = ({
             <DmView
               className={clsx(
                 "justify-center",
-                isAnimText ? "min-h-[55]" : "min-h-[39]"
+                isAnimText ? "min-h-[55]" : "min-h-[39]",
+                classNameOnPressWrapper
               )}
             >
               <DmText
                 className={clsx(
-                  "text-custom400 text-13 leading-[22px]",
+                  "font-custom400 text-13 leading-[22px]",
                   // !!label && "leading-[34px]",
                   isAnimText && "pt-[20]"
                 )}

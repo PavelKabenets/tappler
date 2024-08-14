@@ -60,6 +60,10 @@ if linkage != nil
 end
 
 target 'tappler_mob_app' do
+  pod 'Firebase', :modular_headers => true
+  pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'FirebaseCore', :modular_headers => true
   config = use_native_modules!
 
   use_react_native!(

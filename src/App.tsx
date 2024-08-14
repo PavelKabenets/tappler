@@ -34,6 +34,13 @@ import "react-native-gesture-handler"
 import colors from "styles/colors"
 import TooltipComponent from "components/TooltipComponent"
 import LoadingModal from "components/LoadingModal"
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { FIREBASE_WEB_CLIETN_ID } from "config"
+
+
+GoogleSignin.configure({
+  webClientId: FIREBASE_WEB_CLIETN_ID,
+});
 
 function App(): JSX.Element {
   return (

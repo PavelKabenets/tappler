@@ -21,7 +21,7 @@ const MyPointsCategoryItem: React.FC<Props> = ({
   return (
     <DmView
       className={clsx(
-        "items-center pt-[11] pb-[5] rounded-10 border-1 border-grey40",
+        "items-center justify-center pt-[11] pb-[5] rounded-10 border-1 border-grey40",
         className
       )}
       style={styles.item}

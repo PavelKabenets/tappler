@@ -26,12 +26,19 @@ import {
   ServiceCategoryType,
   SubCategoryType,
 } from "types"
-import { setCurrentScreen, setSelectedCategoriesId, setWaitAMomentModalPossibleVisible } from "store/auth/slice"
+import {
+  setCurrentScreen,
+  setSelectedCategoriesId,
+  setWaitAMomentModalPossibleVisible,
+} from "store/auth/slice"
 import { ProsServicesCategoriesResponse } from "services"
 import {
   useCreateProsServiceCategoriesMutation,
   useLazyProsServiceCategoriesQuery,
+  useProsServiceCategoriesQuery,
 } from "services/api"
+import MaximumIcon from "assets/icons/maximum.svg"
+import MainModal from "components/MainModal"
 
 type Props = RootStackScreenProps<"service-detail">
 
@@ -46,12 +53,14 @@ const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
   const [isDetailModalVisible, setDetailModalVisible] = useState(false)
   const [selectedItem, setSelectedItem] = useState<SubCategoryType>()
   const [isLoading, setLoading] = useState(false)
+  const [isMaxModalVisible, setMaxModalVisible] = useState(false)
 
   // Global Store
   // Variables
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const [createServiceCategory] = useCreateProsServiceCategoriesMutation()
+  const { data: prosCategories } = useProsServiceCategoriesQuery()
   // Refs
   // Methods
 
@@ -84,33 +93,48 @@ const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
   }
 
   const handleAddToMyServices = async () => {
-    if (selectedItem && type === "my-service") {
-      setLoading(true)
-      try {
-        const res = await createServiceCategory({
-          serviceCategoryId: selectedItem.id,
-        }).unwrap()
-        dispatch(setWaitAMomentModalPossibleVisible(false))
-        handleCloseDetailModal()
-        setTimeout(() => {
-          navigation.reset({
-            index: 0,
-            routes: [
-              { name: "dashboard" },
-              { name: "my-services" },
-              {
-                name: "my-services-detail",
-                params: { service: res },
-              },
-            ],
-          })
-        }, 400)
-      } catch (e) {
-        console.log("Create My Service Error: ", e)
-      } finally {
-        setLoading(false)
+    if (prosCategories?.length && prosCategories.length >= 3) {
+      handleCloseDetailModal()
+      setTimeout(() => {
+        handleOpenMaxModal()
+      }, 400)
+    } else {
+      if (selectedItem && type === "my-service") {
+        setLoading(true)
+        try {
+          const res = await createServiceCategory({
+            serviceCategoryId: selectedItem.id,
+          }).unwrap()
+          dispatch(setWaitAMomentModalPossibleVisible(false))
+          handleCloseDetailModal()
+          setTimeout(() => {
+            navigation.reset({
+              index: 0,
+              routes: [
+                { name: "dashboard" },
+                { name: "my-services" },
+                {
+                  name: "my-services-detail",
+                  params: { service: res, isFirstOpen: true },
+                },
+              ],
+            })
+          }, 400)
+        } catch (e) {
+          console.log("Create My Service Error: ", e)
+        } finally {
+          setLoading(false)
+        }
       }
     }
+  }
+
+  const handleCloseMaxModal = () => {
+    setMaxModalVisible(false)
+  }
+
+  const handleOpenMaxModal = () => {
+    setMaxModalVisible(true)
   }
 
   // Hooks
@@ -163,6 +187,16 @@ const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
         onPress={type === "my-service" ? handleAddToMyServices : undefined}
         // @TO DO - descr
         descr={selectedItem?.descriptionForPros || ""}
+      />
+      <MainModal
+        isVisible={isMaxModalVisible}
+        descr={t("you_have_reached_the_maximum", { number: 3 })}
+        onClose={handleCloseMaxModal}
+        className="pt-[42] px-[59]"
+        classNameDescr="mt-[24] text-13 leading-[20px] font-custom500"
+        classNameCloseBtn="mt-[26] mx-[16]"
+        isCloseBtn
+        Icon={<MaximumIcon />}
       />
     </SafeAreaView>
   )

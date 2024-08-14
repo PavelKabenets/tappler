@@ -12,14 +12,26 @@ import ChevronDownIcon from "assets/icons/chevron-down.svg"
 import colors from "styles/colors"
 import { TextInput } from "react-native-gesture-handler"
 import { takeFontFamily } from "helpers/helpers"
+import { fromArabic } from "arabic-digits"
 
 interface Props extends TextInputProps {
   value?: string
   className?: string
+  onChangeText?: (text: string) => void
 }
 
-const PhoneInput: React.FC<Props> = ({ value, className, ...restProps }) => {
+const PhoneInput: React.FC<Props> = ({
+  value,
+  className,
+  onChangeText,
+  ...restProps
+}) => {
   const { i18n } = useTranslation()
+  const handleChangeValue = (text: string) => {
+    if (onChangeText) {
+      onChangeText(fromArabic(text))
+    }
+  }
   return (
     <DmView
       className={clsx(
@@ -61,7 +73,8 @@ const PhoneInput: React.FC<Props> = ({ value, className, ...restProps }) => {
           I18nManager.isRTL && { textAlign: "left", writingDirection: "rtl" },
           takeFontFamily("font-custom400 leading-[25px]", i18n.language),
         ]}
-        keyboardType="numeric"
+        keyboardType="number-pad"
+        onChangeText={handleChangeValue}
         {...restProps}
       />
     </DmView>

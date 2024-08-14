@@ -1,0 +1,3 @@
+import AccountUpgradesViewDetailsScreen from "./AccountUpgradesViewDetailsScreen"
+
+export default AccountUpgradesViewDetailsScreen

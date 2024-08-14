@@ -1,0 +1,3 @@
+import MyAccountVerifyMobileNumberScreen from "./MyAccountVerifyMobileNumberScreen"
+
+export default MyAccountVerifyMobileNumberScreen

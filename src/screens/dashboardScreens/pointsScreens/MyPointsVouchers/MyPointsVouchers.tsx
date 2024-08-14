@@ -21,6 +21,11 @@ import { mockMyPoinstVouchersData } from "data/mockData"
 import MyPointsVoucherItem from "components/MyPointsVoucherItem"
 import { FlatList } from "react-native"
 import MainModal from "components/MainModal"
+import {
+  useGetProVouchersAssignmentQuery,
+  usePostProVouchersAssignmentMutation,
+} from "services/api"
+import { VouchersAssignmentType } from "types"
 
 type Props = RootStackScreenProps<"my-points-vouchers">
 
@@ -31,11 +36,18 @@ const MyPointsVouchers: React.FC<Props> = ({ navigation }) => {
   // Global Store
   // Variables
   const { t } = useTranslation()
+  const { data, isFetching } = useGetProVouchersAssignmentQuery()
+  const [postVoucher] = usePostProVouchersAssignmentMutation()
   // Refs
   // Methods
   // Handlers
-  const handlePressItem = () => {
-    setModalVisible(true)
+  const handlePressItem = async (item: VouchersAssignmentType) => {
+    try {
+      await postVoucher(item.id).unwrap()
+      setModalVisible(true)
+    } catch (e) {
+      console.log("Error Post Vaucher: ", e)
+    }
   }
 
   const handleCloseModal = () => {
@@ -45,12 +57,12 @@ const MyPointsVouchers: React.FC<Props> = ({ navigation }) => {
   // Hooks
   // Listeners
   // Render Methods
-  const renderListItem = ({ item }: { item: MyPointsVoucherItemMockType }) => {
+  const renderListItem = ({ item }: { item: VouchersAssignmentType }) => {
     return (
       <MyPointsVoucherItem
         item={item}
         className="mb-[14]"
-        onPress={handlePressItem}
+        onPress={() => handlePressItem(item)}
       />
     )
   }
@@ -68,7 +80,7 @@ const MyPointsVouchers: React.FC<Props> = ({ navigation }) => {
         </DmText>
         <DmView className="mt-[14]">
           <FlatList
-            data={mockMyPoinstVouchersData}
+            data={data?.data}
             renderItem={renderListItem}
             contentContainerStyle={{ flexGrow: 1 }}
             showsVerticalScrollIndicator={false}

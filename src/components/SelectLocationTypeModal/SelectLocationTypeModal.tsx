@@ -87,24 +87,24 @@ const SelectLocationTypeModal: React.FC<Props> = ({
             </DmView>
             <DmView className="mt-[18]">
               <DmChecbox
-                title={t("office")}
+                title={t("service_location_arr.office")}
                 onPress={() => handleSelectType("office")}
                 isChecked={selectedType === "office"}
               />
               <DmChecbox
-                title={t("warehouse")}
+                title={t("service_location_arr.warehouse")}
                 className="mt-[13]"
                 onPress={() => handleSelectType("warehouse")}
                 isChecked={selectedType === "warehouse"}
               />
               <DmChecbox
-                title={t("home")}
+                title={t("service_location_arr.home")}
                 className="mt-[13]"
                 onPress={() => handleSelectType("home")}
                 isChecked={selectedType === "home"}
               />
               <DmChecbox
-                title={t("shop")}
+                title={t("service_location_arr.shop")}
                 className="mt-[13]"
                 onPress={() => handleSelectType("store")}
                 isChecked={selectedType === "store"}

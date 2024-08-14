@@ -26,6 +26,7 @@ interface Props {
   headerClassName?: string
   isRightIconDisable?: boolean
   classNameTitle?: string
+  classNameSubtitle?: string
   iconsClassName?: string
 }
 
@@ -42,6 +43,7 @@ const HeaderOnboarding: React.FC<Props> = ({
   headerClassName,
   isRightIconDisable,
   classNameTitle,
+  classNameSubtitle,
   iconsClassName,
 }) => {
   const navigation = useNavigation()
@@ -115,7 +117,7 @@ const HeaderOnboarding: React.FC<Props> = ({
             {title}
           </DmText>
           {!!subTitle && (
-            <DmText className="mt-[8] text-13 leading-[16px] text-center font-custom400">
+            <DmText className={clsx("mt-[8] text-13 leading-[16px] text-center font-custom400", classNameSubtitle)}>
               {subTitle}
             </DmText>
           )}

@@ -8,9 +8,10 @@ import clsx from "clsx"
 import { useTranslation } from "react-i18next"
 import moment from "moment"
 import VoucherIcon from "assets/icons/voucher.svg"
+import { VouchersAssignmentType } from "types"
 
 interface Props {
-  item: MyPointsVoucherItemMockType
+  item: VouchersAssignmentType
   className?: string
   onPress?: () => void
 }
@@ -29,10 +30,10 @@ const MyPointsVoucherItem: React.FC<Props> = ({ item, className, onPress }) => {
         <VoucherIcon />
         <DmView className="ml-[20]">
           <DmText className="text-13 leading-[16px] font-custom600">
-            {item.title}
+            {item.notes}
           </DmText>
           <DmText className="mt-[3] text-13 leading-[16px] font-custom400">
-            {t("expires_on")} {item.expired_at}
+            {t("expires_on")} {moment(item.assignDate).format("DD/MM/YYYY")}
           </DmText>
         </DmView>
       </DmView>

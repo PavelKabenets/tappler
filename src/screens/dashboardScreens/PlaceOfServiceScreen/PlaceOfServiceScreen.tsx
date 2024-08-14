@@ -53,9 +53,8 @@ const PlaceOfServiceScreen: React.FC<Props> = ({ route, navigation }) => {
     useState(false)
   const [isSelectionLocalTypeModalVisible, setSelectionLocalTypeModalVisivle] =
     useState(false)
-  const [currentPlaceOfService, setCurrentPlaceOfService] = useState(
-    placeOfServiceParams || currentService?.placeOfService[0]
-  )
+  const [currentPlaceOfService, setCurrentPlaceOfService] =
+    useState<Partial<PlaceOfServiceType>>()
 
   const [isProvideCheck, setProvideCheck] = useState(false)
 
@@ -128,7 +127,7 @@ const PlaceOfServiceScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const handleRemoveCityArea = async (item: string) => {
     handleChangeCurrentPlaceOfService({
-      serviceLocationAreas: currentPlaceOfService?.serviceLocationAreas.filter(
+      serviceLocationAreas: currentPlaceOfService?.serviceLocationAreas?.filter(
         (fItem) => {
           return item !== fItem.city
         }
@@ -161,42 +160,47 @@ const PlaceOfServiceScreen: React.FC<Props> = ({ route, navigation }) => {
     try {
       setLoading(true)
       if (service?.serviceCategory?.placeOfService?.length) {
-        if (currentPlaceOfService?.serviceLocationAreas?.length) {
-          await patchPlaceOfService({
-            id: service.serviceCategory.id,
-            placeOfService: ["proToCustomer"],
-            serviceLocationAreas: currentPlaceOfService?.serviceLocationAreas,
-          }).unwrap()
-        }
-
-        if (currentPlaceOfService?.deliveryRadius) {
-          await patchPlaceOfService({
-            id: service.serviceCategory.id,
-            placeOfService: ["delivery"],
-            deliveryRadius: currentPlaceOfService?.deliveryRadius,
-          }).unwrap()
-        }
-
-        if (currentPlaceOfService?.serviceLocationType) {
-          await patchPlaceOfService({
-            id: service.serviceCategory.id,
-            placeOfService: ["customerToPro"],
-            serviceLocationType: currentPlaceOfService?.serviceLocationType,
-          }).unwrap()
-
-          if (
-            service.serviceCategory.placeOfService.includes("remoteOrOnline")
-          ) {
-            await patchPlaceOfService({
-              id: service.serviceCategory.id,
-              placeOfService: ["remoteOrOnline"],
-            })
-          }
-        }
+        await patchPlaceOfService({
+          id: service.serviceCategory.id,
+          placeOfService: [
+            currentPlaceOfService?.serviceLocationAreas?.length
+              ? "proToCustomer"
+              : undefined,
+            currentPlaceOfService?.deliveryRadius ? "delivery" : undefined,
+            currentPlaceOfService?.serviceLocationType
+              ? "customerToPro"
+              : undefined,
+            isProvideCheck ? "remoteOrOnline" : undefined,
+          ].filter((item) => !!item) as (
+            | "proToCustomer"
+            | "delivery"
+            | "customerToPro"
+            | "remoteOrOnline"
+          )[],
+          ...(currentPlaceOfService?.serviceLocationAreas?.length
+            ? {
+                serviceLocationAreas:
+                  currentPlaceOfService?.serviceLocationAreas,
+              }
+            : {}),
+          ...currentPlaceOfService?.deliveryRadius
+            ? { deliveryRadius: currentPlaceOfService?.deliveryRadius }
+            : {},
+          ...currentPlaceOfService?.serviceLocationType
+            ? {
+                serviceLocationType: currentPlaceOfService?.serviceLocationType,
+              }
+            : {},
+        }).unwrap()
       }
       await refetch().unwrap()
       navigation.navigate("my-services-detail", {
-        service: { ...service, placeOfService: [currentPlaceOfService] },
+        service: {
+          ...service,
+          placeOfService: currentPlaceOfService
+            ? [{ ...currentPlaceOfService, place: isProvideCheck }]
+            : [],
+        },
       })
     } catch (e) {
       console.log("Patch Place Of Service Error: ", e)
@@ -210,7 +214,8 @@ const PlaceOfServiceScreen: React.FC<Props> = ({ route, navigation }) => {
       return (
         !currentPlaceOfService?.serviceLocationAreas?.length &&
         !currentPlaceOfService?.deliveryRadius &&
-        !currentPlaceOfService?.serviceLocationType?.length
+        !currentPlaceOfService?.serviceLocationType?.length &&
+        !currentPlaceOfService?.isRemote
       )
     }
   }
@@ -220,10 +225,51 @@ const PlaceOfServiceScreen: React.FC<Props> = ({ route, navigation }) => {
     setCurrentService(service)
     if (placeOfServiceParams) {
       setCurrentPlaceOfService(placeOfServiceParams)
+      setProvideCheck(!!placeOfServiceParams?.isRemote)
     } else {
-      setCurrentPlaceOfService(service?.placeOfService[0])
+      setCurrentPlaceOfService({
+        ...service.placeOfService.reduce<Omit<PlaceOfServiceType, "place">>(
+          (acc, obj) => {
+            Object.entries(obj).forEach(([key, value]) => {
+              if (key !== "place" && value != null) {
+                if (typeof value === "string" || Array.isArray(value)) {
+                  if (value.length !== 0) {
+                    (acc as any)[key] = value
+                  }
+                } else {
+                  (acc as any)[key] = value
+                }
+              }
+            })
+            return acc
+          },
+          {} as Omit<PlaceOfServiceType, "place">
+        ),
+        isRemote:
+          currentService.placeOfService.some(
+            (item) => item?.isRemote || item.place === "remoteOrOnline"
+          ) ||
+          isProvideCheck ||
+          currentPlaceOfService?.isRemote,
+      })
+      setProvideCheck(
+        service.placeOfService.some(
+          (item) => item.place === "remoteOrOnline" || item?.isRemote
+        ) || isProvideCheck
+      )
     }
   }, [placeOfServiceParams, isFocused])
+
+  useEffect(() => {
+    if (currentService) {
+      setProvideCheck(
+        currentService.placeOfService.some(
+          (item) => item.place === "remoteOrOnline" || item?.isRemote
+        )
+      )
+    }
+  }, [currentService])
+
   // Listeners
   // Render Methods
 
@@ -321,9 +367,12 @@ const PlaceOfServiceScreen: React.FC<Props> = ({ route, navigation }) => {
                   )}
                 >
                   {t("customers_come_to_my_location_descr")}{" "}
-                  <DmText className="text-13 leading-[20px] font-custom600 text-red capitalize">
-                    {currentPlaceOfService?.serviceLocationType ||
-                      currentPlaceOfService?.serviceLocationType}
+                  <DmText className="text-13 leading-[20px] font-custom600 text-red">
+                    {t(
+                      currentPlaceOfService?.serviceLocationType?.toLowerCase()
+                        ? `service_location_arr.${currentPlaceOfService?.serviceLocationType?.toLowerCase()}`
+                        : ""
+                    )}
                   </DmText>
                 </DmText>
               </DmChecbox>
@@ -371,7 +420,13 @@ const PlaceOfServiceScreen: React.FC<Props> = ({ route, navigation }) => {
                 variant="square"
                 title={t("i_provide_my_service_remotely_or_online")}
                 textClassName="flex-1 text-13 leading-[20px] font-custom400"
-                onPress={() => setProvideCheck((prev) => !prev)}
+                onPress={() => {
+                  setProvideCheck((prev) => !prev)
+                  setCurrentPlaceOfService((prev) => ({
+                    ...prev,
+                    isRemote: !prev?.isRemote,
+                  }))
+                }}
                 isChecked={isProvideCheck}
               />
             </DmView>

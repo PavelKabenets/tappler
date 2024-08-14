@@ -9,6 +9,7 @@ import MainModal from "components/MainModal"
 import { useDispatch } from "react-redux"
 import { setCurrentScreen, setLanguage } from "store/auth/slice"
 import RNRestart from "react-native-restart"
+import { useLazyGetMyDocumentQuery, useLazyProsServiceCategoriesQuery } from "services/api"
 
 interface Props {
   isVisible: boolean
@@ -21,10 +22,14 @@ const SettingsChangeLanguageModal: React.FC<Props> = ({
 }) => {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
+  const [getDocs] = useLazyGetMyDocumentQuery()
+  const [getServices] = useLazyProsServiceCategoriesQuery()
 
-  const handleSubmit = (lng: "en" | "ar") => {
+  const handleSubmit = async (lng: "en" | "ar") => {
     dispatch(setLanguage(lng))
     dispatch(setCurrentScreen("setting"))
+    await getDocs().unwrap()
+    await getServices().unwrap()
     setTimeout(() => {
       RNRestart.restart()
     }, 100)

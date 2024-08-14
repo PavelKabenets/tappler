@@ -1,0 +1,3 @@
+import AccountUpgradesViewProfileItem from "./AccountUpgradesViewProfileItem"
+
+export default AccountUpgradesViewProfileItem

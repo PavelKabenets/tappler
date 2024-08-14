@@ -1,0 +1,3 @@
+import MyServiceDocumentsStatusScreen from "./MyServiceDocumentsStatusScreen"
+
+export default MyServiceDocumentsStatusScreen

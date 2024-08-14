@@ -3,10 +3,17 @@ import React from "react"
 import { DmText, DmView } from "components/UI"
 
 import styles from "./styles"
-import { StyleProp, TextInput, TextInputProps, TextStyle } from "react-native"
+import {
+  KeyboardTypeOptions,
+  StyleProp,
+  TextInput,
+  TextInputProps,
+  TextStyle,
+} from "react-native"
 import { useTranslation } from "react-i18next"
 import { takeFontStyles } from "helpers/helpers"
 import clsx from "clsx"
+import { fromArabic } from "arabic-digits"
 
 interface Props extends TextInputProps {
   title: string
@@ -16,6 +23,8 @@ interface Props extends TextInputProps {
   classNameInput?: string
   className?: string
   subTitleComponent?: React.ReactNode
+  keyboardType?: KeyboardTypeOptions
+  onChangeText?: (...event: any[]) => void
 }
 
 const InputInsideText: React.FC<Props> = ({
@@ -26,6 +35,8 @@ const InputInsideText: React.FC<Props> = ({
   classNameInput,
   className,
   subTitleComponent,
+  keyboardType = "numeric",
+  onChangeText,
   ...restProps
 }) => {
   const { t, i18n } = useTranslation()
@@ -46,8 +57,15 @@ const InputInsideText: React.FC<Props> = ({
             maxLength={5}
             textAlign="center"
             textAlignVertical="bottom"
-            keyboardType="numeric"
+            keyboardType={keyboardType}
             returnKeyType={"done"}
+            onChangeText={(val) => {
+              if (keyboardType === "numeric") {
+                onChangeText?.(fromArabic(val))
+              } else {
+                onChangeText?.(val)
+              }
+            }}
             style={[
               takeFontStyles(
                 "leading-[16px] font-custom600 " + classNameInput,

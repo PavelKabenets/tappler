@@ -83,6 +83,32 @@ export type PlaceType =
   | "remoteOrOnline"
   | "delivery"
 
+export type AdditionalDocumentType = {
+  id: number
+  serviceCategoryId: number
+  documentTitle: string
+}
+
+// @TO DO
+export type ProAdditionalDocumentsType = {
+  id: number
+  proDocument: {
+    id: number
+    type: "id" | "companyTradeLicense" | "trust" | "serviceCategory"
+    status: "pending" | "approved" | "rejected"
+    createdAt: string
+    processedAt: null | string
+    proId: number
+    processedById: null | string
+    files: {
+      assignment: string
+      url: string
+    }[]
+    rejectedBySystem: boolean
+  }
+  additionalDocument: AdditionalDocumentType
+}
+
 export type SubCategoryType = {
   id: number
   name: string
@@ -97,6 +123,7 @@ export type SubCategoryType = {
   criminalRecordsRequired: boolean
   healthRecordsRequired: boolean
   locationPhotoRequired: boolean
+  additionalDocuments?: AdditionalDocumentType[]
   serviceId: number
   relatedServiceCategoriesIds: number[]
   placeOfService: PlaceType[]
@@ -222,7 +249,8 @@ export type DocumentsType = {
 }
 
 export type MediaType = {
-  media: string
+  media: "facebook" | "instagram" | "linkedin" | "website" | "tiktok"
+  link: string
 }
 
 export type SocialType = {
@@ -239,7 +267,7 @@ export type AddressHistoryType = {
   latitude: number
   city: string
   governorate: string
-  changedAt: string
+  changedAt: string | null
 }
 
 export type SuspensionsType = {
@@ -283,7 +311,7 @@ export type ProfileEditsType = {
     employmentType: "full time" | "part time" | "contractor" | "seasonal"
     currentPosition: string
     profilePhoto: string
-    lastSeen: string
+    lastSeen: string | null
     joinDate: string
     userId: number
     department: "admin" | "sales" | "quality" | "reviews" | "customer service"
@@ -363,7 +391,7 @@ export type CustomerType = {
   status: "verified" | "unverified" | "active" | "suspended"
   signupPlatform: "google" | "facebook" | "email"
   accountCreationDate: string
-  lastSeen: string
+  lastSeen: string | null
   addresses: AddressType[]
   emailVerified: boolean
 }
@@ -427,6 +455,7 @@ export type PlaceOfServiceType = {
   deliveryRadius: number
   pickupLocationType: ServiceLocationType
   pickupAddress: Omit<AddressType, "unitNumber" | "changedAt">
+  isRemote?: boolean
 }
 
 export type ReviewScoreType = {
@@ -496,12 +525,14 @@ export type ServiceLocationAreasType = {
 }
 
 export type FoodOptionChoiceType = {
+  id?: number
   name: string
   price: string | number
   discountPrice?: string | number
 }
 
 export type FoodOptionType = {
+  id?: number
   index?: number
   name: string
   isRequired: boolean
@@ -540,7 +571,12 @@ export type MenuType = {
 }
 
 export type DocumentFilesType = {
-  assignment: "id.front" | "id.back" | "id.selfie" | "companyTradeLicense"
+  assignment:
+    | "id.front"
+    | "id.back"
+    | "id.selfie"
+    | "companyTradeLicense"
+    | "trustPhoto"
   fileKey?: string
   url?: string
 }
@@ -567,4 +603,178 @@ export type PointsItemPackagesType = {
   description: string
   startDate: string
   expirationDate: string
+}
+
+export type HoursTypeResponse = {
+  closingTime: string
+  dayOfWeek: DaysOfWeekType
+  id: number
+  openingTime: string
+  proId: number
+}
+export type MediaTypeCredentials = {
+  credential?: string
+  photo?: string | ImageOrVideo
+}
+
+export type ProfileSettingParamTypes = {
+  proType?: "individual" | "company"
+  businessName?: string
+  tradeLicenseNumber?: string
+  registrationOrRenewal?: string
+  informationAbout?: string
+  payment?: ("cash" | "credit card")[]
+  media?: MediaType[]
+  photosOfWorks?: (string | ImageOrVideo)[]
+  hours?: HoursTypeResponse[]
+  credential?: MediaTypeCredentials[]
+}
+
+export type VouchersAssignmentType = {
+  assignDate: string
+  claimDate: null | string
+  id: number
+  notes: string
+  proId: number
+  pro?: ProType
+  status: "active" | "disabled" | "expired"
+}
+
+export type PointsTransactionsHistoryType = {
+  id: number
+  type: "purchase" | "spend"
+  pointsAdded: number
+  pointsCharged?: number
+  amountBefore: number
+  amountAfter: number
+  date: string
+  proId: number
+  vouchersAssignmentId?: number
+  pointsPackageId: number | null
+  pro?: ProType
+  vouchersAssignment?: VouchersAssignmentType
+  pointsPackage: PointsItemPackagesType
+  jobId?: number
+  job?: JobType
+}
+
+export type PackageItemType = {
+  id: number
+  type: "motivational" | "trust"
+  status: "active" | "expired"
+  description: string
+  pricePerDay: number
+  pricePerYear: number
+  maxDiscount: number
+  startDate: string
+  expirationDate: string
+  picture: string
+}
+
+export type QuoteStatusType = "active" | "draft" | "converted" | "expired"
+
+export type QuoteItemType = {
+  quoteId: number
+  date: string
+  expirationDate: string
+  price: string
+  status: QuoteStatusType
+  deletedAt: string | null
+  paidAt: string | null
+}
+
+export type PaymentMethodType = "cash" | "creditCard" | "mobileWallet"
+
+export type NewAddressDataType = {
+  address: string
+  city: string
+  governorate: string
+}
+
+export type AvailableTrustStickerType = {
+  id: number
+  type: "motivational" | "trust"
+  status: "active" | "expired"
+  descriptionEn: string
+  pricePerDay: number
+  pricePerYear: number
+  maxDiscount: number
+  startDate: string
+  expirationDate: string
+  picture: string
+}
+
+export type NotificationsItemType = {
+  id: number
+  event:
+    | "system.job:pro.job.request"
+    | "system.job:pro.job.opportunity.selected"
+    | "system.job:pro.job.opportunity.purchased"
+    | "system.job:pro.job.requestReminder"
+    | "system.job:pro.job.cancelled"
+    | "system.account:pro.quote.offer"
+    | "system.account:pro.quote.paid"
+    | "system.job:customer:job.accepted"
+    | "system.account:pro.interview.success"
+    | "system.account:pro.interview.failure"
+    | "system.account:pro.violation.suspended"
+    | "system.account:customer.violation.suspended"
+    | "system.account:customer.jobs.review"
+    | "system.account:pro.activate"
+    | "custom.proDocuments:pro.profile.documents"
+    | "custom.proProfile:pro.profile.content"
+    | "custom.trustStickers:pro.trustStickers"
+    | "custom.serviceDocuments:pro.service.documents"
+    | "custom.foodMenu:pro.service.foodMenu"
+    | "custom.qualificationCreds:pro.qualification.creds"
+  userType: "customer" | "pro" | "employee"
+  userId: number
+  title: string
+  body: string
+  readAt: string
+  createdAt: string
+  // @TO DO
+  data: {
+    jobId: number
+    job: JobType
+  }
+}
+
+export type NotificationsSettingItemType = {
+  id: number
+  type: "accountUpgrade" | "chat" | "jobOpportunity" | "jobSelected" | "review"
+  enabled: boolean
+}
+
+export type SuspendedByType = {
+  id: number
+  status: "active" | "suspended" | "deleted"
+  firstName: string
+  lastName: string
+  address: string
+  city: string
+  country: string
+  dateOfBirth: string
+  gender: "male" | "female"
+  homePhone: string
+  mobilePhone: string
+  employmentType: "full time" | "part time" | "contractor" | "seasonal"
+  currentPosition: string
+  profilePhoto: string
+  lastSeen: string
+  joinDate: string
+  userId: number
+  department: "admin" | "sales" | "quality&reviews" | "customer service"
+}
+
+export type SuspensionType = {
+  id: number
+  systemSuspension: boolean
+  reason: string
+  suspendedAt: string
+  suspendedUserType: "pro" | "customer"
+  suspendedById: number
+  proId: number
+  customerId: number
+  suspendedBy: SuspendedByType
 }

@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import styles from "./styles"
 import clsx from "clsx"
 import { I18nManager } from "react-native"
-import { isLittlePhone, isSmallPhone } from "helpers/helpers"
+import { isSmallPhone } from "helpers/helpers"
 
 interface Props {
   Icon?: React.ReactNode
@@ -15,6 +15,8 @@ interface Props {
   onPress: () => void
   isComplete?: boolean
   className?: string
+  btnTitle?: string
+  btnVariant?: "white" | "bordered" | "grey" | "yellow"
 }
 
 const DashboardCategoryItem: React.FC<Props> = ({
@@ -24,6 +26,8 @@ const DashboardCategoryItem: React.FC<Props> = ({
   onPress,
   isComplete,
   className,
+  btnTitle,
+  btnVariant,
 }) => {
   const { t } = useTranslation()
   return (
@@ -40,14 +44,20 @@ const DashboardCategoryItem: React.FC<Props> = ({
         {title}
       </DmText>
       {!!descr && !!isComplete && (
-        <DmText className="mt-[6] text-13 leading-[16px] font-custom400 text-center">
+        <DmText
+          className={clsx(
+            "mt-[6] text-13 leading-[16px] font-custom400 text-center",
+            isSmallPhone && "text-12"
+          )}
+        >
           {descr}
         </DmText>
       )}
       {!isComplete && (
         <ActionBtn
-          title={t("incomplete")}
+          title={t(btnTitle || "incomplete")}
           className="mt-[8] h-[22]"
+          variant={btnVariant}
           textClassName={clsx(
             "text-11 leading-[14px] font-custom500",
             I18nManager.isRTL && "mt-[-2]"

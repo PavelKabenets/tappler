@@ -28,6 +28,18 @@ import {
   IdDocumentData,
   TradeLicenseDocumentData,
   PointsItemPackagesType,
+  HoursTypeResponse,
+  PointsTransactionsHistoryType,
+  PackageItemType,
+  QuoteItemType,
+  PaymentMethodType,
+  VouchersAssignmentType,
+  MenuSectionType,
+  AvailableTrustStickerType,
+  NotificationsItemType,
+  NotificationsSettingItemType,
+  SuspensionType,
+  ProAdditionalDocumentsType,
 } from "types"
 
 export type ProsSignUpResponse = {
@@ -52,12 +64,17 @@ export type ProsRegFlowRequest = {
   dateOfBirth: string
   gender: "male" | "female"
   hours: HoursType[]
-  socials: [
-    {
-      socialMedia: "facebook" | "instagram" | "linkedin" | "website" | "tiktok"
-      socialLink: "facebook.com/propage"
-    },
-  ]
+  socials:
+    | {
+        socialMedia:
+          | "facebook"
+          | "instagram"
+          | "linkedin"
+          | "website"
+          | "tiktok"
+        socialLink: "facebook.com/propage"
+      }[]
+    | []
   serviceCategories: number[]
   address: AddressType
   paymentMethods: ("cash" | "credit card")[] | []
@@ -108,11 +125,11 @@ export type ProsResponse = {
   isProVerified: boolean
   referral: ReferralType
   serviceLocation: ServicesLocationType
-  hours: BusinessHoursItemType[]
+  hours: HoursTypeResponse[]
   documents: DocumentsType[]
   media: MediaType[]
   socials: SocialType[]
-  address: AddressType
+  address: AddressHistoryType
   addressHistory: AddressHistoryType[]
   suspensions: SuspensionsType[]
   businessName: string
@@ -124,6 +141,7 @@ export type ProsResponse = {
   responseTimeScore: number
   reviewScore: ReviewScoreType
   emailVerified: boolean
+  photosOfWork: string[] | []
 }
 
 export type AuthResetRequest = {
@@ -168,6 +186,8 @@ export type ProsServicesCategoriesResponse = {
   // @TO DO
   menu: MenuType | null
   isFeatured: boolean
+  suspension: SuspensionType
+  proAdditionalDocuments?: ProAdditionalDocumentsType[]
 }
 
 export type MyReviewResponse = {
@@ -211,15 +231,13 @@ export type RefreshTokenResponse = {
 
 export type ProsServicesQuestionRequest = {
   serivceId: number
-  questionAnswers: Partial<{
-    questionId: number
-    optionId: number
-    optionsIds: number[]
-    answer: string
-    date: string
-    startTime: string
-    endTime: string
-  }>[]
+  questionId: number
+  optionId?: number
+  optionsIds?: number[]
+  answer?: string
+  date?: string
+  startTime?: string
+  endTime?: string
 }
 
 export type CreateMenuSectionRequest = {
@@ -307,7 +325,7 @@ export type DocumentsRequest = {
   files: DocumentFilesType[]
 }
 
-export type MyDocumentsResponse = {
+export type DocType = {
   createdAt: string
   files: DocumentFilesType[]
   id: number
@@ -316,13 +334,31 @@ export type MyDocumentsResponse = {
   processedAt: null
   processedById: null
   rejectReason: null
-  status: "pending" | "active" | "inactive"
-  tradeLicenseDocumentData: {
-    licenseNumber: string
-    registrationDate: string
+  status: "pending" | "active" | "inactive" | "approved" | "rejected"
+
+  tradeLicenseDocumentData?: null
+  licenseNumber: string
+  registrationDate: string
+  trustDocumentData?: {
+    expirationDate?: string
+    trustProductId?: number
+    trustProduct?: {
+      id: number
+      type: "trust"
+      status: "active"
+      descriptionEn: string
+      pricePerDay: null | number
+      pricePerYear: number | null
+      maxDiscount: null | number
+      startDate: null | number
+      expirationDate: null | number
+      picture: string
+    }
   }
-  type: "companyTradeLicense" | "id"
-}[]
+  type: "companyTradeLicense" | "id" | "trust"
+}
+
+export type MyDocumentsResponse = DocType[]
 
 export type GetPointsPackagesResponse = {
   page: number
@@ -337,4 +373,178 @@ export type PostPointsPackageRequest = {
   description: string
   startDate: string
   expirationDate: string
+}
+
+export type DefaultRequest = {
+  page: number
+  perPage?: number
+  sort?: "ASC" | "DESC"
+}
+
+export type GetPointsHistoryResponse = {
+  page: number
+  perPage: number
+  total: number
+  data: PointsTransactionsHistoryType[]
+}
+
+export type GetProductsTrustResponse = {
+  page: number
+  perPage: number
+  total: number
+  data: PackageItemType[]
+}
+
+export type GetProductsTrustRequest = {
+  page: number
+  perPage?: number
+}
+
+export type PostPaymentsTrustStickersRequest = {
+  id: number
+  paymentMethod: PaymentMethodType
+  photo: string
+  issueDate?: string
+  note?: string
+}
+
+export type PostPaymentsTrustStickersResponse = {
+  paymentUrl: string
+}
+
+export type GetQuotesResponse = {
+  page: number
+  perPage: number
+  total: number
+  data: QuoteItemType[]
+}
+
+export type PostPointsPackagesRequest = {
+  id: number
+  paymentMethod: PaymentMethodType
+  mobileWalletIdentifier?: string
+}
+
+export type VouchersResponse = {
+  data: VouchersAssignmentType[]
+}
+
+export type LeadsRequest = {
+  page: number
+  sort?: "ASC" | "DESC" | "nearest_to_me"
+  startDate?: string
+  endDate?: string
+  keywords?: string
+  categoryId?: number
+  city?: string
+}
+
+export type OpportunitiesRequest = {
+  page: number
+  sort?: "ASC" | "DESC" | "nearest_to_me"
+  keywords?: string
+  categoryId?: number
+  city?: string
+}
+
+export type PostOpportunitiesOfferRequest = {
+  jobId: number
+  opportunityNotes: string
+  ratePerHour: number
+}
+
+export type PatchMenuSectionsRequest = {
+  id: number
+  sections: { sectionId: number; order: number }[]
+}
+
+export type TrustStickersResponse = {
+  page: number
+  perPage: number
+  total: number
+  data: AvailableTrustStickerType[]
+}
+
+export type ProAdditionalDocumentsResponse = ProsServicesCategoriesResponse
+
+export type ProAdditionalDocumentsRequest = {
+  additionalDocumentId: number
+  files: string[]
+  serviceCategoryId: number
+}
+export type PostNotificationsRegTokenRequest = {
+  registrationToken: string
+}
+
+export type PostNotificationsRegTokenResponse = {
+  id: 1
+  userType: "customer" | "pro" | "employee"
+  userId: 1
+  registrationToken: string
+  createdAt: string
+}
+
+export type GetNotitficationsResponse = {
+  page: number
+  perPage: number
+  total: number
+  data: NotificationsItemType[]
+}
+
+export type PatchNotificationsArrRequest = {
+  ids: number[]
+}
+
+export type GetNotitficationsSettingsResponse = {
+  data: NotificationsSettingItemType[]
+}
+
+export type PatchNotitficationsSettingsRequest = {
+  id: number
+  enabled: boolean
+}
+
+export type InterviewResponse = {
+  assignedAt: string | null
+  id: number
+  interviewDate: string | null
+  notes: string | null
+  previousInterview: boolean
+  proId: number
+  requestedAt: string
+  serviceCategoryId: number
+  status: "new" | "pending" | "passed" | "failed"
+}[]
+
+export type InterviewsResponse = ProsServicesCategoriesResponse
+
+export type InterviewsRequest = {
+  serviceCategoryId: number
+}
+
+export type SingInGoogleRequest = {
+  idToken: string
+  userType: "customer" | "pro" | "employee"
+}
+
+export type PostSocialGoogleProviderRequest = {
+  idToken: string
+}
+
+export type PostSocialGoogleProviderResponse = {
+  id: number
+  email: string
+  emailVerified: boolean
+}
+
+export type PostRegisterNotificationsDeviceRequest = {
+  registrationToken: string
+}
+
+export type PostRegisterNotificationsDeviceResponse = {
+  id: number
+  userType: "customer" | "pro" | "employee"
+  userId: number
+  registrationToken: string
+  createdAt: string
 }

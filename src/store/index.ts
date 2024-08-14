@@ -14,6 +14,7 @@ import {
 } from "redux-persist"
 import { combineReducers } from "redux"
 import { api } from "services/api"
+import appStateMiddleware from "./appStateMiddleware"
 
 const persistConfig = {
   key: "tappler_mob_app-root-storage",
@@ -35,7 +36,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(api.middleware),
+    }).concat(api.middleware, appStateMiddleware),
 })
 
 export const persistor = persistStore(store)

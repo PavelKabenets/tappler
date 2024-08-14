@@ -8,22 +8,51 @@ import { useTranslation } from "react-i18next"
 import { JobType } from "types"
 import { useTypedSelector } from "store"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { useNavigation } from "@react-navigation/native"
 
 interface Props {
   isVisible: boolean
   onClose: () => void
   job: JobType
+  onPress: () => void
+  isLoading?: boolean
 }
 
-const SendOfferModal: React.FC<Props> = ({ isVisible, onClose, job }) => {
+const SendOfferModal: React.FC<Props> = ({
+  isVisible,
+  onClose,
+  job,
+  onPress,
+  isLoading,
+}) => {
   const [selectedType, setSelectedType] = useState<"balance" | "buy">()
 
   const { user } = useTypedSelector((store) => store.auth)
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
+  const navigation = useNavigation()
 
   const handleCheck = (type: "balance" | "buy") => {
     setSelectedType(type)
+  }
+
+  const handlePress = () => {
+    if (selectedType === "balance") {
+      onPress()
+    } else {
+      onClose()
+      setTimeout(() => {
+        navigation.reset({
+          index: 0,
+          routes: [
+            { name: "dashboard" },
+            { name: "home" },
+            { name: "my-points" },
+            { name: "my-points-packages" },
+          ],
+        })
+      }, 400)
+    }
   }
 
   return (
@@ -89,7 +118,9 @@ const SendOfferModal: React.FC<Props> = ({ isVisible, onClose, job }) => {
             title={t("continue")}
             textClassName="text-13 leading-[16px] font-custom600"
             className="mt-[20] rounded-5"
-            disable={!selectedType}
+            disable={!selectedType || isLoading}
+            onPress={handlePress}
+            isLoading={isLoading}
           />
         </DmView>
       </DmView>

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react"
+import React, { useMemo, useRef, useState } from "react"
 
 // Components
 import { DmText, DmView } from "components/UI"
@@ -32,11 +32,21 @@ const FoodMenuStoreScreen: React.FC<Props> = ({ route, navigation }) => {
   const { service } = route.params
   // State
   const flatListRef = useRef<FlatList>(null)
-  const { user } = useTypedSelector((store) => store.auth)
+  const { user, listFoodMenuPositions } = useTypedSelector(
+    (store) => store.auth
+  )
   // Global Store
   // Variables
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
+
+  const filteredData = useMemo(() => {
+    return (
+      listFoodMenuPositions
+        ?.map((item) => item)
+        ?.sort((a, b) => a.order - b.order) || []
+    )
+  }, [listFoodMenuPositions])
   // Refs
   // Methods
   // Handlers
@@ -122,7 +132,7 @@ const FoodMenuStoreScreen: React.FC<Props> = ({ route, navigation }) => {
           sides={{ bottom: true, start: false, end: false, top: false }}
         >
           <FlatList
-            data={service.menu?.menuSections}
+            data={filteredData}
             renderItem={renderListItem}
             horizontal
             contentContainerStyle={{
@@ -133,7 +143,7 @@ const FoodMenuStoreScreen: React.FC<Props> = ({ route, navigation }) => {
         </Shadow>
         <FlatList
           ref={flatListRef}
-          data={service.menu?.menuSections}
+          data={filteredData}
           renderItem={renderMenuListItem}
           showsVerticalScrollIndicator={false}
           className="mt-[10]"

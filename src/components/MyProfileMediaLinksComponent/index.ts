@@ -1,0 +1,3 @@
+import MyProfileMediaLinksComponent from "./MyProfileMediaLinksComponent"
+
+export default MyProfileMediaLinksComponent

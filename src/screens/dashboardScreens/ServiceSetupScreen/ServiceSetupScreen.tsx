@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 
 // Components
 import { ActionBtn, DmText, DmView } from "components/UI"
@@ -26,6 +26,8 @@ import {
 } from "types"
 import {
   api,
+  useDeleteAnswerQuestionMutation,
+  useLazyGetProsServiceByIdQuery,
   useLazyProsServiceCategoriesQuery,
   useProsServiceCategoriesQuery,
   useProsServicesQuestionMutation,
@@ -33,6 +35,7 @@ import {
 import { useDispatch } from "react-redux"
 import { options } from "react-native-mmkv-storage/dist/src/utils"
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
+import { ProsServicesCategoriesResponse } from "services"
 
 type Props = RootStackScreenProps<"service-setup">
 
@@ -42,16 +45,16 @@ const ServiceSetupScreen: React.FC<Props> = ({ route, navigation }) => {
   // State
   const { user } = useTypedSelector((store) => store.auth)
 
-  const [question, setQuestion] = useState(
-    user?.proType === "company"
-      ? service.serviceCategory.proQuestions
-      : service.serviceCategory.customerQuestions
-  )
+  const [question, setQuestion] = useState(service.serviceCategory.proQuestions)
+  const intialAnswetsIds = useMemo(() => {
+    return service.questionsAnswers.map((item) => item.questionId)
+  }, [service])
 
   const [answers, setAnswers] = useState<Partial<QuestionsAnswersType>[]>(
     service.questionsAnswers
   )
   const [isLoading, setLoading] = useState(false)
+  const [getServiceById] = useLazyGetProsServiceByIdQuery()
 
   // Global Store
   // Variables
@@ -60,6 +63,7 @@ const ServiceSetupScreen: React.FC<Props> = ({ route, navigation }) => {
   const [patchAnswers] = useProsServicesQuestionMutation()
   const dispatch = useDispatch()
   const [lazyFetch] = useLazyProsServiceCategoriesQuery()
+  const [deleteAnswer] = useDeleteAnswerQuestionMutation()
 
   // Refs
   // Methods
@@ -94,7 +98,7 @@ const ServiceSetupScreen: React.FC<Props> = ({ route, navigation }) => {
 
     if (type === "multipleChoice") {
       currentRes = {
-        answer: item.optionsIds?.join(", ") || "",
+        answer: item.answer,
         questionId: item.questionId,
         optionsIds: item.optionsIds,
       }
@@ -140,25 +144,73 @@ const ServiceSetupScreen: React.FC<Props> = ({ route, navigation }) => {
   }, [service.questionsAnswers])
 
   const handleSubmit = async () => {
-    if (answers?.length) {
+    if (answers?.length || intialAnswetsIds.length) {
       setLoading(true)
+      const idsForDelete = intialAnswetsIds
+        .filter(
+          (item) =>
+            !answers.map((aItem) => aItem.questionId).includes(item as number)
+        )
+        .map((item) => item)
+
       try {
-        const res = await patchAnswers({
-          serivceId: service.serviceCategory.id,
-          questionAnswers: answers,
-        }).unwrap()
+        let result: ProsServicesCategoriesResponse | undefined
+        if (idsForDelete.length) {
+          await Promise.all(
+            idsForDelete.map(async (id) => {
+              await deleteAnswer({
+                questionId: id as number,
+                serviceCategoryId: service.serviceCategory.id,
+              }).unwrap()
+            })
+          )
+        }
+        if (answers.length) {
+          await Promise.all(
+            answers.map(async (item, _, arr) => {
+              let response: ProsServicesCategoriesResponse
+              if (item?.option) {
+                const { option, ...restItem } = item
+                const { questionId, ...itemToSend } = restItem
+                response = await patchAnswers({
+                  serivceId: service.serviceCategory.id,
+                  questionId: item.questionId as number,
+                  ...itemToSend,
+                }).unwrap()
+              } else {
+                const { questionId, ...itemToSend } = item
+                response = await patchAnswers({
+                  serivceId: service.serviceCategory.id,
+                  questionId: item.questionId as number,
+                  ...itemToSend,
+                }).unwrap()
+              }
+              if (item.questionId === arr[arr.length - 1].questionId) {
+                result = response
+              }
+            })
+          )
+        }
 
         await lazyFetch().unwrap()
-        navigation.navigate("my-services-detail", { service: res })
+        const response = await getServiceById(
+          service.serviceCategory.id
+        ).unwrap()
+        navigation.navigate("my-services-detail", { service: response })
       } catch (e) {
         console.log("Patch Error: ", e)
       } finally {
         setLoading(false)
       }
+    } else {
+      navigation.goBack()
     }
   }
 
   // Hooks
+  useEffect(() => {
+    setAnswers((prev) => prev.filter((item) => item.answer || item.startTime))
+  }, [answers.some((item) => !item.answer && !item.startTime)])
   // Listeners
   // Render Methods
   const renderListItem = ({
@@ -204,11 +256,7 @@ const ServiceSetupScreen: React.FC<Props> = ({ route, navigation }) => {
           title={t("save")}
           className="mt-[12] mx-[20] rounded-5"
           isLoading={isLoading}
-          disable={
-            isLoading ||
-            answers?.length < question.length ||
-            answers.some((item) => !item.answer && !item.startTime)
-          }
+          disable={isLoading || answers.length !== question.length}
         />
       </DmView>
     </SafeAreaView>

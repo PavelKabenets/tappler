@@ -1,0 +1,3 @@
+import MyProfilePaymentsMethodsScreen from "./MyProfilePaymentsMethodsScreen"
+
+export default MyProfilePaymentsMethodsScreen

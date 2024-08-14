@@ -4,7 +4,7 @@ import { DmText, DmView } from "components/UI"
 
 import styles from "./styles"
 import clsx from "clsx"
-import { I18nManager } from "react-native"
+import { I18nManager, StyleProp, TextStyle } from "react-native"
 
 interface Props {
   title: string
@@ -12,6 +12,7 @@ interface Props {
   descr: string
   subTitle?: string
   onPress?: () => void
+  textStyle?: StyleProp<TextStyle>
 }
 
 const ScoreComponent: React.FC<Props> = ({
@@ -20,6 +21,7 @@ const ScoreComponent: React.FC<Props> = ({
   descr,
   subTitle,
   onPress,
+  textStyle,
 }) => {
   return (
     <DmView
@@ -27,7 +29,10 @@ const ScoreComponent: React.FC<Props> = ({
       onPress={onPress}
     >
       <DmView className="flex-row items-center justify-center">
-        <DmText className="text-22 leading-[27px] text-white font-custom600 text-center">
+        <DmText
+          className="text-22 leading-[27px] text-white font-custom600 text-center"
+          style={textStyle}
+        >
           {title}{" "}
         </DmText>
         {!!subTitle && (

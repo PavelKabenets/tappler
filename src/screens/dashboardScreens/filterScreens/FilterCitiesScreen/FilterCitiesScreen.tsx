@@ -27,6 +27,7 @@ type Props = RootStackScreenProps<"filter-cities">
 const FilterCitiesScreen: React.FC<Props> = ({ route, navigation }) => {
   // Props
   const selectedCity = route.params?.selectedAddress
+  const isLeads = route.params?.isLeads
   // State
   const [filterValue, setFilterValue] = useState("")
   // Global Store
@@ -39,6 +40,7 @@ const FilterCitiesScreen: React.FC<Props> = ({ route, navigation }) => {
     navigation.navigate("filter", {
       selectedAddress: item,
       prevScreen: "filter-cities",
+      isLeads,
     })
   }
   // Hooks

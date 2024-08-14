@@ -42,12 +42,17 @@ const AuthScreen: React.FC<Props> = ({ navigation }) => {
   const handleGoLogInScreen = () => {
     navigation.navigate("log-in")
   }
+
+  useEffect(() => {
+    if (isLogout) {
+      setTimeout(() => {
+        dispatch(setLogout(false))
+      }, 6000)
+    }
+  }, [isLogout])
   // Hooks
   // Listeners
   // Render Methods
-  useEffect(() => {
-    dispatch(setLogout(false))
-  }, [isLogout])
 
   return (
     <SafeAreaView className="flex-1 pt-[99] pb-[32] px-[24] justify-between bg-white">

@@ -21,15 +21,22 @@ import RedSearch from "assets/icons/search-red.svg"
 import CloseIcon from "assets/icons/close.svg"
 import { ServiceCategoryType, SubCategoryType } from "types"
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
-import { useGetServicesQuery } from "services/api"
+import {
+  useCreateProsServiceCategoriesMutation,
+  useGetServicesQuery,
+  useProsServiceCategoriesQuery,
+} from "services/api"
 import { useDebounce } from "use-debounce"
 import { ProsServicesCategoriesResponse } from "services"
+import { useDispatch } from "react-redux"
+import { setWaitAMomentModalPossibleVisible } from "store/auth/slice"
 
 interface Props {
   isVisible: boolean
   onClose: () => void
   myServicesCategoriesData?: ProsServicesCategoriesResponse[]
   type?: "my-service"
+  onOpenDetailModal?: (item: SubCategoryType) => void
 }
 
 const AllServicesModal: React.FC<Props> = ({
@@ -37,6 +44,7 @@ const AllServicesModal: React.FC<Props> = ({
   onClose,
   myServicesCategoriesData,
   type,
+  onOpenDetailModal,
 }) => {
   const [filter, setFilter] = useState("")
   const [debounce] = useDebounce(filter, 300)
@@ -46,10 +54,13 @@ const AllServicesModal: React.FC<Props> = ({
   const data = useMemo(() => {
     return dataResponse?.data
   }, [dataResponse])
+  const dispatch = useDispatch()
 
   const insets = useSafeAreaInsets()
   const navigation = useNavigation()
   const { t } = useTranslation()
+  const [addService] = useCreateProsServiceCategoriesMutation()
+  const { data: prosData } = useProsServiceCategoriesQuery()
 
   const categories = useMemo(() => {
     return data?.map((item) => ({
@@ -69,7 +80,7 @@ const AllServicesModal: React.FC<Props> = ({
   }, [data])
 
   const filteredData = useMemo(() => {
-    return [...(categories || []), ...(subCategories || [])].filter((item) => {
+    return [...categories || [], ...subCategories || []].filter((item) => {
       if (item.type === "category") {
         return item.name.toLowerCase().includes(debounce.toLowerCase())
       }
@@ -85,23 +96,37 @@ const AllServicesModal: React.FC<Props> = ({
     })
   }, [data, filter, subCategories])
 
-  const handleSubItemPress = (
+  const handleSubItemPress = async (
     item:
       | (SubCategoryType & {
           type?: "category" | "subCategory"
         })
       | (ServiceCategoryType & { type?: "category" | "subCategory" })
   ) => {
-    if (item.type === "subCategory") {
-      navigation.navigate("sign-up", { subItem: item as SubCategoryType })
-    }
-
     if (item.type === "category") {
       navigation.navigate("service-detail", {
         service: item as ServiceCategoryType,
         type,
         myServicesCategoriesData,
       })
+    } else {
+      if (type === "my-service") {
+        try {
+          onClose()
+          dispatch(setWaitAMomentModalPossibleVisible(false))
+          setTimeout(() => {
+            if (onOpenDetailModal) {
+              onOpenDetailModal(item as SubCategoryType)
+            }
+          }, 600)
+        } catch (e) {
+          console.log("Error add Service: ", e)
+        }
+      } else {
+        if (item.type === "subCategory") {
+          navigation.navigate("sign-up", { subItem: item as SubCategoryType })
+        }
+      }
     }
 
     onClose()
@@ -116,14 +141,28 @@ const AllServicesModal: React.FC<Props> = ({
         })
       | (ServiceCategoryType & { type?: "category" | "subCategory" })
   }) => {
+    const isIncluded = prosData
+      ?.map((mItem) => mItem?.serviceCategory.id)
+      .includes(item.id)
     return (
       <DmView
-        className="py-[17] px-[20] border-b-0.5 border-b-grey5"
-        onPress={() => handleSubItemPress(item)}
+        className="py-[17] px-[20] border-b-0.5 border-b-grey5 flex-row justify-between items-center"
+        onPress={isIncluded ? undefined : () => handleSubItemPress(item)}
       >
         <DmText className="font-custom500 text-12 leading-[15px]">
           {item.name}
         </DmText>
+        {item.type === "subCategory" ? 
+          (isIncluded ? (
+            <DmText className="ml-[14] font-custom400 text-10 leading-[13px]">
+              {t("added")}
+            </DmText>
+          ) :
+            (<DmText className="ml-[14] font-custom400 text-10 leading-[13px] text-red">
+              {t("plus_add")}
+            </DmText>
+          ))
+         : null}
       </DmView>
     )
   }

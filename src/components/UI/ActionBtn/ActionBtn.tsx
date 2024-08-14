@@ -3,10 +3,11 @@ import React from "react"
 import { DmText, DmView } from "components/UI"
 import { ActivityIndicator } from "react-native"
 
+import { hexToRGBA } from "helpers/helpers"
+
 import styles from "./styles"
 import clsx from "clsx"
 import colors from "styles/colors"
-import { hexToRGBA } from "helpers/helpers"
 
 interface Props {
   onPress?: () => void
@@ -15,7 +16,7 @@ interface Props {
   disable?: boolean
   isLoading?: boolean
   textClassName?: string
-  variant?: "white" | "bordered" | "grey"
+  variant?: "white" | "bordered" | "grey" | "yellow"
   descr?: string
   Icon?: React.ReactNode
   isIconRight?: boolean
@@ -23,6 +24,7 @@ interface Props {
   classNameIcon?: string
   IconNearTitle?: React.ReactNode
   titleSecond?: string
+  reverseItems?: boolean
 }
 
 const ActionBtn: React.FC<Props> = ({
@@ -40,6 +42,7 @@ const ActionBtn: React.FC<Props> = ({
   classNameIcon,
   IconNearTitle,
   titleSecond,
+  reverseItems,
 }) => {
   return (
     <DmView
@@ -48,6 +51,7 @@ const ActionBtn: React.FC<Props> = ({
         { "px-[28] flex-row justify-between": !!Icon },
         { "bg-white border-0.5 border-grey2": variant === "white" },
         { "bg-white border-0.5 border-red": variant === "bordered" },
+        { "bg-yellow1": variant === "yellow"},
         disable && variant !== "white" && "bg-grey7",
         { "opacity-[0.4]": disable && variant === "white" },
         { "bg-grey28": variant === "grey" },
@@ -71,14 +75,15 @@ const ActionBtn: React.FC<Props> = ({
           <DmView
             className={clsx(
               "flex-row items-center",
-              titleSecond && "w-full justify-between"
+              titleSecond && "w-full justify-between",
+              { "flex-row-reverse": reverseItems }
             )}
           >
             <DmText
               className={clsx(
                 " text-16 text-white text-center leading-[19px]",
                 !textClassName?.match(/font/) && "font-custom500",
-                { "text-black": variant === "white" },
+                { "text-black": variant === "white" || variant === "yellow" },
                 { "text-red": variant === "bordered" },
                 textClassName
               )}

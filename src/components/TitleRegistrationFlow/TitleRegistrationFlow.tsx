@@ -16,6 +16,7 @@ interface Props {
   classNameDescr?: string
   classNameTitle?: string
   descrRight?: string
+  classNameDescrRight?: string
   IconRight?: React.ReactNode
   onPress?: () => void
   classNameDescrArr?: string
@@ -29,6 +30,7 @@ const TitleRegistrationFlow: React.FC<Props> = ({
   Icon,
   className,
   classNameDescr,
+  classNameDescrRight,
   classNameTitle,
   descrArray,
   descrRight,
@@ -78,7 +80,7 @@ const TitleRegistrationFlow: React.FC<Props> = ({
               {title}
               {!!descrRight && (
                 <DmText
-                  className={clsx("ml-[5] text-16 leading-[19px] flex-1")}
+                  className={clsx("ml-[5] text-16 leading-[19px] flex-1", classNameDescrRight)}
                 >
                   {" "}
                   {descrRight}

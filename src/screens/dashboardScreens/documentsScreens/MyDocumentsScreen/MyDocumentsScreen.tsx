@@ -56,6 +56,8 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
   const [isPhotoModalVisible, setPhotoModalVisible] = useState(false)
   const [isActiveModalVisible, setActiveModalVisible] = useState(false)
   const [activeModalDescr, setActiveModalDescr] = useState("")
+  const [isTrustStickerModalVisible, setTrustStickerModalVisible] =
+    useState(false)
   // Global Store
   const { user } = useTypedSelector((store) => store.auth)
   // Variables
@@ -63,7 +65,9 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
   const isFocused = useIsFocused()
   const checkCameraPermission = useCheckCameraPermissions
   const requestCammeraPermission = useRequestCameraPermissions
-  const { data: documentsData } = useGetMyDocumentQuery()
+  const { data: documentsData } = useGetMyDocumentQuery(undefined, {
+    pollingInterval: 10000,
+  })
 
   useEffect(() => {
     if (documentsData && isFocused) {
@@ -74,10 +78,11 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
   const idStatus = useMemo(() => {
     const arr = Array.isArray(documents) ? documents : [documents]
     if (arr.length) {
-      return arr?.filter((item) => item?.type === "id")[0]?.status ===
+      return arr?.filter((item) => item?.type === "id").pop()?.status ===
         "inactive"
         ? "incomplete"
-        : arr?.filter((item) => item?.type === "id")[0]?.status || "incomplete"
+        : arr?.filter((item) => item?.type === "id").pop()?.status ||
+            "incomplete"
     }
     return "incomplete"
   }, [documents])
@@ -85,14 +90,70 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
   const companyTradeLicenseStatus = useMemo(() => {
     const arr = Array.isArray(documents) ? documents : [documents]
     if (arr.length) {
-      return arr?.filter((item) => item?.type === "companyTradeLicense")[0]
+      return arr?.filter((item) => item?.type === "companyTradeLicense").pop()
         ?.status === "inactive"
         ? "incomplete"
-        : arr?.filter((item) => item?.type === "companyTradeLicense")[0]
+        : arr?.filter((item) => item?.type === "companyTradeLicense").pop()
             ?.status || "incomplete"
     }
     return "incomplete"
   }, [documents])
+
+  const companyTrustFingerPrintsStatus = useMemo(() => {
+    const arr = Array.isArray(documents) ? documents : [documents]
+    if (arr.length) {
+      const currentArr = arr?.filter(
+        (item) =>
+          item?.type === "trust" &&
+          item?.trustDocumentData?.trustProduct?.descriptionEn ===
+            "Fingerprint Certificate"
+      )
+
+      const item = currentArr.pop()?.status
+
+      return item === "inactive" ? "incomplete" : item || "incomplete"
+    } else {
+      return "incomplete"
+    }
+  }, [documents])
+
+  const companyHealthtatus = useMemo(() => {
+    const arr = Array.isArray(documents) ? documents : [documents]
+
+    if (arr.length) {
+      const currentArr = arr?.filter(
+        (item) =>
+          item?.type === "trust" &&
+          (item.trustDocumentData?.trustProduct?.descriptionEn ===
+            "Health Certificate." ||
+            item.trustDocumentData?.trustProduct?.descriptionEn ===
+              "Health Certificate")
+      )
+
+      const item = currentArr.pop()?.status
+
+      return item === "inactive" ? "incomplete" : item || "incomplete"
+    }
+    return "incomplete"
+  }, [documents])
+
+  const companyTrustStickersStatus = useMemo(() => {
+    const arr = Array.isArray(documents) ? documents : [documents]
+
+    if (arr.length) {
+      const currentArr = arr?.filter(
+        (item) =>
+          item?.type === "trust" &&
+          item.trustDocumentData?.trustProduct?.descriptionEn ===
+            "Verified Business Seal"
+      )
+      const item = currentArr.pop()?.status
+
+      return item === "inactive" ? "incomplete" : item || "incomplete"
+    }
+    return "incomplete"
+  }, [documents])
+
   // Refs  // Methods
   // Handlers
   const handlePressIdentificationCard = async () => {
@@ -118,24 +179,27 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
   }
 
   const handleFingerprints = () => {
-    if (!cardPhoto) {
+    if (user?.accountStatus !== "active") {
       return handleOpenAccountActiveModal()
     }
 
-    return handleOpenRequestModal()
+    return handleGoodHealth(true)
   }
 
-  const handleGoodHealth = () => {
+  const handleGoodHealth = (isFingerPrint?: boolean) => {
+    if (isFingerPrint) {
+      return navigation.navigate("my-documents-health", {
+        isBusinnes: false,
+        documents,
+        isFingerPrint,
+      })
+    }
     if (user?.proType === "company") {
       navigation.navigate("my-documents-health", {
         isBusinnes: true,
         documents,
       })
     } else {
-      // @TO UNCOMMENTED AFTER DONEj ID SCREEN
-      // if (!cardPhoto) {
-      //   return handleOpenAccountActiveModal()
-      // }
       navigation.navigate("my-documents-health", {
         isBusinnes: false,
         documents,
@@ -157,6 +221,41 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const handleCloseRequestModal = () => {
     setRequestModalVisible(false)
+  }
+
+  const handleOpenTrustModal = () => {
+    setTrustStickerModalVisible(true)
+  }
+
+  const handleCloseTrustModal = () => {
+    setTrustStickerModalVisible(false)
+  }
+
+  const handlePressTrustStickers = () => {
+    if (user?.proType !== "company") {
+      if (
+        (user?.accountStatus === "active" &&
+          (companyTrustFingerPrintsStatus === "incomplete" ||
+            companyTrustFingerPrintsStatus === "rejected")) ||
+        user?.proType === "individual" && user?.accountStatus === "active"
+      ) {
+        return handleGoodHealth()
+      }
+    } else {
+      if (
+        user?.accountStatus === "active" &&
+        (companyTrustStickersStatus === "incomplete" ||
+          companyTrustStickersStatus === "rejected")
+      ) {
+        return handleGoodHealth()
+      }
+    }
+
+    if (user?.accountStatus !== "active") {
+      handleOpenAccountActiveModal()
+    } else {
+      handleOpenTrustModal()
+    }
   }
 
   const handleOpenActiveModal = (type: "id" | "license") => {
@@ -184,9 +283,11 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
     navigation.navigate("trade-license")
   }
   // Hooks
+  useEffect(() => {
+    navigation.setParams({ documents: documentsData })
+  }, [documentsData])
   // Listeners
   // Render Methods
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       <HeaderOnboarding
@@ -206,14 +307,20 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
           descr={t("your_valid_national_identification_card")}
           titleBtn={t(idStatus || "incomplete")}
           onPress={
-            idStatus === "incomplete"
+            idStatus === "incomplete" || idStatus === "rejected"
               ? handlePressIdentificationCard
-              : idStatus === "active"
+              : idStatus === "active" || idStatus === "approved"
                 ? () => handleOpenActiveModal("id")
                 : handleOpenRequestModal
           }
           Icon={<IdCardIcon />}
-          btnVariant={idStatus !== "incomplete" ? "grey" : undefined}
+          btnVariant={
+            idStatus !== "incomplete" && idStatus !== "rejected"
+              ? "grey"
+              : idStatus === "rejected"
+                ? "yellow"
+                : undefined
+          }
           classNameTitle="text-15 leading-[19px]"
           classNameDescr="mt-[1] text-12 leading-[20px]"
           isCenterIcon
@@ -224,7 +331,7 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
             </DmView>
           }
           IconDone={<GreenCheckIcon />}
-          isDoneIconVisible={idStatus === "active"}
+          isDoneIconVisible={idStatus === "active" || idStatus === "approved"}
         />
         {user?.proType === "company" && (
           <MyServiceDetailItem
@@ -232,14 +339,21 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
             descr={t("trade_license_is_one_of_descr")}
             titleBtn={t(companyTradeLicenseStatus || "incomplete")}
             onPress={
-              companyTradeLicenseStatus === "incomplete"
+              companyTradeLicenseStatus === "incomplete" ||
+              companyTradeLicenseStatus === "rejected"
                 ? handleTradeLicense
-                : idStatus === "active"
+                : companyTradeLicenseStatus === "active" ||
+                    companyTradeLicenseStatus === "approved"
                   ? () => handleOpenActiveModal("license")
                   : handleOpenRequestModal
             }
             btnVariant={
-              companyTradeLicenseStatus !== "incomplete" ? "grey" : undefined
+              companyTradeLicenseStatus !== "incomplete" &&
+              companyTradeLicenseStatus !== "rejected"
+                ? "grey"
+                : companyTradeLicenseStatus === "rejected"
+                  ? "yellow"
+                  : undefined
             }
             Icon={<FileIcon />}
             classNameTitle="text-15 leading-[19px]"
@@ -252,7 +366,10 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
               </DmView>
             }
             IconDone={<GreenCheckIcon />}
-            isDoneIconVisible={companyTradeLicenseStatus === "active"}
+            isDoneIconVisible={
+              companyTradeLicenseStatus === "active" ||
+              companyTradeLicenseStatus === "approved"
+            }
           />
         )}
         <TitleRegistrationFlow
@@ -268,9 +385,25 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
               title={t("fingerprints_certificate")}
               descr={t("add_background_checked_to_your_profile_descr")}
               onPress={handleFingerprints}
-              titleBtn={cardPhoto ? t("pending") : undefined}
+              titleBtn={t(
+                companyTrustFingerPrintsStatus === "incomplete"
+                  ? ""
+                  : companyTrustFingerPrintsStatus
+              )}
               Icon={<FingerPrintIcon />}
-              btnVariant="grey"
+              IconDone={<GreenCheckIcon />}
+              btnVariant={
+                companyTrustFingerPrintsStatus !== "incomplete" &&
+                companyTrustFingerPrintsStatus !== "rejected"
+                  ? "grey"
+                  : companyTrustFingerPrintsStatus === "rejected"
+                    ? "yellow"
+                    : undefined
+              }
+              isDoneIconVisible={
+                companyTrustFingerPrintsStatus === "active" ||
+                companyTrustFingerPrintsStatus === "approved"
+              }
               classNameTitle="text-15 leading-[19px]"
               classNameDescr="mt-[1] text-12 leading-[20px]"
               isCenterIcon
@@ -288,7 +421,7 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
             <MyServiceDetailItem
               title={t("good_health_certificate")}
               descr={t("add_health_checked_sticker_to_your_descr")}
-              onPress={handleGoodHealth}
+              onPress={handlePressTrustStickers}
               Icon={<HealthSertificateIcon />}
               classNameTitle="text-15 leading-[19px]"
               classNameDescr="mt-[1] text-12 leading-[20px]"
@@ -303,6 +436,22 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
                   />
                 </DmView>
               }
+              titleBtn={t(
+                companyHealthtatus === "incomplete" ? "" : companyHealthtatus
+              )}
+              IconDone={<GreenCheckIcon />}
+              btnVariant={
+                companyHealthtatus !== "incomplete" &&
+                companyHealthtatus !== "rejected"
+                  ? "grey"
+                  : companyHealthtatus === "rejected"
+                    ? "yellow"
+                    : undefined
+              }
+              isDoneIconVisible={
+                companyHealthtatus === "active" ||
+                companyHealthtatus === "approved"
+              }
             />
           </>
         )}
@@ -310,7 +459,7 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
           <MyServiceDetailItem
             title={t("verified_business_seal")}
             descr={t("verification_seal_to_show_descr")}
-            onPress={handleGoodHealth}
+            onPress={handlePressTrustStickers}
             Icon={<BlueCheckIcon width={24} height={24} />}
             classNameTitle="text-15 leading-[19px]"
             classNameDescr="mt-[1] text-12 leading-[20px]"
@@ -321,7 +470,24 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
                 <ChevronRighttIcon stroke={colors.red} width={18} height={18} />
               </DmView>
             }
+            titleBtn={
+              companyTrustStickersStatus === "pending"
+                ? t(companyTrustStickersStatus || "incomplete")
+                : undefined
+            }
             IconDone={<GreenCheckIcon />}
+            btnVariant={
+              companyTrustStickersStatus !== "incomplete" &&
+              companyTrustStickersStatus !== "rejected"
+                ? "grey"
+                : companyTrustStickersStatus === "rejected"
+                  ? "yellow"
+                  : undefined
+            }
+            isDoneIconVisible={
+              companyTrustStickersStatus === "active" ||
+              companyTrustStickersStatus === "approved"
+            }
             classNameIcon="items-center"
           />
         )}
@@ -346,6 +512,19 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
         classNameDescr="mx-[30] text-13 leading-[18px] font-custom400"
         titleBtn={t("close")}
         onPress={handleCloseRequestModal}
+        classNameBtn="mt-[22]"
+        classNameActionBtnText="text-13 leading-[16px] font-custom600"
+      />
+      <MainModal
+        isVisible={isTrustStickerModalVisible}
+        onClose={handleCloseTrustModal}
+        title={t("your_request_is_being_processed")}
+        descr={t("please_expect_a_response_as_soon_as_possible")}
+        className="pt-[35] pb-[21] px-[21]"
+        classNameTitle="mt-[0] text-16 leading-[19px]"
+        classNameDescr="mx-[30] text-13 leading-[18px] font-custom400"
+        titleBtn={t("close")}
+        onPress={handleCloseTrustModal}
         classNameBtn="mt-[22]"
         classNameActionBtnText="text-13 leading-[16px] font-custom600"
       />

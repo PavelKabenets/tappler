@@ -1,0 +1,3 @@
+import AccountUpgradesPromoMessageScreen from "./AccountUpgradesPromoMessageScreen"
+
+export default AccountUpgradesPromoMessageScreen

@@ -16,7 +16,10 @@ import { RootStackScreenProps } from "navigation/types"
 import clsx from "clsx"
 import styles from "./styles"
 import HeaderOnboarding from "components/HeaderOnboarding"
-import { useGetServicesQuery, useProsServiceCategoriesQuery } from "services/api"
+import {
+  useGetServicesQuery,
+  useProsServiceCategoriesQuery,
+} from "services/api"
 import { ActivityIndicator, FlatList } from "react-native"
 import { ServiceCategoryType, SubCategoryType } from "types"
 import FilterItem from "components/FilterItem"
@@ -26,7 +29,7 @@ type Props = RootStackScreenProps<"filter-categories">
 
 const FilterCategoriesScreen: React.FC<Props> = ({ route, navigation }) => {
   // Props
-  const { selectedCategory } = route.params
+  const { selectedCategory, isLeads } = route.params
   // State
   // Global Store
   // Variables
@@ -40,6 +43,7 @@ const FilterCategoriesScreen: React.FC<Props> = ({ route, navigation }) => {
     navigation.navigate("filter", {
       selectedCategory: item,
       prevScreen: "filter-categories",
+      isLeads,
     })
   }
   // Hooks

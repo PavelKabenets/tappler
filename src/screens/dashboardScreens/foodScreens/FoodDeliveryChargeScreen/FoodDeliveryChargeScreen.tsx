@@ -19,6 +19,7 @@ import { RootStackScreenProps } from "navigation/types"
 // Styles & Assets
 import clsx from "clsx"
 import styles from "./styles"
+import { Controller, useForm } from "react-hook-form"
 
 type Props = RootStackScreenProps<"food-delivery-charge">
 
@@ -26,11 +27,16 @@ const FoodDeliveryChargeScreen: React.FC<Props> = ({ route, navigation }) => {
   // Props
   const { service } = route.params
   // State
-  const [inputValue, setInputValue] = useState(
-    service.menu?.deliveryCharge !== null
-      ? service.menu?.deliveryCharge.toString()
-      : ""
-  )
+  const {
+    control,
+    getValues,
+    formState: { isValid },
+    watch,
+  } = useForm({
+    defaultValues: {
+      inputValue: service.menu?.deliveryCharge?.toString() || "",
+    },
+  })
   const [isLoading, setLoading] = useState(false)
   // Global Store
   // Variables
@@ -47,7 +53,7 @@ const FoodDeliveryChargeScreen: React.FC<Props> = ({ route, navigation }) => {
       setLoading(true)
       const res = await patchDeliveryCharge({
         serviceId: service.serviceCategory.id,
-        deliveryCharge: Number(inputValue),
+        deliveryCharge: Number(getValues("inputValue")),
       }).unwrap()
       navigation.navigate("service-setup-food", { service: res })
     } catch (e) {
@@ -74,18 +80,25 @@ const FoodDeliveryChargeScreen: React.FC<Props> = ({ route, navigation }) => {
           isChevron
           title={t("pickup_and_delivery")}
         />
-        <InputInsideText
-          className="mt-[38] px-[20]"
-          title={t("the_delivery_charge_is")}
-          descr={t("enter_number_if_you_are_offering_free_delivery", {
-            number: 0,
-          })}
-          value={inputValue}
-          returnKeyType="done"
-          onChangeText={setInputValue}
+        <Controller
+          control={control}
+          rules={{ required: true }}
+          render={({ field: { value, onChange } }) => (
+            <InputInsideText
+              className="mt-[38] px-[20]"
+              title={t("the_delivery_charge_is")}
+              descr={t("enter_number_if_you_are_offering_free_delivery", {
+                number: 0,
+              })}
+              value={value}
+              returnKeyType="done"
+              onChangeText={onChange}
+            />
+          )}
+          name="inputValue"
         />
       </KeyboardAwareScrollView>
-      {!!inputValue && (
+      {isValid && (
         <ActionBtn
           className="mx-[20] rounded-5"
           title={t("save")}

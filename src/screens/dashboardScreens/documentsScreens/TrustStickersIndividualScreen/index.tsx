@@ -1,0 +1,3 @@
+import TrustStickersIndividualScreen from "./TrustStickersIndividualScreen"
+
+export default TrustStickersIndividualScreen

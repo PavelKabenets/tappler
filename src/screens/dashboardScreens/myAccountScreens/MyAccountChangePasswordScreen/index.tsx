@@ -1,0 +1,3 @@
+import MyAccountChangePasswordScreen from "./MyAccountChangePasswordScreen"
+
+export default MyAccountChangePasswordScreen

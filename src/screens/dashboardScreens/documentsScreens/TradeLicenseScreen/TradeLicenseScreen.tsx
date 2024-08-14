@@ -24,8 +24,12 @@ import UploadLicenseComponent from "components/UploadLicenseComponent"
 import SelectDoPhotoModal from "components/SelectDoPhotoModal"
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
 import { ImageOrVideo } from "react-native-image-crop-picker"
-import { usePostDocumentMutation, usePostProfilePhotoMutation } from "services/api"
+import {
+  usePostDocumentMutation,
+  usePostProfilePhotoMutation,
+} from "services/api"
 import { Keyboard } from "react-native"
+import CustomDatePicker from "components/CustomDatePicker"
 
 type Props = RootStackScreenProps<"trade-license">
 
@@ -47,7 +51,8 @@ const TradeLicenseScreen: React.FC<Props> = ({ navigation }) => {
     handleSubmit,
     getValues,
     setValue,
-    formState: { isValid },
+    formState: { isValid, errors },
+    trigger,
   } = useForm<FormValuesType>({
     defaultValues: {
       tradeNumber: "",
@@ -55,7 +60,7 @@ const TradeLicenseScreen: React.FC<Props> = ({ navigation }) => {
   })
   // Global Store
   // Variables
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const insets = useSafeAreaInsets()
   const [postPhoto] = usePostProfilePhotoMutation()
   const [postDocuments] = usePostDocumentMutation()
@@ -90,7 +95,9 @@ const TradeLicenseScreen: React.FC<Props> = ({ navigation }) => {
           type: "companyTradeLicense",
           tradeLicenseDocumentData: {
             licenseNumber: getValues("tradeNumber"),
-            registrationDate: moment(getValues("date")).format("YYYY-MM-DD"),
+            registrationDate: moment(getValues("date"))
+              .locale("en")
+              .format("YYYY-MM-DD"),
           },
           files: [
             { fileKey: photoRes.storageKey, assignment: "companyTradeLicense" },
@@ -127,7 +134,11 @@ const TradeLicenseScreen: React.FC<Props> = ({ navigation }) => {
       />
       <KeyboardAwareScrollView
         scrollEnabled={false}
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "space-between", paddingHorizontal: 14 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "space-between",
+          paddingHorizontal: 14,
+        }}
         keyboardShouldPersistTaps="handled"
       >
         <DmView>
@@ -140,7 +151,7 @@ const TradeLicenseScreen: React.FC<Props> = ({ navigation }) => {
           />
           <Controller
             control={control}
-            rules={{ required: true }}
+            rules={{ required: true, pattern: /^[\d\s]+$/ }}
             render={({ field: { value, onChange } }) => (
               <DmInput
                 isAnimText={false}
@@ -150,8 +161,12 @@ const TradeLicenseScreen: React.FC<Props> = ({ navigation }) => {
                   value && "bg-transparent"
                 )}
                 label={t("trade_license_number")}
-                onChangeText={onChange}
-                keyboardType="numeric"
+                onChangeText={(val) => {
+                  onChange(val.replace(/[^0-9]/g, ""))
+                  trigger("tradeNumber")
+                }}
+                keyboardType="number-pad"
+                error={errors.tradeNumber?.type}
               />
             )}
             name="tradeNumber"
@@ -162,7 +177,13 @@ const TradeLicenseScreen: React.FC<Props> = ({ navigation }) => {
             render={({ field: { value } }) => (
               <DmInput
                 isAnimText={false}
-                value={value ? moment(value).format("DD/MM/YYYY") : ""}
+                value={
+                  value
+                    ? i18n.language === "ar"
+                      ? moment(value).format("YYYY/MM/DD")
+                      : moment(value).format("DD/MM/YYYY")
+                    : ""
+                }
                 className={clsx(
                   "mt-[10] h-[66] bg-white1",
                   value && "bg-transparent"
@@ -196,14 +217,12 @@ const TradeLicenseScreen: React.FC<Props> = ({ navigation }) => {
           />
         </DmView>
       </KeyboardAwareScrollView>
-      <DatePicker
+      <CustomDatePicker
         open={isDatePickerOpen}
         date={getValues("date") || new Date()}
         onConfirm={handleChangeDate}
         modal
         mode="date"
-        confirmText={t("OK")}
-        cancelText={t("cancel")}
         onCancel={() => {
           setDatePickerOpen(false)
         }}

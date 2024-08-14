@@ -1,0 +1,3 @@
+import MyServiceQualificationCredentialsScreen from "./MyServiceQualificationCredentialsScreen"
+
+export default MyServiceQualificationCredentialsScreen

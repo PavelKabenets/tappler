@@ -44,15 +44,26 @@ import {
 import {
   useGetJobsQuery,
   useGetMyDocumentQuery,
+  useGetNotitficationsQuery,
+  useGetPointsHistoryQuery,
   useGetPointsPackagesQuery,
+  useGetProSybscriptionsQuery,
+  useGetProductsTrustQuery,
   useGetProsQuery,
+  useGetQuotesQuery,
+  useLazyGetNotitficationsByIdQuery,
   useLazyRefreshTokenQuery,
+  usePostRegisterNotificationsDeviceMutation,
   useProsServiceCategoriesQuery,
   useResponseTimeQuery,
 } from "services/api"
 import { API_URL } from "config"
 import AccountStatusModal from "components/AccountStatusModal"
 import renderStatusIcon from "utils/renderStatusIcon"
+import { useNetInfoInstance } from "@react-native-community/netinfo"
+import messaging from "@react-native-firebase/messaging"
+import notifee, { EventType, Notification } from "@notifee/react-native"
+import { NotificationsItemType } from "types"
 
 type Props = RootStackScreenProps<"home">
 
@@ -79,6 +90,9 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
     refreshToken,
     isAuth,
     isLogout,
+    isNotificationsAllowed,
+    isOnceServiceAllowed,
+    lastDoc,
   } = useTypedSelector((store) => store.auth)
 
   const user = useMemo(() => {
@@ -91,10 +105,17 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
     return stateUser
   }, [stateUser, userParams])
 
-  useGetProsQuery()
+  const { refetch: refetchPro } = useGetProsQuery(undefined, {
+    pollingInterval: 60000,
+  })
+  useGetQuotesQuery({ page: 1 })
   useResponseTimeQuery()
   useGetJobsQuery({ page: 1 })
   useGetPointsPackagesQuery(1)
+  useGetPointsHistoryQuery({ page: 1 })
+  useGetProductsTrustQuery({ page: 1 })
+  useGetProSybscriptionsQuery()
+  useGetNotitficationsQuery({ page: 1 })
   const { data: documentsData } = useGetMyDocumentQuery()
   const { data: servicesData, refetch } = useProsServiceCategoriesQuery()
 
@@ -103,6 +124,12 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
   const instets = useSafeAreaInsets()
   const isFocused = useIsFocused()
   const insets = useSafeAreaInsets()
+  const {
+    netInfo: { type, isConnected },
+    refresh,
+  } = useNetInfoInstance()
+  const [getNotificationById] = useLazyGetNotitficationsByIdQuery()
+  const [postDeviceTokenNotif] = usePostRegisterNotificationsDeviceMutation()
 
   const imgHeight = useMemo(() => {
     if (isSmallPhoneHeight) {
@@ -114,6 +141,15 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
   const { t } = useTranslation()
   // Refs
   // Methods
+  async function onMessageReceived(message: any) {
+    notifee.displayNotification({
+      data: {
+        id: message.id,
+      },
+      title: message.title,
+      body: message.body,
+    })
+  }
   const onRefreshToken = async () => {
     try {
       if (token && refreshToken) {
@@ -190,12 +226,13 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
       !currentScreen &&
       isWaitAMomentModalPossibleVisible &&
       isAuth &&
-      !isLogout
+      !isLogout &&
+      isConnected
     ) {
       setWaitAMomentModalVisible(true)
     }
     dispatch(setWaitAMomentModalPossibleVisible(true))
-  }, [])
+  }, [!!isConnected])
 
   useEffect(() => {
     if (isLogout || !isAuth) {
@@ -206,10 +243,75 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
   useEffect(() => {
     async function refetchFunc() {
       await refetch()
+      await refetchPro()
     }
 
     refetchFunc()
   }, [isFocused])
+
+  const onPressNotification = async (notification: Notification) => {
+    navigation.navigate("main-notifications")
+  }
+
+  const getFRtoken = async () => {
+    try {
+      const token = await messaging().getToken()
+      const res = await postDeviceTokenNotif({
+        registrationToken: token as string,
+      }).unwrap()
+    } catch (e) {
+      console.log("GetFR token er", e)
+    }
+  }
+
+  useEffect(() => {
+    getFRtoken()
+  }, [])
+
+  useEffect(() => {
+    if (isNotificationsAllowed) {
+      return notifee.onForegroundEvent(({ type, detail }) => {
+        switch (type) {
+          case EventType.DISMISSED:
+            console.log("User dismissed notification", detail.notification)
+            break
+          case EventType.PRESS:
+            if (detail.notification) {
+              onPressNotification(detail.notification)
+            }
+            break
+        }
+      })
+    }
+  }, [isNotificationsAllowed])
+
+  useEffect(() => {
+    if (isNotificationsAllowed) {
+      return notifee.onBackgroundEvent(async ({ type, detail }) => {
+        const { notification, pressAction } = detail
+
+        // Check if the user pressed the "Mark as read" action
+        if (type === EventType.ACTION_PRESS) {
+          // Update external API
+          if (detail.notification) {
+            onPressNotification(detail.notification)
+          }
+          // Remove the notification
+          if (notification?.id) {
+            await notifee.cancelNotification(notification?.id)
+          }
+        }
+      })
+    }
+  }, [isNotificationsAllowed])
+
+
+  useEffect(() => {
+    if (isNotificationsAllowed) {
+      messaging().onMessage(onMessageReceived)
+      messaging().setBackgroundMessageHandler(onMessageReceived)
+    }
+  }, [isNotificationsAllowed])
 
   // Listeners
   // Render Methods
@@ -257,7 +359,15 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
           </DmView>
           <ActionBtn
             className="mt-[10] mx-[47] border-0 rounded-5 flex-row-reverse px-[36] h-[41] bg-grey29"
-            title={t("account_is_inactive")}
+            title={
+              t("account_is_status") +
+              " " +
+              t(
+                user?.accountStatus !== "active"
+                  ? "inactive"
+                  : user?.accountStatus || ""
+              )
+            }
             onPress={handleOpenStatusModal}
             variant="grey"
             textClassName="text-13 leading-[16px] font-custom500 text-black"
@@ -277,6 +387,12 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
                 descr={t("response_time")}
                 className="flex-1"
                 onPress={handleRersponseTimePress}
+                textStyle={{
+                  fontSize:
+                    String(user?.responseTimeHours || 0).length > 4
+                      ? 22 - String(user?.responseTimeHours || 0).length
+                      : 22,
+                }}
               />
               <ScoreComponent
                 title="0"
@@ -301,7 +417,7 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
             onPress={handleServicesPress}
             descr={t("add_remove_services")}
             Icon={<MyServices />}
-            isComplete={servicesData?.some((item) => item.status === "active")}
+            isComplete={isOnceServiceAllowed}
           />
           <DashboardCategoryItem
             title={t("account_upgrades")}
@@ -316,12 +432,21 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
             onPress={handleMyDocuments}
             descr={t("add_view_documents")}
             Icon={<MyDocumentsIcon />}
+            isComplete={user?.accountStatus === "active"}
+            btnTitle={t(lastDoc?.status || "")}
+            btnVariant={
+              lastDoc && lastDoc.status === "rejected"
+                ? "yellow"
+                : lastDoc && lastDoc?.status === "pending"
+                  ? "grey"
+                  : undefined
+            }
           />
           <DashboardCategoryItem
             title={t("my_points")}
             className="mt-[10]"
             onPress={handleMyPoints}
-            descr={t("you_have_points", { number: 0 })}
+            descr={t("you_have_points", { number: user?.pointsBalance || 0 })}
             Icon={<MyPoints />}
             isComplete
           />

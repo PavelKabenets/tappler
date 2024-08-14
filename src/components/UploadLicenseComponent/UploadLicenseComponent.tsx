@@ -14,12 +14,16 @@ interface Props {
   onPress: () => void
   photoUrl: string
   className?: string
+  title?: string
+  titleActive?: string
 }
 
 const UploadLicenseComponent: React.FC<Props> = ({
   onPress,
   photoUrl,
   className,
+  title,
+  titleActive,
 }) => {
   const { t } = useTranslation()
   return (
@@ -33,7 +37,11 @@ const UploadLicenseComponent: React.FC<Props> = ({
       <DmView className="flex-row items-center">
         {photoUrl ? <DoneIcon width={27} height={27} /> : <TradeLicenseIcon />}
         <DmText className="ml-[12] text-13 leading-[16px] font-custom600">
-          {t(!photoUrl ? "upload_trade_license" : "document_uploaded")}
+          {t(
+            !photoUrl
+              ? title || "upload_trade_license"
+              : titleActive || "document_uploaded"
+          )}
         </DmText>
       </DmView>
       {!!photoUrl && (

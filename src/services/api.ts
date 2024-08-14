@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import { API_URL } from "config"
 import i18n from "locales/i18n"
+import moment from "moment"
 import { ImageOrVideo } from "react-native-image-crop-picker"
 import {
   AuthRequest,
@@ -39,10 +40,46 @@ import {
   MyDocumentsResponse,
   GetPointsPackagesResponse,
   PostPointsPackageRequest,
+  GetProductsTrustRequest,
+  PostPaymentsTrustStickersRequest,
+  PostPaymentsTrustStickersResponse,
+  DefaultRequest,
+  GetProductsTrustResponse,
+  GetPointsHistoryResponse,
+  GetQuotesResponse,
+  PostPointsPackagesRequest,
+  VouchersResponse,
+  LeadsRequest,
+  OpportunitiesRequest,
+  PostOpportunitiesOfferRequest,
+  PatchMenuSectionsRequest,
+  TrustStickersResponse,
+  ProAdditionalDocumentsResponse,
+  ProAdditionalDocumentsRequest,
+  PostNotificationsRegTokenRequest,
+  PostNotificationsRegTokenResponse,
+  GetNotitficationsResponse,
+  PatchNotificationsArrRequest,
+  GetNotitficationsSettingsResponse,
+  PatchNotitficationsSettingsRequest,
+  InterviewsResponse,
+  InterviewsRequest,
+  InterviewResponse,
+  SingInGoogleRequest,
+  PostSocialGoogleProviderRequest,
+  PostSocialGoogleProviderResponse,
+  PostRegisterNotificationsDeviceRequest,
+  PostRegisterNotificationsDeviceResponse,
 } from "services"
 import { RootState } from "store"
 import { logout, setLogout, setTokens } from "store/auth/slice"
-import { PointsItemPackagesType, SubCategoryType } from "types"
+import {
+  NotificationsItemType,
+  NotificationsSettingItemType,
+  PointsItemPackagesType,
+  SubCategoryType,
+  VouchersAssignmentType,
+} from "types"
 
 const baseQuery = fetchBaseQuery({
   baseUrl: API_URL,
@@ -68,7 +105,7 @@ const baseQueryWithReauth: BaseQueryType = async (
   const state = apiBase.getState() as RootState
   const { dispatch } = apiBase
   const result = await baseQuery(args, apiBase, extraOptions)
-  if (result?.error?.status === 401) {
+  if (result?.error?.status === 401 && state.auth.token) {
     if (state.auth.refreshToken && !state.auth.isLogout) {
       try {
         await fetch(`${API_URL}/auth/refresh/${state.auth.refreshToken}`, {
@@ -76,6 +113,10 @@ const baseQueryWithReauth: BaseQueryType = async (
             "Content-Type": "application/json",
           },
         }).then(async (res) => {
+          if (!res?.ok) {
+            return dispatch(logout())
+          }
+
           await res.json().then((resJ) => {
             dispatch(setTokens(resJ))
           })
@@ -102,6 +143,11 @@ export const api = createApi({
     "Documents",
     "Jobs",
     "PointsPackages",
+    "Points",
+    "Quotes",
+    "Leads",
+    "Notifications",
+    "NotificationsSettings",
   ],
   endpoints: (builder) => ({
     prosSignUp: builder.mutation<ProsSignUpResponse, ProsSignUpRequest>({
@@ -139,6 +185,7 @@ export const api = createApi({
     getPros: builder.query<ProsResponse, void>({
       query: () => "/pros/me",
       providesTags: ["Auth"],
+      keepUnusedDataFor: 0,
     }),
     authResetPassword: builder.mutation<void, AuthResetRequest>({
       query: ({ lang, ...body }) => ({
@@ -219,7 +266,7 @@ export const api = createApi({
       ProsServicesQuestionRequest
     >({
       query: ({ serivceId, ...body }) => ({
-        url: `/pros/me/service-categories/${serivceId}/questions`,
+        url: `/pros/me/service-categories/${serivceId}/questions/${body.questionId}`,
         method: "PATCH",
         body,
       }),
@@ -254,10 +301,7 @@ export const api = createApi({
       query: ({ id, serviceId }) =>
         `/services/${serviceId}/categories/${id}/relatedCategories`,
     }),
-    getJobs: builder.query<
-      GetJobsResponse,
-      { page: number; sort?: "ASC" | "DESC" | "nearest_to_me" }
-    >({
+    getJobs: builder.query<GetJobsResponse, OpportunitiesRequest>({
       query: (body) => {
         const url = "/jobs/pro-jobs/available"
         const params = new URLSearchParams()
@@ -265,6 +309,15 @@ export const api = createApi({
         params.append("perPage", "20")
         if (body.sort) {
           params.append("sort", body.sort)
+        }
+        if (body.categoryId) {
+          params.append("categoryId", body.categoryId.toString())
+        }
+        if (body.keywords) {
+          params.append("keywords", body.keywords)
+        }
+        if (body.city) {
+          params.append("city", body.city)
         }
         return {
           url: url + "?" + params,
@@ -429,18 +482,350 @@ export const api = createApi({
           url: "/points/packages?" + params,
         }
       },
-      providesTags: ["PointsPackages"],
     }),
     postPointsPackages: builder.mutation<
-      PointsItemPackagesType,
-      PostPointsPackageRequest
+      PostPaymentsTrustStickersResponse,
+      PostPointsPackagesRequest
     >({
-      query: (body) => ({
-        url: "points/packages",
+      query: ({ id, ...body }) => ({
+        url: `/payments/points-package/${id}`,
+        method: "POST",
+        body: {
+          ...body,
+        },
+      }),
+    }),
+    getPointsHistory: builder.query<GetPointsHistoryResponse, DefaultRequest>({
+      query: (body) => {
+        const params = new URLSearchParams()
+        params.append("page", body.page.toString())
+        params.append("perPage", body?.perPage?.toString() || "20")
+        params.append("sort", body?.sort || "ASC")
+
+        return {
+          url: "/pros/points/history?" + params,
+        }
+      },
+      providesTags: ["Points"],
+    }),
+    getPointsPurchaseHistory: builder.query<
+      GetPointsHistoryResponse,
+      DefaultRequest
+    >({
+      query: (body) => {
+        const params = new URLSearchParams()
+        params.append("page", body.page.toString())
+        params.append("perPage", body?.perPage?.toString() || "20")
+        params.append("sort", body?.sort || "ASC")
+
+        return {
+          url: "/pros/points/purchase-history?" + params,
+        }
+      },
+      providesTags: ["Points"],
+    }),
+    getPointsSpendHistory: builder.query<
+      GetPointsHistoryResponse,
+      DefaultRequest
+    >({
+      query: (body) => {
+        const params = new URLSearchParams()
+        params.append("page", body.page.toString())
+        params.append("perPage", body?.perPage?.toString() || "20")
+        params.append("sort", body?.sort || "ASC")
+
+        return {
+          url: "/pros/points/spend-history?" + params,
+        }
+      },
+      providesTags: ["Points"],
+    }),
+    getProductsTrust: builder.query<
+      GetProductsTrustResponse,
+      GetProductsTrustRequest
+    >({
+      query: (body) => {
+        const params = new URLSearchParams()
+        params.append("page", body.page.toString())
+        params.append("prePage", body?.perPage?.toString() || "20")
+        return {
+          url: "/api/products/trust?" + params,
+        }
+      },
+      providesTags: ["Points"],
+    }),
+    postPaymentsTrustStickers: builder.mutation<
+      PostPaymentsTrustStickersResponse,
+      PostPaymentsTrustStickersRequest
+    >({
+      query: ({ id, ...body }) => {
+        return {
+          url: `/payments/trust-stickers/${id}`,
+          method: "POST",
+          body: {
+            issueDate: moment().format("YYYY-MM-DD"),
+            ...body,
+          },
+        }
+      },
+    }),
+    getQuotes: builder.query<GetQuotesResponse, DefaultRequest>({
+      query: (body) => {
+        const params = new URLSearchParams()
+        params.append("page", body.page.toString())
+        params.append("perPage", body?.perPage?.toString() || "20")
+        params.append("sort", body?.sort || "ASC")
+        return {
+          url: "/quotes/pro?" + params,
+        }
+      },
+      providesTags: ["Quotes"],
+    }),
+    getProSybscriptions: builder.query<any, void>({
+      query: () => "/pro/sybscriptions",
+    }),
+    getProVouchersAssignment: builder.query<VouchersResponse, void>({
+      query: () => "/vouchers-assignment/pro",
+      providesTags: ["Points"],
+    }),
+    postProVouchersAssignment: builder.mutation<VouchersAssignmentType, number>(
+      {
+        query: (id) => {
+          return {
+            url: `/vouchers-assignment/pro/${id}/claim`,
+            method: "POST",
+          }
+        },
+        invalidatesTags: ["Auth", "Points"],
+      }
+    ),
+    getLeads: builder.query<GetJobsResponse, LeadsRequest>({
+      query: (body) => {
+        const params = new URLSearchParams()
+        params.append("page", body.page.toString())
+        params.append("perPage", "20")
+        if (body.sort) {
+          params.append("sort", body.sort)
+        }
+        if (body.categoryId) {
+          params.append("categoryId", body.categoryId.toString())
+        }
+        if (body.startDate) {
+          params.append("startDate", body.startDate)
+        }
+        if (body.endDate) {
+          params.append("endDate", body.endDate)
+        }
+        if (body.keywords) {
+          params.append("keywords", body.keywords)
+        }
+        if (body.city) {
+          params.append("city", body.city)
+        }
+        return {
+          url: "/jobs/pro-jobs/active?" + params,
+          method: "GET",
+        }
+      },
+      providesTags: ["Leads"],
+    }),
+    postOpportunitiesOffer: builder.mutation<
+      any,
+      PostOpportunitiesOfferRequest
+    >({
+      query: ({ jobId, ...body }) => {
+        return {
+          url: `/jobs/${jobId}/pros/opportunity`,
+          method: "POST",
+          body,
+        }
+      },
+      invalidatesTags: ["Jobs", "Leads", "Auth"],
+    }),
+    patchMenuSections: builder.mutation<
+      ProsServicesCategoriesResponse,
+      PatchMenuSectionsRequest
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/pros/me/service-categories/${id}/menu-sections/order`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["ProsServicesCategories"],
+    }),
+    patchPros: builder.mutation<
+      ProsRegistrationResponse,
+      Partial<ProsRegFlowRequest>
+    >({
+      query: (body) => {
+        return {
+          url: "/pros",
+          method: "PATCH",
+          body,
+        }
+      },
+      invalidatesTags: ["Auth"],
+    }),
+    getTrustStickers: builder.query<TrustStickersResponse, void>({
+      query: () => ({
+        url: "/products/trust",
+      }),
+    }),
+    deleteAnswerQuestion: builder.mutation<
+      any,
+      { questionId: number; serviceCategoryId: number }
+    >({
+      query: ({ questionId, serviceCategoryId }) => ({
+        url: `/pros/me/service-categories/${serviceCategoryId}/questions/${questionId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ProsServicesCategories"],
+    }),
+    postProAdditionalDocuments: builder.mutation<
+      ProAdditionalDocumentsResponse,
+      ProAdditionalDocumentsRequest
+    >({
+      query: ({ serviceCategoryId, ...body }) => ({
+        url: `/pros/me/service-categories/${serviceCategoryId}/additional-documents`,
         method: "POST",
         body,
       }),
-      invalidatesTags: ["PointsPackages"]
+      invalidatesTags: ["ProsServicesCategories"],
+    }),
+    postNotificationsRegToken: builder.mutation<
+      PostNotificationsRegTokenResponse,
+      PostNotificationsRegTokenRequest
+    >({
+      query: (body) => ({
+        url: "/notifications/registration-token",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Notifications"],
+    }),
+    getNotitfications: builder.query<GetNotitficationsResponse, DefaultRequest>(
+      {
+        query: (body) => {
+          const params = new URLSearchParams()
+          params.append("page", body.page.toString())
+          params.append("perPage", body.perPage?.toString() || "20")
+          params.append("sort", body.sort?.toString() || "asc")
+
+          return {
+            url: "/notifications",
+            method: "GET",
+          }
+        },
+        providesTags: ["Notifications"],
+      }
+    ),
+    getNotitficationsById: builder.query<NotificationsItemType, number>({
+      query: (number) => `/notifications/${number}`,
+    }),
+    patchNotifications: builder.mutation<NotificationsItemType, number>({
+      query: (id) => ({
+        url: `/notifications/${id}/mark-as-read`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Notifications"],
+    }),
+    patchAllNotifications: builder.mutation<NotificationsItemType[], void>({
+      query: () => ({
+        url: "/notifications/mark-all-as-read",
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Notifications"],
+    }),
+    patchNotificationsArr: builder.mutation<
+      NotificationsItemType[],
+      PatchNotificationsArrRequest
+    >({
+      query: (body) => ({
+        url: "/notifications/mark-as-read",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Notifications"],
+    }),
+    getNotitficationsSettings: builder.query<
+      GetNotitficationsSettingsResponse,
+      void
+    >({
+      query: () => "/pro/settings/notifications",
+      providesTags: ["NotificationsSettings"],
+    }),
+    patchNotitficationsSettings: builder.mutation<
+      NotificationsSettingItemType,
+      PatchNotitficationsSettingsRequest
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/pro/settings/notifications/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["NotificationsSettings"],
+    }),
+    postInterviews: builder.mutation<InterviewsResponse, InterviewsRequest>({
+      query: (body) => ({
+        url: "/interviews",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ProsServicesCategories"],
+    }),
+    getServiceById: builder.query<ProsServicesCategoriesResponse, number>({
+      query: (id) => ({
+        url: `/pros/me/service-categories/${id}`,
+        method: "GET",
+      }),
+      keepUnusedDataFor: 0,
+    }),
+    getServiceStatus: builder.query<InterviewResponse, number>({
+      query: (id) => {
+        const params = new URLSearchParams()
+        params.append("serviceCategoryId", id.toString())
+        return {
+          url: "/interviews/me?" + params,
+          method: "GET",
+        }
+      },
+      keepUnusedDataFor: 0,
+    }),
+    singInGoogle: builder.mutation<AuthResponse, SingInGoogleRequest>({
+      query: (body) => ({
+        url: "/auth/social-provider/sign-in",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Auth"],
+    }),
+    postSocialGoogleProvider: builder.mutation<
+      PostSocialGoogleProviderResponse,
+      PostSocialGoogleProviderRequest
+    >({
+      query: (body) => ({
+        url: "/pros/signup/social-provider",
+        method: "POST",
+        body,
+      }),
+    }),
+    postRegisterNotificationsDevice: builder.mutation<
+      PostRegisterNotificationsDeviceResponse,
+      PostRegisterNotificationsDeviceRequest
+    >({
+      query: (body) => ({
+        url: "/notifications/registration-token",
+        method: "POST",
+        body,
+      }),
+    }),
+    getProsServiceById: builder.query<ProsServicesCategoriesResponse, number>({
+      query: (id) => {
+        return {
+          url: `/pros/me/service-categories/${id}`,
+          method: "GET",
+        }
+      },
     }),
   }),
 })
@@ -485,4 +870,37 @@ export const {
   useGetPointsPackagesQuery,
   useLazyGetPointsPackagesQuery,
   usePostPointsPackagesMutation,
+  useGetPointsHistoryQuery,
+  useGetProductsTrustQuery,
+  usePostPaymentsTrustStickersMutation,
+  useGetQuotesQuery,
+  useGetProSybscriptionsQuery,
+  useLazyGetPointsHistoryQuery,
+  useLazyGetPointsPurchaseHistoryQuery,
+  useLazyGetPointsSpendHistoryQuery,
+  useGetProVouchersAssignmentQuery,
+  usePostProVouchersAssignmentMutation,
+  useGetLeadsQuery,
+  useLazyGetLeadsQuery,
+  usePostOpportunitiesOfferMutation,
+  usePatchMenuSectionsMutation,
+  useDeleteAnswerQuestionMutation,
+  usePatchProsMutation,
+  useGetTrustStickersQuery,
+  usePostProAdditionalDocumentsMutation,
+  useGetNotitficationsQuery,
+  usePatchNotificationsMutation,
+  usePostInterviewsMutation,
+  useLazyGetServiceByIdQuery,
+  useGetServiceStatusQuery,
+  useLazyGetServiceStatusQuery,
+  useGetNotitficationsByIdQuery,
+  useLazyGetNotitficationsByIdQuery,
+  useSingInGoogleMutation,
+  usePostSocialGoogleProviderMutation,
+  usePostNotificationsRegTokenMutation,
+  usePostRegisterNotificationsDeviceMutation,
+  useLazyGetMyDocumentQuery,
+  useLazyGetProsServiceByIdQuery,
+  useGetProsServiceByIdQuery,
 } = api

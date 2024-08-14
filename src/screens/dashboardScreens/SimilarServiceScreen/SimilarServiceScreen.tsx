@@ -38,7 +38,7 @@ const SimilarServiceScreen: React.FC<Props> = ({ route, navigation }) => {
   const [selectedItem, setSelectedItem] = useState<SubCategoryType>()
   const [isLoading, setLoading] = useState(false)
   const [isMaxModalVisible, setMaxModalVisible] = useState(false)
-  const { data: myCategoriesData } = useProsServiceCategoriesQuery()
+  const { data: prosCategories } = useProsServiceCategoriesQuery()
 
   const { data: myServicesData } = useProsServiceCategoriesQuery()
   const { data, isFetching } = useGetSimilarServicesQuery({
@@ -65,24 +65,31 @@ const SimilarServiceScreen: React.FC<Props> = ({ route, navigation }) => {
   }
 
   const handleAddToMyServices = async () => {
-    if (selectedItem) {
-      setLoading(true)
-      try {
-        const res = await createServiceCategory({
-          serviceCategoryId: selectedItem.id,
-        }).unwrap()
-        dispatch(setWaitAMomentModalPossibleVisible(false))
-        handleCloseDetailModal()
-        setTimeout(() => {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "dashboard" }, { name: "my-services" }],
-          })
-        }, 400)
-      } catch (e) {
-        console.log("Create My Service Error: ", e)
-      } finally {
-        setLoading(false)
+    if (prosCategories?.length && prosCategories.length >= 3) {
+      handleCloseDetailModal()
+      setTimeout(() => {
+        handleOpenMaxModal()
+      }, 400)
+    } else {
+      if (selectedItem) {
+        setLoading(true)
+        try {
+          const res = await createServiceCategory({
+            serviceCategoryId: selectedItem.id,
+          }).unwrap()
+          dispatch(setWaitAMomentModalPossibleVisible(false))
+          handleCloseDetailModal()
+          setTimeout(() => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "dashboard" }, { name: "my-services" }],
+            })
+          }, 400)
+        } catch (e) {
+          console.log("Create My Service Error: ", e)
+        } finally {
+          setLoading(false)
+        }
       }
     }
   }
@@ -99,21 +106,9 @@ const SimilarServiceScreen: React.FC<Props> = ({ route, navigation }) => {
     return (
       <AllServicesSubItem
         item={item}
-        onPress={
-          isServiceWasAdd(item.id)
-            ? undefined
-            : !!myServicesData?.length && myServicesData?.length >= 3 ||
-                [].length >= 3
-              ? handleOpenMaxModal
-              : handleOpenDetailModal
-        }
+        onPress={isServiceWasAdd(item.id) ? undefined : handleOpenDetailModal}
         onPressDetail={
-          isServiceWasAdd(item.id)
-            ? undefined
-            : !!myServicesData?.length && myServicesData?.length >= 3 ||
-                [].length >= 3
-              ? handleOpenMaxModal
-              : handleOpenDetailModal
+          isServiceWasAdd(item.id) ? undefined : handleOpenDetailModal
         }
         isCheckHide
         descr={t(isServiceWasAdd(item.id) ? "added" : "plus_add")}

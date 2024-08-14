@@ -1,0 +1,3 @@
+import MyAccountVerifyPasswordScreen from "./MyAccountVerifyPasswordScreen"
+
+export default MyAccountVerifyPasswordScreen

@@ -15,7 +15,10 @@ import {
   requestNotifications,
 } from "react-native-permissions"
 import { I18nManager, Platform } from "react-native"
-import { setNotificationsWasShowing } from "store/auth/slice"
+import {
+  setNotificationsAllowed,
+  setNotificationsWasShowing,
+} from "store/auth/slice"
 import clsx from "clsx"
 
 interface Props {
@@ -35,8 +38,14 @@ const NotificationModal: React.FC<Props> = ({
     onClose()
     dispatch(setNotificationsWasShowing(true))
     setTimeout(async () => {
-      await requestNotifications(["alert", "sound"])
-        .catch((e) => console.log(e))
+      await requestNotifications(["alert", "sound", "badge"])
+        .then(() => {
+          dispatch(setNotificationsAllowed(true))
+        })
+        .catch((e) => {
+          console.log(e)
+          dispatch(setNotificationsAllowed(false))
+        })
         .finally(() =>
           setTimeout(() => {
             setWaitAMomentModalVisible(true)

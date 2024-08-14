@@ -14,6 +14,7 @@ import {
   I18nManager,
   ImageBackground,
   NativeSyntheticEvent,
+  Platform,
   TextInputContentSizeChangeEventData,
 } from "react-native"
 import { Alert } from "react-native"
@@ -166,10 +167,25 @@ const FoodSectionMenuItemDetailScreen: React.FC<Props> = ({
           discountPrice: Number(getValues("discountedPrice")),
           options: currentOptions.map((item) => {
             if (typeof item.index === "number") {
-              const { index, ...body } = item
-              return body
+              const { index, id, ...body } = item
+              return {
+                ...body,
+                choices: body.choices.map((item) => {
+                  const { id, ...restM } = item
+
+                  return restM
+                }),
+              }
             }
-            return item
+            const { id, ...rest } = item
+            return {
+              ...rest,
+              choices: rest.choices.map((item) => {
+                const { id, ...restM } = item
+
+                return restM
+              }),
+            }
           }),
           isExpressDeliveryAvailable: getValues("expressDelivery"),
           isPreOrderOnly: getValues("preOrder"),
@@ -226,10 +242,25 @@ const FoodSectionMenuItemDetailScreen: React.FC<Props> = ({
           discountPrice: Number(getValues("discountedPrice")),
           options: currentOptions.map((item) => {
             if (typeof item.index === "number") {
-              const { index, ...body } = item
-              return body
+              const { index, id, ...body } = item
+              return {
+                ...body,
+                choices: body.choices.map((item) => {
+                  const { id, ...restM } = item
+
+                  return restM
+                }),
+              }
             }
-            return item
+            const { id, ...rest } = item
+            return {
+              ...rest,
+              choices: rest.choices.map((item) => {
+                const { id, ...restM } = item
+
+                return restM
+              }),
+            }
           }),
           isExpressDeliveryAvailable: getValues("expressDelivery"),
           isPreOrderOnly: getValues("preOrder"),
@@ -294,11 +325,15 @@ const FoodSectionMenuItemDetailScreen: React.FC<Props> = ({
         shouldTouch: false,
         shouldValidate: true,
       })
-      setValue("discountedPrice", menuItem.discountPrice.toString(), {
-        shouldDirty: false,
-        shouldTouch: false,
-        shouldValidate: true,
-      })
+      setValue(
+        "discountedPrice",
+        menuItem.discountPrice ? menuItem.discountPrice.toString() : "",
+        {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: true,
+        }
+      )
       setValue("expressDelivery", menuItem.isExpressDeliveryAvailable, {
         shouldDirty: false,
         shouldTouch: false,
@@ -336,11 +371,13 @@ const FoodSectionMenuItemDetailScreen: React.FC<Props> = ({
     event: NativeSyntheticEvent<TextInputContentSizeChangeEventData>
   ) => {
     const { height } = event.nativeEvent.contentSize
-    const newLines = Math.ceil(height / (I18nManager.isRTL ? 21 : 16))
+    const newLines = Math.round(height / (I18nManager.isRTL ? 21 : 16))
     if (newLines > 5) {
       setValue("descr", watch("descr").slice(0, -1), { shouldValidate: true })
     }
-    setLines(newLines)
+    if (newLines <= 5) {
+      setLines(newLines)
+    }
   }
 
   return (
@@ -424,11 +461,14 @@ const FoodSectionMenuItemDetailScreen: React.FC<Props> = ({
                 wrapperClassName="ml-[14]"
                 numberOfLines={lines}
                 containerClassName="mr-[14.5]"
+                placeholderClassName="text-left"
                 onChangeText={(val) => {
                   if (lines <= 5) {
                     onChange(val)
                   }
                 }}
+                inputClassName={clsx(Platform.OS === "android" && "mt-[-7]")}
+                textAlignVertical="top"
                 multiline
                 style={{
                   height:
@@ -542,8 +582,7 @@ const FoodSectionMenuItemDetailScreen: React.FC<Props> = ({
             isLoading ||
             !isValid ||
             !photo && !menuItem?.photo ||
-            (!watch("expressDelivery") &&
-            !watch("preOrder"))
+            (!watch("expressDelivery") && !watch("preOrder"))
           }
         />
       </DmView>

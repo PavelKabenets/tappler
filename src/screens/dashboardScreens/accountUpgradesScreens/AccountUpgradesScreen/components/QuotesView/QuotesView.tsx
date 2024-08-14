@@ -13,6 +13,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import clsx from "clsx"
 import { FlatList, Image } from "react-native"
 import img from "assets/images/cactus.png"
+import { useGetQuotesQuery } from "services/api"
+import { QuoteItemType } from "types"
+import QuotesItem from "components/QuotesItem"
 
 interface Props {
   navigation: NativeStackNavigationProp<
@@ -23,6 +26,7 @@ interface Props {
 }
 
 const QuotesView: React.FC<Props> = ({ navigation }) => {
+  const { data } = useGetQuotesQuery({ page: 1 })
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
 
@@ -40,14 +44,14 @@ const QuotesView: React.FC<Props> = ({ navigation }) => {
     )
   }
 
-  const renderListItem = ({ item }: { item: any }) => {
-    return null
+  const renderListItem = ({ item }: { item: QuoteItemType }) => {
+    return <QuotesItem item={item} onPress={() => null} />
   }
 
   return (
-    <DmView className="flex-1 px-[11]">
+    <DmView className="flex-1">
       <FlatList
-        data={[]}
+        data={data?.data}
         renderItem={renderListItem}
         ListEmptyComponent={renderEmptyListComponent()}
         contentContainerStyle={styles.flatList}

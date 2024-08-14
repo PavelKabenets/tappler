@@ -7,25 +7,37 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { ROUTES, Routes } from "./routes"
 
 import {
+  AdditionalDocumentType,
   AddressType,
   IdDocumentData,
   JobType,
   MenuItemType,
   MenuSectionType,
   MyServiceDetailCategorySelectType,
+  NewAddressDataType,
+  NotificationsItemType,
   PlaceOfServiceType,
+  ProAdditionalDocumentsType,
+  ProfileSettingParamTypes,
   ServiceCategoryType,
   SubCategoryType,
   UserType,
 } from "types"
 import {
   AuthResetConfirmRequest,
+  GetPointsHistoryResponse,
   MyDocumentsResponse,
   ProsRegistrationResponse,
   ProsResponse,
   ProsServicesCategoriesResponse,
 } from "services"
-import { MockSearchItemType } from "data/mockData"
+import {
+  MockMainNotificationsDataItemType,
+  MockMessagesDataItemType,
+  MockSearchItemType,
+  MockSubscriptionDetailsDataItemType,
+  mockServicesDataItemType,
+} from "data/mockData"
 import { ImageOrVideo } from "react-native-image-crop-picker"
 
 export type RootStackParamList = {
@@ -52,8 +64,22 @@ export type RootStackParamList = {
   [ROUTES.CongratulationScreen]: undefined
   [ROUTES.PasswordResetScreen]: undefined
   [ROUTES.RequestAddingServiceScreen]: undefined
-  [ROUTES.LeadsScreen]: undefined
-  [ROUTES.OpportunitiesScreen]: undefined
+  [ROUTES.LeadsScreen]:
+    | {
+        selectedCategory?: SubCategoryType
+        selectedAddress?: MockSearchItemType
+        startDate?: string
+        endDate?: string
+        keyword?: string
+      }
+    | undefined
+  [ROUTES.OpportunitiesScreen]:
+    | {
+        selectedCategory?: SubCategoryType
+        selectedAddress?: MockSearchItemType
+        keyword?: string
+      }
+    | undefined
   [ROUTES.MessagesScreen]: undefined
   [ROUTES.DashboardScreen]: { userParams: Partial<UserType> } | undefined
   [ROUTES.SettingScreen]: undefined
@@ -62,7 +88,10 @@ export type RootStackParamList = {
   [ROUTES.NotificationsScreen]: undefined
   [ROUTES.ScoreDetailScreen]: { type: "response" | "views" | "review" }
   [ROUTES.MyServicesScreen]: undefined
-  [ROUTES.MyServiceDetailScreen]: { service: ProsServicesCategoriesResponse }
+  [ROUTES.MyServiceDetailScreen]: {
+    service: ProsServicesCategoriesResponse
+    isFirstOpen?: boolean
+  }
   [ROUTES.PlaceOfServiceScreen]:
     | { service: ProsServicesCategoriesResponse }
     | {
@@ -88,18 +117,32 @@ export type RootStackParamList = {
   }
   [ROUTES.MyDocumentsScreen]: { documents?: MyDocumentsResponse }
   [ROUTES.MyDocumentsHealthScreen]:
-    | { isBusinnes: boolean; documents?: MyDocumentsResponse }
+    | {
+        isBusinnes: boolean
+        documents?: MyDocumentsResponse
+        isFingerPrint?: boolean
+      }
     | undefined
   [ROUTES.SimilarServiceScreen]: { id: number; serviceId: number }
   [ROUTES.FilterScreen]:
     | {
         selectedCategory?: SubCategoryType
         selectedAddress?: MockSearchItemType
+        startDate?: string
+        endDate?: string
+        keyword?: string
         prevScreen?: Routes
+        isLeads?: boolean
       }
     | undefined
-  [ROUTES.FilterCategoriesScreen]: { selectedCategory?: SubCategoryType }
-  [ROUTES.FilterCitiesScreen]: { selectedAddress?: MockSearchItemType }
+  [ROUTES.FilterCategoriesScreen]: {
+    selectedCategory?: SubCategoryType
+    isLeads?: boolean
+  }
+  [ROUTES.FilterCitiesScreen]: {
+    selectedAddress?: MockSearchItemType
+    isLeads?: boolean
+  }
   [ROUTES.OpportunityDetailScreen]: { job: JobType }
   [ROUTES.FoodDeliveryChargeScreen]: { service: ProsServicesCategoriesResponse }
   [ROUTES.FoodDiscountsScreen]: { service: ProsServicesCategoriesResponse }
@@ -110,7 +153,12 @@ export type RootStackParamList = {
     descr?: string
     startHours?: number
     endHours?: number
-    headerTitle: string
+    headerTitle?: string
+    noneBorder?: boolean
+    isBorder?: boolean
+    text13?: boolean
+    onPressBack?: () => void
+    customTimeTitle?: string
   }
   [ROUTES.PreviewScreen]: { menuItem: MenuItemType }
   [ROUTES.FoodMenuStoreScreen]: { service: ProsServicesCategoriesResponse }
@@ -129,13 +177,96 @@ export type RootStackParamList = {
     selfiePhoto?: string
   }
   [ROUTES.OpportunitiesSendOfferScreen]: { job: JobType }
-  [ROUTES.MyPointsScreen]: undefined
+  [ROUTES.MyPointsScreen]: { data?: GetPointsHistoryResponse } | undefined
   [ROUTES.MyPointsPackagesScreen]: undefined
   [ROUTES.MyPointsVouchers]: undefined
-  [ROUTES.MyPointsTransactionsScreen]: undefined
+  [ROUTES.MyPointsTransactionsScreen]: { data?: GetPointsHistoryResponse }
   [ROUTES.AccountUpgradesScreen]: undefined
   [ROUTES.AccountUpgradesSelectOptionsScreen]: undefined
   [ROUTES.MyPerfomanceScreen]: undefined
+  [ROUTES.MyAccountScreen]: { isSuccessModalVisible: boolean } | undefined
+  [ROUTES.MyAccountDetailsScreen]: undefined
+  [ROUTES.MyAccountTypeScreen]: undefined
+  [ROUTES.MyAccountChangeTypeScreen]: undefined
+  [ROUTES.MyAccountEmailScreen]: { isSuccessModalVisible: boolean } | undefined
+  [ROUTES.MyAccountAddressScreen]: { data: NewAddressDataType } | undefined
+  [ROUTES.MyAccountNewAddressScreen]:
+    | { data: NewAddressDataType; onSubmitGoBack?: boolean }
+    | undefined
+  [ROUTES.MyAccountChangedAddressScreen]:
+    | { data: NewAddressDataType }
+    | undefined
+  [ROUTES.MyAccountPhoneNumberScreen]:
+    | { isSuccessModalVisible: boolean }
+    | undefined
+  [ROUTES.MyAccountChangePasswordScreen]: undefined
+  [ROUTES.MyAccountResetPasswordScreen]: undefined
+  [ROUTES.MyAccountVerifyMobileNumberScreen]: { phone: string }
+  [ROUTES.MyAccountVerifyEmailScreen]: undefined
+  [ROUTES.MyAccountVerifyPasswordScreen]: undefined
+  [ROUTES.MyAccountNewPasswordScreen]: undefined
+  [ROUTES.MyProfileScreen]: { profileParams: ProfileSettingParamTypes }
+  [ROUTES.MyProfileChooseAccountTypeScreen]: {
+    profileParams: ProfileSettingParamTypes
+  }
+  [ROUTES.MyProfileAboutMeScreen]: { profileParams: ProfileSettingParamTypes }
+  [ROUTES.MyProfileBusinessHoursScreen]: {
+    profileParams: ProfileSettingParamTypes
+  }
+  [ROUTES.MyProfileQualificationCredentialsScreen]: {
+    profileParams: ProfileSettingParamTypes
+  }
+  [ROUTES.MyProfilePaymentsMethodsScreen]: {
+    profileParams: ProfileSettingParamTypes
+  }
+  [ROUTES.MyProfilePhotosOfMyWorksScreen]: {
+    profileParams: ProfileSettingParamTypes
+  }
+  [ROUTES.MyProfileSocialMediaLinksScreen]: {
+    profileParams: ProfileSettingParamTypes
+  }
+  [ROUTES.AccountUpgradesFeaturedProScreen]: undefined
+  [ROUTES.AccountUpgradesMotivationStickersScreen]: undefined
+  [ROUTES.AccountUpgardesMotivationStickersDetailScreen]: undefined
+  [ROUTES.AccountUpgradesPromoMessageScreen]: undefined
+  [ROUTES.AccountUpgradesContactDetailsScreen]: undefined
+  [ROUTES.DoneScreen]: {
+    nextScreenName: Routes
+    nextScreenParams?: ParamsFor<keyof RootStackParamList>
+  }
+  [ROUTES.MainNotificationsScreen]: undefined
+  [ROUTES.UpdatesNotificationsScreen]: {
+    notifications: NotificationsItemType
+  }
+  [ROUTES.MessagesDetailsScreen]: { messages: MockMessagesDataItemType }
+  [ROUTES.ArchivedMessagesScreen]: undefined
+  [ROUTES.ReviceOfferScreen]: { messages: MockMessagesDataItemType }
+  [ROUTES.DetailsInMessagesScreen]: undefined
+  [ROUTES.LostConnectionScreen]: undefined
+  [ROUTES.AccountUpgradesViewDetailsScreen]: {
+    subscription: MockSubscriptionDetailsDataItemType
+    resultCost?: number
+  }
+  [ROUTES.AccountUpgradesHistoryScreen]: undefined
+  [ROUTES.AccountUpgradesViewMyProfileScreen]: undefined
+  [ROUTES.AccountUpgradesTermsConditionsScreen]: undefined
+  [ROUTES.MyServiceDetailPhotosScreen]: {
+    service: ProsServicesCategoriesResponse
+  }
+  [ROUTES.MyServiceDetailDocumentsScreen]: {
+    service: ProsServicesCategoriesResponse
+  }
+  [ROUTES.MyServiceQualificationCredentialsScreen]: {
+    service: ProsServicesCategoriesResponse
+  }
+  [ROUTES.TrustStickersIndividualScreen]: { type: "fingerpringts" | "health" }
+  [ROUTES.MyServiceDocumentsStatusScreen]: {
+    service: ProsServicesCategoriesResponse
+  }
+  [ROUTES.MyServiceResubmitDocumentsScreen]: {
+    service: ProsServicesCategoriesResponse
+    document: ProAdditionalDocumentsType
+  }
 }
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =
@@ -145,6 +276,9 @@ export type HomeTabParamList = {
   Popular: undefined
   Latest: undefined
 }
+
+type ParamsFor<T extends keyof RootStackParamList> =
+  RootStackParamList[T] extends undefined ? undefined : RootStackParamList[T]
 
 declare global {
   namespace ReactNavigation {

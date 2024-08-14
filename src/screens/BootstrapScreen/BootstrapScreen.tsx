@@ -14,6 +14,7 @@ import { useTypedSelector, persistor } from "store"
 import Geocoder from "react-native-geocoding"
 import "moment/locale/ar"
 
+
 // Styles & Assets
 import clsx from "clsx"
 import styles from "./styles"
@@ -24,9 +25,12 @@ const BootstrapScreen = (): JSX.Element => {
   // Props
   // State
   // Global Store
-  const { isAuth, isRegistrationFlowComleted, language } = useTypedSelector(
-    (store) => store.auth
-  )
+  const {
+    isAuth,
+    isRegistrationFlowComleted,
+    language,
+    isNotificationsAllowed,
+  } = useTypedSelector((store) => store.auth)
 
   const { i18n } = useTranslation()
 
@@ -35,6 +39,7 @@ const BootstrapScreen = (): JSX.Element => {
   })
   // Variables
   // Methods
+
   // Handlers
   // Hooks
   useEffect(() => {
@@ -43,7 +48,9 @@ const BootstrapScreen = (): JSX.Element => {
     moment.locale(language)
   }, [language])
 
+
   // Listeners
+
   // Render Methods
 
   return (

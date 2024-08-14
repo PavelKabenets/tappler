@@ -4,40 +4,41 @@ import React, { useEffect, useState } from "react"
 import { ActionBtn, DmInput, DmText, DmView } from "components/UI"
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import SelectPhotosItem from "components/SelectPhotosItem"
-
+import TitleRegistrationFlow from "components/TitleRegistrationFlow"
+import MainModal from "components/MainModal"
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
+import { Controller, useForm } from "react-hook-form"
+import CustomDatePicker from "components/CustomDatePicker"
 // Hooks & Redux
 import { useTranslation } from "react-i18next"
-
+import { useTypedSelector } from "store"
 // Helpers & Types
+import { PermissionsAndroid } from "react-native"
 import { RootStackScreenProps } from "navigation/types"
-
-// Libs & Utils
-
-// Styles & Assets
-import clsx from "clsx"
-import styles, { photoWidth } from "./styles"
-import CloseIcon from "assets/icons/close.svg"
-import TitleRegistrationFlow from "components/TitleRegistrationFlow"
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
 import {
   Camera,
   useCameraDevice,
   useCameraPermission,
 } from "react-native-vision-camera"
-import { Controller, useForm } from "react-hook-form"
-import CustomDatePicker from "components/CustomDatePicker"
-import moment from "moment"
-import FrontId from "assets/icons/front-id.svg"
-import BackId from "assets/icons/back-id.svg"
 import {
   usePostDocumentMutation,
   usePostProfilePhotoMutation,
 } from "services/api"
+// Libs & Utils
+import moment from "moment"
+// Styles & Assets
+import clsx from "clsx"
+import styles, { photoWidth } from "./styles"
+import CloseIcon from "assets/icons/close.svg"
+import FrontId from "assets/icons/front-id.svg"
+import BackId from "assets/icons/back-id.svg"
+import IdUserIcon from "assets/icons/id-user.svg"
 import { HIT_SLOP_DEFAULT } from "styles/helpersStyles"
 
 type Props = RootStackScreenProps<"my-documents-id">
 
 const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
+  const { user } = useTypedSelector((store) => store.auth)
   // Props
   const frontPhoto = route.params?.frontPhoto
   const backPhoto = route.params?.backPhoto
@@ -62,6 +63,8 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
     watch,
     getValues,
     formState: { isValid },
+    formState: { errors },
+    trigger,
   } = useForm({
     defaultValues: {
       name: "",
@@ -72,17 +75,42 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
   })
   // Global Store
   // Variables
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const insets = useSafeAreaInsets()
   const [sendPhoto] = usePostProfilePhotoMutation()
   const [postDocument] = usePostDocumentMutation()
+  const [isModalIdVisible, setModalIdVisible] = useState(false)
 
   const device = useCameraDevice("front")
   const { hasPermission, requestPermission } = useCameraPermission()
 
   // Refs
   // Methods
+  async function requestStoragePermission() {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: "Storage Permission",
+          message: "App needs access to your storage to save photos.",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK",
+        }
+      )
+      return granted === PermissionsAndroid.RESULTS.GRANTED
+    } catch (err) {
+      console.warn(err)
+      return false
+    }
+  }
   // Handlers
+  const handleOpenModalId = () => {
+    setModalIdVisible(true)
+  }
+  const handleHideModalId = () => {
+    setModalIdVisible(false)
+  }
   const handleOpenBirthDatePicker = (type: "birth" | "expirationDate") => {
     setDatePickerVisible(true)
     setDatePickerType(type)
@@ -102,21 +130,26 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
   }
 
   const handleSubmit = async () => {
-    if (frontId && backId) {
-      navigation.navigate("my-documents-selfie", {
-        idDocumentData: {
-          name: getValues("name"),
-          idNumber: getValues("idNumber"),
-          dateOfBirth: moment(getValues("birth")).format("YYYY-MM-DD"),
-          expirationDate: moment(getValues("expirationDate")).format(
-            "YYYY-MM-DD"
-          ),
-        },
-        frontPhoto: frontId,
-        backPhoto: backId,
-        selfiePhoto: undefined
-      })
-    }
+    handleHideModalId()
+    setTimeout(() => {
+      if (frontId && backId) {
+        navigation.navigate("my-documents-selfie", {
+          idDocumentData: {
+            name: getValues("name"),
+            idNumber: getValues("idNumber"),
+            dateOfBirth: moment(getValues("birth"))
+              .locale("en")
+              .format("YYYY-MM-DD"),
+            expirationDate: moment(getValues("expirationDate"))
+              .locale("en")
+              .format("YYYY-MM-DD"),
+          },
+          frontPhoto: frontId,
+          backPhoto: backId,
+          selfiePhoto: undefined,
+        })
+      }
+    }, 400)
   }
 
   // Hooks
@@ -124,7 +157,7 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
     if (!hasPermission) {
       requestPermission()
     }
-  })
+  }, [])
 
   useEffect(() => {
     if (frontPhoto) {
@@ -180,7 +213,13 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
             render={({ field: { value, onChange } }) => {
               return (
                 <DmInput
-                  value={value ? moment(value).format("DD/MM/YYYY") : ""}
+                  value={
+                    value
+                      ? moment(value).format(
+                          i18n.language === "ar" ? "YYYY/MM/DD" : "DD/MM/YYYY"
+                        )
+                      : ""
+                  }
                   className="mt-[10] h-[66]"
                   placeholder={t("date_of_birth")}
                   onPress={() => handleOpenBirthDatePicker("birth")}
@@ -191,16 +230,20 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
           />
           <Controller
             control={control}
-            rules={{ required: true }}
+            rules={{ required: true, pattern: /^[\d\s]+$/ }}
             render={({ field: { value, onChange } }) => {
               return (
                 <DmInput
                   value={value}
-                  onChangeText={onChange}
+                  onChangeText={(val) => {
+                    onChange(val.replace(/[^0-9]/g, ""))
+                    trigger("idNumber")
+                  }}
                   className="mt-[10] h-[66]"
                   placeholder={t("id_number")}
-                  keyboardType="numeric"
+                  keyboardType="number-pad"
                   returnKeyType="done"
+                  error={errors.idNumber?.type}
                 />
               )
             }}
@@ -212,7 +255,13 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
             render={({ field: { value, onChange } }) => {
               return (
                 <DmInput
-                  value={value ? moment(value).format("DD/MM/YYYY") : ""}
+                  value={
+                    value
+                      ? moment(value).format(
+                          i18n.language === "ar" ? "YYYY/MM/DD" : "DD/MM/YYYY"
+                        )
+                      : ""
+                  }
                   className="mt-[10] h-[66]"
                   placeholder={t("expiration_date")}
                   onPress={() => handleOpenBirthDatePicker("expirationDate")}
@@ -230,7 +279,7 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
               height={photoWidth / 1.155}
               photoUrl={frontId || undefined}
               onPress={() => handleCameraModalOpen("front")}
-              resizeMode="stretch"
+              descrWithPhoto
             />
             <SelectPhotosItem
               Icon={<BackId />}
@@ -240,7 +289,7 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
               height={photoWidth / 1.155}
               photoUrl={backId || undefined}
               onPress={() => handleCameraModalOpen("back")}
-              resizeMode="stretch"
+              descrWithPhoto
             />
           </DmView>
         </KeyboardAwareScrollView>
@@ -250,7 +299,7 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
           title={t("continue")}
           className="mx-[14] mt-[8] rounded-5"
           textClassName="text-13 leading-[16px] font-custom600"
-          onPress={handleSubmit}
+          onPress={handleOpenModalId}
           disable={isLoading}
           isLoading={isLoading}
         />
@@ -280,6 +329,23 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
         }}
         maximumDate={datePickerType === "birth" ? new Date() : undefined}
         onCancel={() => setDatePickerVisible(false)}
+      />
+      <MainModal
+        isVisible={isModalIdVisible}
+        Icon={<IdUserIcon />}
+        onClose={handleSubmit}
+        title={t("attention")}
+        className="px-[5] pt-[50] pb-[39]"
+        classNameTitle="mt-[20] text-20 leading-[24px] font-custom600"
+        classNameDescr="mt-[6] mx-[25] text-13 leading-[20px] font-custom400"
+        titleBtn={t("close")}
+        classNameActionBtnText="text-13 leading-[16px] font-custom600"
+        classNameBtnsWrapper="mx-[91]"
+        classNameBtn="mt-[26] rounded-5"
+        onPress={handleSubmit}
+        descr={t("this_id_number_is_already_registered_in_our_system_descr", {
+          email: "care@tappler.me",
+        })}
       />
     </SafeAreaView>
   )

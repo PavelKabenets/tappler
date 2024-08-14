@@ -28,7 +28,7 @@ import {
   useCameraPermission,
   useFrameProcessor,
 } from "react-native-vision-camera"
-import { useSharedValue } from "react-native-worklets-core"
+import { Worklets, useSharedValue } from "react-native-worklets-core"
 import {
   Platform,
   Pressable,
@@ -36,7 +36,13 @@ import {
   StyleSheet,
   Vibration,
 } from "react-native"
-import { SCREEN_HEIGHT, SCREEN_WIDTH, hexToRGBA } from "helpers/helpers"
+import {
+  SCREEN_HEIGHT,
+  SCREEN_WIDTH,
+  hexToRGBA,
+  isLittlePhone,
+  isSmallPhone,
+} from "helpers/helpers"
 import { Image } from "react-native"
 import { Shadow } from "react-native-shadow-2"
 import colors from "styles/colors"
@@ -65,6 +71,7 @@ const CameraScreen: React.FC<Props> = ({ route, navigation }) => {
   const [isFlashOn, setFleshOn] = useState(false)
   const [isActive, setIsActive] = useState(true)
   const [cameraDevice, setCameraDevice] = useState<"front" | "back">("back")
+  const [isDone, setDone] = useState(false)
   const capture = () => {
     shouldTake.value = true
   }
@@ -109,7 +116,7 @@ const CameraScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const onCaptured = (path: string) => {
     setIsActive(false)
-    setCurrentPhoto(path)
+    setCurrentPhoto(Platform.OS === "android" ? "file://" + path : path)
   }
 
   const handleFleshPress = async () => {
@@ -137,8 +144,11 @@ const CameraScreen: React.FC<Props> = ({ route, navigation }) => {
       enableShutterSound: true,
       flash: isFlashOn ? "on" : "off",
     })
+    setDone(true)
     if (res?.path && !isEmpty) {
-      setCurrentPhoto(res?.path)
+      setCurrentPhoto(
+        Platform.OS === "android" ? "file://" + res.path : res.path
+      )
     }
   }
 
@@ -222,13 +232,11 @@ const CameraScreen: React.FC<Props> = ({ route, navigation }) => {
               <DmText className="text-16 leading-[20px] font-custom700 text-center text-white">
                 {t("take_a_selfie")}
               </DmText>
-              <DmText className="mt-[10] text-15 font-custom400 leading-[20px] text-center text-white">
-                {t(
-                  currentPhoto
-                    ? "is_the_photo_clear_and_all_edges_are_visible"
-                    : "make_sure_that_your_face_is_in_the_frame_descr"
-                )}
-              </DmText>
+              {!currentPhoto && (
+                <DmText className="mt-[10] text-15 font-custom400 leading-[20px] text-center text-white">
+                  {t("make_sure_that_your_face_is_in_the_frame_descr")}
+                </DmText>
+              )}
             </DmView>
           </Shadow>
         </DmView>
@@ -239,19 +247,34 @@ const CameraScreen: React.FC<Props> = ({ route, navigation }) => {
             className="absolute"
             style={{
               left: (8 / 100) * getFrameSize().width,
-              top: (cropRegion.top / 100) * getFrameSize().height,
+              top: ((cropRegion.top - 1) / 100) * getFrameSize().height,
             }}
           >
             <Shadow
               distance={999}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              // offsetLine={
+              //   Platform.OS === "android"
+              //     ? SCREEN_WIDTH < 432 && !isLittlePhone
+              //       ? 0.01
+              //       : SCREEN_WIDTH > 479
+              //         ? 1
+              //         : 0.7
+              //     : 1
+              // }
               startColor={hexToRGBA(colors.black, 0.8)}
               endColor={hexToRGBA(colors.black, 0.8)}
               style={{
-                width: ((cropRegion.width + 12) / 100) * getFrameSize().width,
-                height: (cropRegion.height / 100) * getFrameSize().height,
-                borderRadius: 15,
+                borderRadius: 16,
               }}
             >
+              <DmView
+                style={{
+                  width: ((cropRegion.width + 12) / 100) * getFrameSize().width,
+                  height: cropRegion.height / 100 * getFrameSize().height,
+                }}
+              />
               <DmView className="absolute w-full top-[-30]">
                 <DmText className="text-16 leading-[19px] font-custom600 text-white text-center">
                   {t(
@@ -261,8 +284,8 @@ const CameraScreen: React.FC<Props> = ({ route, navigation }) => {
                   )}
                 </DmText>
               </DmView>
-              <DmView className="w-full h-full" style={{ borderRadius: 15 }}>
-                {!!currentPhoto && (
+              <DmView className="w-full absolute" style={{ borderRadius: 16 }}>
+                {!!currentPhoto && isDone && (
                   <DmView className="items-center">
                     <DmView className="rounded-15 border-1 overflow-hidden">
                       <Image
@@ -274,7 +297,6 @@ const CameraScreen: React.FC<Props> = ({ route, navigation }) => {
                           height:
                             (cropRegion.height / 100) * getFrameSize().height,
                         }}
-                        resizeMode="stretch"
                       />
                     </DmView>
                   </DmView>
@@ -343,27 +365,27 @@ const CameraScreen: React.FC<Props> = ({ route, navigation }) => {
           style={{
             paddingBottom:
               insets.bottom > 31 ? insets.bottom : 31 - insets.bottom,
-            backgroundColor:
-              currentPhoto && type !== "selfie"
-                ? hexToRGBA(colors.black, 0.6)
-                : undefined,
+            backgroundColor: currentPhoto
+              ? hexToRGBA(colors.black, 0.6)
+              : undefined,
             borderTopLeftRadius: 5,
             borderTopRightRadius: 5,
           }}
         >
-          {!currentPhoto && <ShuttterIcon />}
-          {currentPhoto && (
+          {!currentPhoto && !isDone && <ShuttterIcon />}
+          {currentPhoto && isDone && (
             <>
-              {type !== "selfie" && (
-                <DmText className="pt-[20] pb-[40] text-20 leading-[24px] font-custom600 text-white text-center">
-                  {t("is_the_photo_clear")}
-                </DmText>
-              )}
+              <DmText className="pt-[20] pb-[40] text-20 leading-[24px] font-custom600 text-white text-center">
+                {t("is_the_photo_clear")}
+              </DmText>
               <DmView className="w-full flex-row justify-between px-[12]">
                 <ActionBtn
                   title={t("retake")}
                   className="flex-1 rounded-5 bg-transparent border-1 border-white mr-[5]"
-                  onPress={() => setCurrentPhoto("")}
+                  onPress={() => {
+                    setDone(false)
+                    setCurrentPhoto("")
+                  }}
                 />
                 <ActionBtn
                   className="flex-1 rounded-5 ml-[5]"

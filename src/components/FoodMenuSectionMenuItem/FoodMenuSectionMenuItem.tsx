@@ -47,7 +47,6 @@ const FoodMenuSectionMenuItem: React.FC<Props> = ({
             {item.price || item.price !== 0 ? (
               <DmText
                 className={clsx("flex-1 text-13 leading-[16px] font-custom600")}
-                style={{ fontSize: 15 - item.price.toString().length }}
               >
                 {item.discountPrice ? item.discountPrice : item.price}{" "}
                 {t("EGP")}
@@ -65,14 +64,12 @@ const FoodMenuSectionMenuItem: React.FC<Props> = ({
             >
               <DmText
                 className={clsx(
-                  "flex-1 text-13 leading-[16px] text-grey2 font-custom400 line-through",
+                  "flex-1 text-13 leading-[16px] text-grey2 font-custom400 line-through text-center",
                   !item.price && "flex-0"
                 )}
-                style={{
-                  fontSize: 15 - item.discountPrice.toString().length,
-                }}
               >
-                {item.discountPrice ? item?.price : ""}{" "}
+                {item.discountPrice ? item?.price : ""}
+                {(item.discountPrice ? item?.price : "") ? " " : ""}
                 {item.discountPrice ? t("EGP") : ""}
               </DmText>
               <DmView className={clsx(item.price && "flex-1")}>
@@ -82,7 +79,9 @@ const FoodMenuSectionMenuItem: React.FC<Props> = ({
                     className="h-[20] self-auto bg-red2 rounded-4 px-[8]"
                     classNameTextWrapper="mx-[0]"
                     textClassName={clsx(
-                      "text-11 leading-[14px] font-custom700 text-white"
+                      "text-11 leading-[14px] font-custom700 text-white",
+                      isSmallPhone && "text-10",
+                      isLittlePhone && "text-9"
                     )}
                   />
                 ) : (

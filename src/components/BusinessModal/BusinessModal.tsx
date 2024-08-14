@@ -20,6 +20,8 @@ import "moment/locale/ar"
 
 interface Props {
   isVisible: boolean
+  classNameBtn?: string
+  classNameTitle?: string
   onClose: () => void
   onSubmit: (value: BusinessHoursItemValueType) => void
   item?: BusinessHoursItemType
@@ -29,6 +31,8 @@ interface Props {
 const BusinessModal: React.FC<Props> = ({
   isVisible,
   onClose,
+  classNameBtn,
+  classNameTitle,
   onSubmit,
   item,
   onSelectAll,
@@ -73,6 +77,8 @@ const BusinessModal: React.FC<Props> = ({
       animationIn={"fadeIn"}
       animationOut={"fadeOut"}
       animationInTiming={400}
+      backdropTransitionOutTiming={0}
+      hideModalContentWhileAnimating
     >
       <DmView className="bg-white rounded-10 pt-[46] pb-[20] px-[37]">
         <DmText className="text-center text-16 leading-[25px] font-custom500">
@@ -137,8 +143,9 @@ const BusinessModal: React.FC<Props> = ({
           </DmView>
         </DmView>
         <ActionBtn
-          className="mt-[37] z-0"
+          className={clsx("mt-[37] z-0", classNameBtn)}
           title={t("OK")}
+          textClassName={clsx("", classNameTitle)}
           disable={isOpenDateAfter}
           onPress={() =>
             onSubmit({

@@ -17,6 +17,7 @@ import { setCurrentScreen, setLanguage } from "store/auth/slice"
 import { RootStackScreenProps } from "navigation/types"
 
 // Libs & Utils
+import { GoogleSignin } from "@react-native-google-signin/google-signin"
 
 // Styles & Assets
 import clsx from "clsx"
@@ -28,6 +29,12 @@ import EmailIcon from "assets/icons/email.svg"
 import FacebookIcon from "assets/icons/facebook.svg"
 import GoogleIcon from "assets/icons/google.svg"
 import colors from "styles/colors"
+import {
+  useLazyGetProsQuery,
+  usePostSocialGoogleProviderMutation,
+  useSingInGoogleMutation,
+} from "services/api"
+import { useTypedSelector } from "store"
 
 type Props = RootStackScreenProps<"log-in">
 
@@ -37,10 +44,15 @@ const LogInScreen: React.FC<Props> = ({ route, navigation }) => {
   const viewType = route.params?.viewType
   const [view, setView] = useState<"sign-in" | "sign-up">(viewType || "sign-in")
   const [isLoading, setLoading] = useState(false)
+
+  const { token } = useTypedSelector((store) => store.auth)
   // Global Store
   // Variables
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
+  const [getPros] = useLazyGetProsQuery()
+  const [authGoogle] = useSingInGoogleMutation()
+  const [socialProvider] = usePostSocialGoogleProviderMutation()
   // Refs
   // Methods
   // Handlers
@@ -58,8 +70,34 @@ const LogInScreen: React.FC<Props> = ({ route, navigation }) => {
     navigation.navigate(view === "sign-in" ? "sign-in-email" : "sign-up-email")
   }
   // @TO DO
-  const handleGooglePress = () => {
-    //
+  const handleGooglePress = async () => {
+    try {
+      // Check if your device supports Google Play
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
+      // Get the users ID token
+      const { idToken } = await GoogleSignin.signIn()
+
+      try {
+        await socialProvider({
+          idToken: idToken as string,
+        }).unwrap()
+      } catch (e) {
+        console.log("Sign Up Error: ", e)
+      }
+
+      await authGoogle({
+        idToken: idToken as string,
+        userType: "pro",
+      })
+
+      const res = await getPros().unwrap()
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "dashboard", params: { userParams: res } }],
+      })
+    } catch (e) {
+      console.log("Google Sign IN er", e)
+    }
   }
   // @TO DO
   const handleFacebookPress = () => {

@@ -1,0 +1,3 @@
+import MyProfileBusinessHoursScreen from "./MyProfileBusinessHoursScreen"
+
+export default MyProfileBusinessHoursScreen

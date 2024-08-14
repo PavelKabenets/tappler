@@ -1,0 +1,3 @@
+import AccountUpgradesViewMyProfileScreen from "./AccountUpgradesViewMyProfileScreen"
+
+export default AccountUpgradesViewMyProfileScreen

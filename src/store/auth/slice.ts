@@ -1,9 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { Routes } from "navigation/routes"
 import { RootStackParamList } from "navigation/types"
-import { MyDocumentsResponse } from "services"
+import { DocType, MyDocumentsResponse } from "services"
 import { api } from "services/api"
-import { ResultFlowDataType, UserType } from "types"
+import {
+  MenuItemType,
+  MenuSectionType,
+  ResultFlowDataType,
+  UserType,
+} from "types"
 
 export interface AuthState {
   isAuth: boolean
@@ -23,6 +28,10 @@ export interface AuthState {
   isShowDeleteOpportunitiesModal?: boolean
   jobsIgnoredIds: number[]
   isLoadingModalVisible?: boolean
+  listFoodMenuPositions?: MenuSectionType[]
+  isNotificationsAllowed: boolean
+  isOnceServiceAllowed: boolean
+  lastDoc?: DocType
 }
 
 const initialState: AuthState = {
@@ -34,6 +43,8 @@ const initialState: AuthState = {
   isLogout: false,
   jobsIgnoredIds: [],
   isShowDeleteOpportunitiesModal: true,
+  isNotificationsAllowed: false,
+  isOnceServiceAllowed: false,
 }
 
 export const authSlice = createSlice({
@@ -60,6 +71,8 @@ export const authSlice = createSlice({
       state.isLogout = true
       state.jobsIgnoredIds = []
       state.isShowDeleteOpportunitiesModal = true
+      state.documents = undefined
+      state.listFoodMenuPositions = undefined
     },
     setResultRegFlow: (
       state: AuthState,
@@ -129,6 +142,18 @@ export const authSlice = createSlice({
     ) => {
       state.isLoadingModalVisible = action.payload
     },
+    setListFoodMenuPositions: (
+      state: AuthState,
+      action: PayloadAction<MenuSectionType[]>
+    ) => {
+      state.listFoodMenuPositions = action.payload
+    },
+    setNotificationsAllowed: (
+      state: AuthState,
+      action: PayloadAction<boolean>
+    ) => {
+      state.isNotificationsAllowed = action.payload
+    },
   },
   extraReducers: (builder) => {
     builder.addMatcher(
@@ -139,6 +164,16 @@ export const authSlice = createSlice({
     )
     builder.addMatcher(
       api.endpoints.auth.matchFulfilled,
+      (state, { payload }) => {
+        state.token = payload.token
+        state.refreshToken = payload.refreshToken
+        state.user = { ...state.user, id: payload.id }
+        state.isAuth = true
+        state.isRegistrationFlowComleted = true
+      }
+    )
+    builder.addMatcher(
+      api.endpoints.singInGoogle.matchFulfilled,
       (state, { payload }) => {
         state.token = payload.token
         state.refreshToken = payload.refreshToken
@@ -185,6 +220,26 @@ export const authSlice = createSlice({
         state.documents = payload
       }
     )
+    builder.addMatcher(
+      api.endpoints.patchMenuSections.matchFulfilled,
+      (state, { payload }) => {
+        state.listFoodMenuPositions = payload.menu?.menuSections || []
+      }
+    )
+    builder.addMatcher(
+      api.endpoints.prosServiceCategories.matchFulfilled,
+      (state, { payload }) => {
+        state.isOnceServiceAllowed = payload.some(
+          (item) => item.status === "active"
+        )
+      }
+    )
+    builder.addMatcher(
+      api.endpoints.getMyDocument.matchFulfilled,
+      (state, { payload }) => {
+        state.lastDoc = payload?.map((item) => item).pop()
+      }
+    )
   },
 })
 
@@ -204,6 +259,8 @@ export const {
   setShowDeleteOpportuinityModal,
   addIgnoredJob,
   setLoadingModalVisible,
+  setListFoodMenuPositions,
+  setNotificationsAllowed,
 } = authSlice.actions
 
 export default authSlice.reducer

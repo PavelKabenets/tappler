@@ -1,0 +1,3 @@
+import AccountUpgradesViewElemComponent from "./AccountUpgradesViewElemComponent"
+
+export default AccountUpgradesViewElemComponent

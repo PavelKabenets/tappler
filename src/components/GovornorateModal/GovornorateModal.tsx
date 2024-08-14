@@ -154,7 +154,7 @@ const GovornorateModal: React.FC<Props> = ({
     if (
       placeOfService &&
       isVisible &&
-      !!placeOfService.serviceLocationAreas.length
+      !!placeOfService.serviceLocationAreas?.length
     ) {
       setSelectedCityArea(
         placeOfService.serviceLocationAreas.map((item) => item.city)
@@ -189,7 +189,13 @@ const GovornorateModal: React.FC<Props> = ({
 
   const renderSearchItem = ({ item }: { item: MockSearchItemType }) => {
     const handlePressSearchItem = () => {
-      setSelectedCityArea(item.area)
+      setSelectedCityArea((prev) => {
+        if (prev.includes(t(item.area))) {
+          return prev
+        } else {
+          return [...prev, t(item.area)]
+        }
+      })
       setSelectedGovernorate(item.governorate)
       setFilter("")
     }

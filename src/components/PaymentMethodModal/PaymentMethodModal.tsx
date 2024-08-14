@@ -12,23 +12,29 @@ import FawryIcon from "assets/icons/fawry.svg"
 import WalletIcon from "assets/icons/wallet.svg"
 import { useTranslation } from "react-i18next"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { PaymentMethodType } from "types"
 
 interface Props {
   isVisible: boolean
   onClose: () => void
+  onPress?: (type: PaymentMethodType) => void
 }
 
-const PaymentMethodModal: React.FC<Props> = ({ isVisible, onClose }) => {
+const PaymentMethodModal: React.FC<Props> = ({
+  isVisible,
+  onClose,
+  onPress,
+}) => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const handleCreditOrDebit = () => {
-    //
+    onPress?.("creditCard")
   }
-  const handleFawryPress = () => {
-    //
-  }
+  // const handleFawryPress = () => {
+  //   onPress?.("")
+  // }
   const handleWallet = () => {
-    //
+    onPress?.("mobileWallet")
   }
   return (
     <>
@@ -57,11 +63,11 @@ const PaymentMethodModal: React.FC<Props> = ({ isVisible, onClose }) => {
             ]}
             className="border-t-0"
           />
-          <PaymentItem
+          {/* <PaymentItem
             title={t("fawry_pay")}
             Icons={[<FawryIcon key={0} />]}
             onPress={handleFawryPress}
-          />
+          /> */}
           <PaymentItem
             title={t("mobile_wallet")}
             Icons={[<WalletIcon key={0} />]}
