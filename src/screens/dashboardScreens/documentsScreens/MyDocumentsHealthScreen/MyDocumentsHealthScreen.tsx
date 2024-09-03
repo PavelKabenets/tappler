@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 
 // Components
 import { ActionBtn, DmText, DmView } from "components/UI"
@@ -34,6 +34,7 @@ import {
   api,
   useGetTrustStickersQuery,
   useLazyGetMyDocumentQuery,
+  usePatchProsServiceCategoriesFoodDeliveryChargeMutation,
   usePostPaymentsTrustStickersMutation,
   usePostProfilePhotoMutation,
 } from "services/api"
@@ -69,6 +70,20 @@ const MyDocumentsHealthScreen: React.FC<Props> = ({ route, navigation }) => {
   const { data } = useGetTrustStickersQuery()
   const [postPhoto] = usePostProfilePhotoMutation()
   const [getDocs] = useLazyGetMyDocumentQuery()
+  const docAvalibleId = useMemo(() => {
+    const avalibleItems = documents?.filter((item) => {
+      if (item?.trustDocumentData?.trustProductId === currentTrustSticker?.id) {
+        return true
+      }
+      return false
+    })
+    if (avalibleItems?.length) {
+      const item = avalibleItems.pop()
+      return item?.trustDocumentData?.trustProductId
+    } else {
+      return undefined
+    }
+  }, [documents, currentTrustSticker])
 
   // Refs
   const webViewRef = useRef<WebView>(null)
@@ -254,7 +269,10 @@ const MyDocumentsHealthScreen: React.FC<Props> = ({ route, navigation }) => {
                 title={t("setup_fee")}
                 classNameTitle="text-14 leading-[18px]"
                 descr={t("number_inclusive_of_VAT_this_fee_doesnt", {
-                  number: currentTrustSticker?.pricePerYear || 0,
+                  number:
+                    docAvalibleId !== undefined
+                      ? 0
+                      : currentTrustSticker?.pricePerYear || 0,
                 })}
                 classNameDescr="text-13 leading-[20px]"
                 className={clsx(

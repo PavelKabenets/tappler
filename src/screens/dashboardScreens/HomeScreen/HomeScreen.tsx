@@ -49,6 +49,7 @@ import {
   useGetPointsPackagesQuery,
   useGetProSybscriptionsQuery,
   useGetProductsTrustQuery,
+  useGetProsMyActivationQuery,
   useGetProsQuery,
   useGetQuotesQuery,
   useLazyGetNotitficationsByIdQuery,
@@ -64,6 +65,7 @@ import { useNetInfoInstance } from "@react-native-community/netinfo"
 import messaging from "@react-native-firebase/messaging"
 import notifee, { EventType, Notification } from "@notifee/react-native"
 import { NotificationsItemType } from "types"
+import FailedActivationModal from "components/FailedActivationModal"
 
 type Props = RootStackScreenProps<"home">
 
@@ -79,6 +81,8 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
   const [isWaitAMomentModalVisible, setWaitAMomentModalVisible] =
     useState(false)
   const [isStatusModalVisible, setStatusModalVisible] = useState(false)
+  const [isFailedActivationModalVisible, setFailedActivationModalVisible] =
+    useState(false)
   // Global Store
   // Variables
   const {
@@ -93,6 +97,7 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
     isNotificationsAllowed,
     isOnceServiceAllowed,
     lastDoc,
+    isMyDocsUploaded,
   } = useTypedSelector((store) => store.auth)
 
   const user = useMemo(() => {
@@ -116,6 +121,8 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
   useGetProductsTrustQuery({ page: 1 })
   useGetProSybscriptionsQuery()
   useGetNotitficationsQuery({ page: 1 })
+  const { data: activationData, isFetching } = useGetProsMyActivationQuery()
+
   const { data: documentsData } = useGetMyDocumentQuery()
   const { data: servicesData, refetch } = useProsServiceCategoriesQuery()
 
@@ -141,6 +148,37 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
   const { t } = useTranslation()
   // Refs
   // Methods
+  const onCheckAllDocsUploaded = () => {
+    if (
+      user?.proType === "individual" &&
+      !documentsData?.filter(
+        (item) =>
+          item.type === "id" &&
+          (item.status === "approved" || item.status === "pending")
+      ).length
+    ) {
+      return true
+    }
+
+    if (
+      user?.proType === "company" &&
+      (!documentsData?.filter(
+        (item) =>
+          item.type === "id" &&
+          (item.status === "approved" || item.status === "pending")
+      ).length ||
+        !documentsData?.filter(
+          (item) =>
+            item.type === "trust" &&
+            (item.status === "approved" || item.status === "pending")
+        ).length)
+    ) {
+      return true
+    }
+
+    return false
+  }
+
   async function onMessageReceived(message: any) {
     notifee.displayNotification({
       data: {
@@ -204,6 +242,14 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
     setStatusModalVisible(false)
   }
 
+  const handleOpenActivatedModal = () => {
+    setFailedActivationModalVisible(true)
+  }
+
+  const handleCloseActivatedModal = () => {
+    setFailedActivationModalVisible(false)
+  }
+
   // Hooks
   useEffect(() => {
     if (isFocused) {
@@ -221,7 +267,6 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
 
   useEffect(() => {
     if (
-      user?.accountStatus === "registered" &&
       isNotificationRequestWasShowing &&
       !currentScreen &&
       isWaitAMomentModalPossibleVisible &&
@@ -229,9 +274,11 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
       !isLogout &&
       isConnected
     ) {
-      setWaitAMomentModalVisible(true)
+      setWaitAMomentModalVisible(!isMyDocsUploaded)
     }
-    dispatch(setWaitAMomentModalPossibleVisible(true))
+    setTimeout(() => {
+      dispatch(setWaitAMomentModalPossibleVisible(true))
+    }, 1000)
   }, [!!isConnected])
 
   useEffect(() => {
@@ -305,13 +352,32 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
     }
   }, [isNotificationsAllowed])
 
-
   useEffect(() => {
     if (isNotificationsAllowed) {
       messaging().onMessage(onMessageReceived)
       messaging().setBackgroundMessageHandler(onMessageReceived)
     }
   }, [isNotificationsAllowed])
+
+  useEffect(() => {
+    if (
+      !isNotificationModalVisible &&
+      !isWaitAMomentModalVisible &&
+      !isFailedActivationModalVisible &&
+      activationData
+    ) {
+      if (
+        activationData?.profilePhoto?.status === "rejected" ||
+        activationData?.informationAbout?.status === "rejected" ||
+        activationData?.photosOfWork?.status === "rejected" ||
+        !activationData?.photosOfWork
+      ) {
+        setTimeout(() => {
+          setFailedActivationModalVisible(true)
+        }, 400)
+      }
+    }
+  }, [activationData, !isWaitAMomentModalVisible])
 
   // Listeners
   // Render Methods
@@ -432,7 +498,7 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
             onPress={handleMyDocuments}
             descr={t("add_view_documents")}
             Icon={<MyDocumentsIcon />}
-            isComplete={user?.accountStatus === "active"}
+            isComplete={isMyDocsUploaded}
             btnTitle={t(lastDoc?.status || "")}
             btnVariant={
               lastDoc && lastDoc.status === "rejected"
@@ -465,6 +531,10 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
       <AccountStatusModal
         isVisible={isStatusModalVisible}
         onClose={handleCloseStatusModal}
+      />
+      <FailedActivationModal
+        isVisible={isFailedActivationModalVisible}
+        onClose={handleCloseActivatedModal}
       />
     </DmView>
   )

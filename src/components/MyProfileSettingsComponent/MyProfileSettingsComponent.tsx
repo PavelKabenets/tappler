@@ -1,7 +1,7 @@
 import React from "react"
 // Components
-import { DmText, DmView } from "components/UI"
-import { Dimensions, FlatList, Image } from "react-native"
+import { ActionBtn, DmText, DmView } from "components/UI"
+import { Dimensions, FlatList, I18nManager, Image } from "react-native"
 import { Shadow } from "react-native-shadow-2"
 // Hooks & Redux
 import { useTypedSelector } from "store"
@@ -32,6 +32,9 @@ interface Props {
   subtitleArrCredential?: MediaTypeCredentials[]
   onPress?: () => void
   onDeleteImg?: (index: number) => void
+  status?: "approved" | "rejected" | "pending"
+  titleWrapperClassName?: string
+  classNameBtn?: string
 }
 
 const MyProfileSettingsComponent: React.FC<Props> = ({
@@ -47,6 +50,9 @@ const MyProfileSettingsComponent: React.FC<Props> = ({
   classNameHeader,
   photo,
   onDeleteImg,
+  status,
+  titleWrapperClassName,
+  classNameBtn,
 }) => {
   const { t } = useTranslation()
   const { user } = useTypedSelector((store) => store.auth)
@@ -115,9 +121,30 @@ const MyProfileSettingsComponent: React.FC<Props> = ({
                 classNameHeader
               )}
             >
-              <DmText className="text-14 leading-[18px] font-custom600">
-                {title}
-              </DmText>
+              <DmView
+                className={clsx("flex-row items-center", titleWrapperClassName)}
+              >
+                <DmText className="text-14 leading-[18px] font-custom600">
+                  {title}
+                </DmText>
+                {status !== "approved" && status && (
+                  <ActionBtn
+                    className={clsx("ml-[10] h-[22]", classNameBtn)}
+                    title={t(status)}
+                    textClassName={clsx(
+                      I18nManager.isRTL && "mt-[-2]",
+                      "text-12 leading-[15px] font-custom500"
+                    )}
+                    variant={
+                      status === "pending"
+                        ? "grey"
+                        : status === "rejected"
+                          ? "yellow"
+                          : undefined
+                    }
+                  />
+                )}
+              </DmView>
               {Icon && (
                 <DmView onPress={onPress}>
                   <EditPencilIcon />
@@ -125,7 +152,13 @@ const MyProfileSettingsComponent: React.FC<Props> = ({
               )}
             </DmView>
             {photo && (
-              <DmView onPress={onPress} className="items-center mt-[-18]">
+              <DmView
+                onPress={onPress}
+                className={clsx(
+                  "items-center mt-[-18]",
+                  status !== "approved" && status && "mt-[-40]"
+                )}
+              >
                 <Image
                   source={{
                     uri: currentPhoto?.path || user?.profilePhoto,

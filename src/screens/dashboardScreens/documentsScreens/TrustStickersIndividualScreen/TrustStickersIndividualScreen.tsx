@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 
 // Components
 import { ActionBtn, DmInput, DmText, DmView } from "components/UI"
@@ -15,10 +15,12 @@ import { useTranslation } from "react-i18next"
 import { Controller, useForm } from "react-hook-form"
 import {
   api,
+  useGetMyDocumentQuery,
   useGetTrustStickersQuery,
   useLazyGetMyDocumentQuery,
   usePostPaymentsTrustStickersMutation,
   usePostProfilePhotoMutation,
+  usePostResendTrustStickersMutation,
 } from "services/api"
 import { useDispatch } from "react-redux"
 
@@ -35,6 +37,7 @@ import clsx from "clsx"
 import styles from "./styles"
 import CloseIcon from "assets/icons/close.svg"
 import PaymentMethodModal from "components/PaymentMethodModal"
+import { Image } from "react-native"
 
 type Props = RootStackScreenProps<"trust-stickers-individual">
 
@@ -69,6 +72,7 @@ const TrustStickersIndividualScreen: React.FC<Props> = ({
   } = useForm<FormValueType>()
   // Global Store
   // Variables
+  const { data: documents } = useGetMyDocumentQuery()
   const { t, i18n } = useTranslation()
   const insets = useSafeAreaInsets()
   const [postPhoto] = usePostProfilePhotoMutation()
@@ -76,6 +80,20 @@ const TrustStickersIndividualScreen: React.FC<Props> = ({
   const { data } = useGetTrustStickersQuery()
   const [postTrustStickers] = usePostPaymentsTrustStickersMutation()
   const dispatch = useDispatch()
+  const [resendDoc] = usePostResendTrustStickersMutation()
+  const docAvalibleItem = useMemo(() => {
+    const avalibleItems = documents?.filter((item) => {
+      if (item?.trustDocumentData?.trustProductId === currentTrustSticker?.id) {
+        return true
+      }
+      return false
+    })
+    if (avalibleItems?.length) {
+      return avalibleItems.pop()
+    } else {
+      return undefined
+    }
+  }, [documents, currentTrustSticker])
 
   // Refs
   const webViewRef = useRef<WebView>(null)
@@ -85,7 +103,36 @@ const TrustStickersIndividualScreen: React.FC<Props> = ({
   }
 
   const onSubmit = async () => {
-    handleOpenPayment()
+    if (
+      docAvalibleItem !== undefined &&
+      currentTrustSticker &&
+      docAvalibleItem?.files.length
+    ) {
+      try {
+        let resPhoto
+        if (watch("file")) {
+          resPhoto = await postPhoto(getValues("file")).unwrap()
+          await resendDoc({
+            id: docAvalibleItem.id,
+            fileKey: resPhoto?.storageKey,
+          }).unwrap()
+          const response = await getDocs().unwrap()
+
+          navigation.navigate("wait", {
+            headerTitle: t("trust_stickers"),
+            title: t("we_have_received_your_information"),
+            descr: t("we_will_verify_the_information_descr"),
+            startHours: 2,
+            endHours: 4,
+            documents: response,
+          })
+        }
+      } catch (e) {
+        console.log("resend error: ", e)
+      }
+    } else {
+      handleOpenPayment()
+    }
   }
   // Handlers
   const handleOpenSelectPhotoModal = () => {
@@ -276,7 +323,9 @@ const TrustStickersIndividualScreen: React.FC<Props> = ({
             </DmView>
             {isValid && (
               <ActionBtn
-                title={t("make_payment")}
+                title={t(
+                  docAvalibleItem !== undefined ? "send" : "make_payment"
+                )}
                 className="mt-[25] mx-[6] rounded-5"
                 textClassName=" text-13 leading-[16px] font-custom600"
                 onPress={handleSubmit(onSubmit)}

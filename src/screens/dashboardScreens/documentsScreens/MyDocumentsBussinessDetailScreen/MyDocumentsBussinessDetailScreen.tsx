@@ -18,8 +18,10 @@ import { useTranslation } from "react-i18next"
 import { Controller, useForm } from "react-hook-form"
 import { useTypedSelector } from "store"
 import {
+  useGetMyDocumentQuery,
   useLazyGetMyDocumentQuery,
   usePostProfilePhotoMutation,
+  usePostResendTrustStickersMutation,
 } from "services/api"
 
 // Helpers & Types
@@ -90,12 +92,28 @@ const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
   const { language, user } = useTypedSelector((store) => store.auth)
   // Variables
   const dispatch = useDispatch()
+  const { data: documents } = useGetMyDocumentQuery()
+
   const { t, i18n } = useTranslation()
   const insets = useSafeAreaInsets()
   const [postTrustStickers] = usePostPaymentsTrustStickersMutation()
   const { data } = useGetTrustStickersQuery()
   const [responseUrl, setResponseUrl] = useState("")
   const [postPhoto] = usePostProfilePhotoMutation()
+  const [resendDoc] = usePostResendTrustStickersMutation()
+  const docAvalibleItem = useMemo(() => {
+    const avalibleItems = documents?.filter((item) => {
+      if (item?.trustDocumentData?.trustProductId === currentTrustSticker?.id) {
+        return true
+      }
+      return false
+    })
+    if (avalibleItems?.length) {
+      return avalibleItems.pop()
+    } else {
+      return undefined
+    }
+  }, [documents, currentTrustSticker])
 
   const [getDocs] = useLazyGetMyDocumentQuery()
 
@@ -206,8 +224,37 @@ const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
     setDatePickerVisible(false)
   }
 
-  const handleSubmit = () => {
-    handleOpenPayment()
+  const handleSubmit = async () => {
+    if (
+      docAvalibleItem !== undefined &&
+      currentTrustSticker &&
+      docAvalibleItem?.files.length
+    ) {
+      try {
+        let resPhoto
+        if (watch("file")) {
+          resPhoto = await postPhoto(getValues("file")).unwrap()
+          await resendDoc({
+            id: docAvalibleItem.id,
+            fileKey: resPhoto?.storageKey,
+          }).unwrap()
+          const response = await getDocs().unwrap()
+
+          navigation.navigate("wait", {
+            headerTitle: t("trust_stickers"),
+            title: t("we_have_received_your_information"),
+            descr: t("we_will_verify_the_information_descr"),
+            startHours: 2,
+            endHours: 4,
+            documents: response,
+          })
+        }
+      } catch (e) {
+        console.log("resend error: ", e)
+      }
+    } else {
+      handleOpenPayment()
+    }
   }
 
   const handleGoChangeLocatinScreen = () => {
@@ -243,9 +290,11 @@ const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
 
   useEffect(() => {
     const trust = data?.data?.filter(
-      (fItem) => fItem.type === "trust" && fItem.descriptionEn === "Verified Business Seal"
+      (fItem) =>
+        fItem.type === "trust" &&
+        fItem.descriptionEn === "Verified Business Seal"
     )
-    
+
     if (trust?.length) {
       setCurrentTrustSticker(trust[0])
     }
@@ -318,7 +367,12 @@ const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
                 control={control}
                 rules={{ required: true }}
                 render={({ field: { value, onChange } }) => (
-                  <DmView className={clsx("mt-[20] flex-row", i18n.language === "ar" && "mt-[10]")}>
+                  <DmView
+                    className={clsx(
+                      "mt-[20] flex-row",
+                      i18n.language === "ar" && "mt-[10]"
+                    )}
+                  >
                     {!value && (
                       <DmView
                         className={clsx(
@@ -372,7 +426,9 @@ const MyDocumentsBussinessDetailScreen: React.FC<Props> = ({
               <DmView className="mt-[25] px-[6]">
                 <ActionBtn
                   className="rounded-5 px-[0]"
-                  title={t("make_payment")}
+                  title={t(
+                    docAvalibleItem !== undefined ? "send" : "make_payment"
+                  )}
                   onPress={handleSubmit}
                   textClassName="text-14 leading-[17px] font-custom600"
                 />

@@ -535,7 +535,7 @@
 				CODE_SIGN_ENTITLEMENTS = tappler_mob_app/tappler_mob_app.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 89;
+				CURRENT_PROJECT_VERSION = 96;
 				DEVELOPMENT_TEAM = 72HAUA5958;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = tappler_mob_app/Info.plist;
@@ -567,7 +567,7 @@
 				CODE_SIGN_ENTITLEMENTS = tappler_mob_app/tappler_mob_app.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 89;
+				CURRENT_PROJECT_VERSION = 96;
 				DEVELOPMENT_TEAM = 72HAUA5958;
 				INFOPLIST_FILE = tappler_mob_app/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

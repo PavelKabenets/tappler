@@ -286,6 +286,64 @@ export type AccountStatusType =
   | "idle"
   | "vacation"
 
+export type ProcessedByType = {
+  id: number
+  status: "active" | "suspended" | "deleted"
+  firstName: string
+  lastName: string
+  address: string
+  city: string
+  country: string
+  dateOfBirth: "1990-11-28T15:59:20.598Z"
+  gender: "male" | "famale"
+  homePhone: string
+  mobilePhone: string
+  employmentType: "full time" | "part time" | "contractor" | "seasonal"
+  currentPosition: string
+  profilePhoto: string
+  lastSeen: string | null
+  joinDate: string
+  userId: number
+  department: "admin" | "sales" | "quality" | "reviews" | "customer service"
+  statusHistory: {
+    status: "active" | "suspended" | "deleted"
+    changedOn: string
+    changedById: number
+  }[]
+  targets: {
+    id: number
+    unit:
+      | "sales amount"
+      | "sales quotes"
+      | "reviews processing"
+      | "profile approvals"
+      | "documents processing"
+      | "customer care tickets"
+    monthlyTarget: number
+    employeeId: number
+  }[]
+  permissions: {
+    sales: boolean
+    leaderboard: boolean
+    accounting: boolean
+    customers: boolean
+    quality: boolean
+    pros: boolean
+    customerCare: boolean
+    jobs: boolean
+    viewConversations: boolean
+  }
+  activityLogs: {
+    date: string
+    actionType: "login" | "resetPassword"
+  }[]
+  systemLogs: {
+    date: string
+    actionType: "activateAccount" | "deactivateAccount"
+    reason: string
+    actionDoneByEmployeeId: number
+  }[]
+}
 export type ProfileEditsType = {
   id: number
   postedOn: string
@@ -296,64 +354,7 @@ export type ProfileEditsType = {
   processedAt: string
   processedById: number
   rejectReason: string
-  processedBy: {
-    id: number
-    status: "active" | "suspended" | "deleted"
-    firstName: string
-    lastName: string
-    address: string
-    city: string
-    country: string
-    dateOfBirth: "1990-11-28T15:59:20.598Z"
-    gender: "male" | "famale"
-    homePhone: string
-    mobilePhone: string
-    employmentType: "full time" | "part time" | "contractor" | "seasonal"
-    currentPosition: string
-    profilePhoto: string
-    lastSeen: string | null
-    joinDate: string
-    userId: number
-    department: "admin" | "sales" | "quality" | "reviews" | "customer service"
-    statusHistory: {
-      status: "active" | "suspended" | "deleted"
-      changedOn: string
-      changedById: number
-    }[]
-    targets: {
-      id: number
-      unit:
-        | "sales amount"
-        | "sales quotes"
-        | "reviews processing"
-        | "profile approvals"
-        | "documents processing"
-        | "customer care tickets"
-      monthlyTarget: number
-      employeeId: number
-    }[]
-    permissions: {
-      sales: boolean
-      leaderboard: boolean
-      accounting: boolean
-      customers: boolean
-      quality: boolean
-      pros: boolean
-      customerCare: boolean
-      jobs: boolean
-      viewConversations: boolean
-    }
-    activityLogs: {
-      date: string
-      actionType: "login" | "resetPassword"
-    }[]
-    systemLogs: {
-      date: string
-      actionType: "activateAccount" | "deactivateAccount"
-      reason: string
-      actionDoneByEmployeeId: number
-    }[]
-  }
+  processedBy: ProcessedByType
   pro: string
 }
 
@@ -777,4 +778,94 @@ export type SuspensionType = {
   proId: number
   customerId: number
   suspendedBy: SuspendedByType
+}
+
+export type FileType = {
+  assignment: "id.front" | "id.back" | "id.selfie" | "companyTradeLicense"
+  url: string
+}
+
+export type ActivationDocType = {
+  id: number
+  type: "id" | "companyTradeLicense" | "trust" | "serviceCategory"
+  status: "pending" | "approved" | "rejected"
+  createdAt: string
+  processedAt: string
+  rejectReason: string
+  proId: number
+  pro: ProType
+  processedById: number
+  processedBy: ProcessedByType
+  files: FileType
+  idDocumentData: IdDocumentData
+  tradeLicenseDocumentData: TradeLicenseDocumentData
+  trustDocumentData: {
+    expirationDate: string
+    trustProductId: number
+    trustProduct: {
+      id: number
+      type: "motivational" | "trust"
+      status: "active" | "expired"
+      descriptionEn: string
+      descriptionAr: string
+      pricePerDay: number
+      pricePerYear: number
+      maxDiscount: number
+      startDate: string
+      expirationDate: string
+      pictureEn: string
+      pictureAr: string
+      proType: "all" | "company" | "individual"
+    }
+    issueDate: string
+    note: string
+    internalNotes: {
+      id: number
+      text: string
+      employee: ProcessedByType
+      employeeId: number
+      createdAt: string
+    }[]
+  }
+  proAdditionalDocument: ProAdditionalDocumentsType
+  rejectedBySystem: boolean
+}
+
+export type ProsActivationInfoType = {
+  id: number
+  proName: string
+  businessName: string
+  proId: number
+  proType: "individual" | "company"
+  mobileNumber: string
+  email: string
+  accountCreatedAt: string
+  status: "pending" | "approved" | "rejected"
+  createdAt: string
+  profilePhotoId: number
+  profilePhoto: {
+    rejectReason?: string
+    status: "pending" | "approved" | "rejected"
+    id: number
+    fileId: number
+    file: any
+  }
+  photosOfWork: {
+    rejectReason?: string
+    status: "pending" | "approved" | "rejected"
+    id: number
+    photosOfWork: any[]
+  }
+  idDocumentId: number
+  idDocument: ActivationDocType
+  tradeLicense: ActivationDocType
+  informationAbout: {
+    rejectReason?: string
+    status: "pending" | "approved" | "rejected"
+    id: number
+    informationAbout: string
+  }
+  processedById: number
+  processedBy: ProcessedByType
+  processedAt: string
 }

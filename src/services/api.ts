@@ -70,6 +70,9 @@ import {
   PostSocialGoogleProviderResponse,
   PostRegisterNotificationsDeviceRequest,
   PostRegisterNotificationsDeviceResponse,
+  PostResendTrustRequest,
+  PostResendTrustResponse,
+  GetProsMyActivation,
 } from "services"
 import { RootState } from "store"
 import { logout, setLogout, setTokens } from "store/auth/slice"
@@ -827,6 +830,21 @@ export const api = createApi({
         }
       },
     }),
+    postResendTrustStickers: builder.mutation<
+      PostResendTrustResponse,
+      PostResendTrustRequest
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/pro-documents/trust/${id}`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Documents", "Auth"],
+    }),
+    getProsMyActivation: builder.query<GetProsMyActivation, void>({
+      query: () => "/profile-activations/pros/me",
+      providesTags: ["Auth", "Documents"],
+    }),
   }),
 })
 
@@ -903,4 +921,7 @@ export const {
   useLazyGetMyDocumentQuery,
   useLazyGetProsServiceByIdQuery,
   useGetProsServiceByIdQuery,
+  usePostResendTrustStickersMutation,
+  useLazyGetProsMyActivationQuery,
+  useGetProsMyActivationQuery,
 } = api

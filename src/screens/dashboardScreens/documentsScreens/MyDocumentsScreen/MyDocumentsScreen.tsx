@@ -384,7 +384,12 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
             <MyServiceDetailItem
               title={t("fingerprints_certificate")}
               descr={t("add_background_checked_to_your_profile_descr")}
-              onPress={handleFingerprints}
+              onPress={
+                companyTrustFingerPrintsStatus === "incomplete" ||
+                companyTrustFingerPrintsStatus === "rejected"
+                  ? handleFingerprints
+                  : handleOpenRequestModal
+              }
               titleBtn={t(
                 companyTrustFingerPrintsStatus === "incomplete"
                   ? ""
@@ -421,7 +426,12 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
             <MyServiceDetailItem
               title={t("good_health_certificate")}
               descr={t("add_health_checked_sticker_to_your_descr")}
-              onPress={handlePressTrustStickers}
+              onPress={
+                companyHealthtatus === "rejected" ||
+                companyHealthtatus === "incomplete"
+                  ? handlePressTrustStickers
+                  : handleOpenRequestModal
+              }
               Icon={<HealthSertificateIcon />}
               classNameTitle="text-15 leading-[19px]"
               classNameDescr="mt-[1] text-12 leading-[20px]"
@@ -470,11 +480,11 @@ const MyDocumentsScreen: React.FC<Props> = ({ route, navigation }) => {
                 <ChevronRighttIcon stroke={colors.red} width={18} height={18} />
               </DmView>
             }
-            titleBtn={
-              companyTrustStickersStatus === "pending"
-                ? t(companyTrustStickersStatus || "incomplete")
-                : undefined
-            }
+            titleBtn={t(
+              companyTrustStickersStatus === "incomplete"
+                ? ""
+                : companyTrustStickersStatus
+            )}
             IconDone={<GreenCheckIcon />}
             btnVariant={
               companyTrustStickersStatus !== "incomplete" &&

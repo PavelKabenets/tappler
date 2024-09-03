@@ -1,12 +1,13 @@
 import React, { Dispatch, SetStateAction } from "react"
 
-import { DmText, DmView } from "components/UI"
+import { ActionBtn, DmText, DmView } from "components/UI"
 
 import styles from "./styles"
 import ChevronRight from "assets/icons/chevron-right.svg"
 import colors from "styles/colors"
 import clsx from "clsx"
 import { I18nManager } from "react-native"
+import DoneIcon from "assets/icons/check-mark.svg"
 
 interface Props {
   title: string
@@ -19,6 +20,9 @@ interface Props {
   textVariant?: "default" | "red"
   onPress?: () => void
   classNameTitleChevron?: string
+  btnTitle?: string
+  btnVariant?: "white" | "bordered" | "grey" | "yellow"
+  isMarkDone?: boolean
 }
 
 const SettingsItem: React.FC<Props> = ({
@@ -32,6 +36,9 @@ const SettingsItem: React.FC<Props> = ({
   className,
   onPress,
   classNameTitleChevron,
+  btnTitle,
+  btnVariant,
+  isMarkDone,
 }) => {
   return (
     <DmView
@@ -61,6 +68,20 @@ const SettingsItem: React.FC<Props> = ({
         >
           {title}
         </DmText>
+        {!!btnTitle && !isMarkDone && (
+          <ActionBtn
+            className={clsx("ml-[10] h-[22]")}
+            title={btnTitle}
+            textClassName={clsx(
+              I18nManager.isRTL && "mt-[-2]",
+              "text-10 leading-[13px] font-custom500"
+            )}
+            variant={btnVariant}
+          />
+        )}
+        {isMarkDone && (
+          <DmView className={clsx("ml-[10]")}>{<DoneIcon />}</DmView>
+        )}
       </DmView>
       <DmView className="flex-row items-center">
         {titleChevron && (

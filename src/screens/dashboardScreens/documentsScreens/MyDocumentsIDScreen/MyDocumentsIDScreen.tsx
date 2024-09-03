@@ -21,6 +21,7 @@ import {
   useCameraPermission,
 } from "react-native-vision-camera"
 import {
+  useGetMyDocumentQuery,
   usePostDocumentMutation,
   usePostProfilePhotoMutation,
 } from "services/api"
@@ -57,6 +58,8 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
   )
   const [isLoading, setLoading] = useState(false)
 
+  const [isModalWasShowing, setModalWasShowing] = useState(false)
+
   const {
     control,
     setValue,
@@ -80,6 +83,9 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
   const [sendPhoto] = usePostProfilePhotoMutation()
   const [postDocument] = usePostDocumentMutation()
   const [isModalIdVisible, setModalIdVisible] = useState(false)
+  const { data: documentsData } = useGetMyDocumentQuery()
+  const [postImg] = usePostProfilePhotoMutation()
+  const [postDoc] = usePostDocumentMutation()
 
   const device = useCameraDevice("front")
   const { hasPermission, requestPermission } = useCameraPermission()
@@ -106,7 +112,19 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
   }
   // Handlers
   const handleOpenModalId = () => {
-    setModalIdVisible(true)
+    const idAlreadyUploaded = documentsData?.filter(
+      (item) => item.type === "id"
+    )
+    if (idAlreadyUploaded?.length) {
+      const item = idAlreadyUploaded.pop()
+      if (item?.idDocumentData?.idNumber === getValues("idNumber")) {
+        handleSendDocs()
+      } else {
+        setModalIdVisible(true)
+      }
+    } else {
+      setModalIdVisible(true)
+    }
   }
   const handleHideModalId = () => {
     setModalIdVisible(false)
@@ -127,6 +145,62 @@ const MyDocumentsIDScreen: React.FC<Props> = ({ route, navigation }) => {
   const handleCameraModalOpen = (type: "front" | "back") => {
     setCameraModalType(type)
     navigation.navigate("camera", { type })
+  }
+
+  const handleSendDocs = async () => {
+    try {
+      setLoading(true)
+      const frontImg = await postImg(frontId).unwrap()
+      const backImg = await postImg(backId).unwrap()
+
+      const item = documentsData?.filter((item) => item.type === "id").pop()
+
+      const itemStorage = item?.files
+        ?.filter((item) => item.assignment === "id.selfie")
+        .pop()
+
+      if (!itemStorage) {
+        return
+      }
+
+      const res = await postDoc({
+        type: "id",
+        idDocumentData: {
+          name: getValues("name"),
+          idNumber: getValues("idNumber"),
+          dateOfBirth: moment(getValues("birth"))
+            .locale("en")
+            .format("YYYY-MM-DD"),
+          expirationDate: moment(getValues("expirationDate"))
+            .locale("en")
+            .format("YYYY-MM-DD"),
+        },
+        files: [
+          {
+            assignment: "id.front",
+            fileKey: frontImg.storageKey,
+          },
+          {
+            assignment: "id.back",
+            fileKey: backImg.storageKey,
+          },
+          {
+            assignment: "id.selfie",
+            fileKey: itemStorage!.url!.split("/").pop(),
+          },
+        ],
+      }).unwrap()
+      navigation.navigate("wait", {
+        endHours: 12,
+        headerTitle: t("identity_verification"),
+        descr: t("we_will_verify_the_information"),
+        documents: Array.isArray(res) ? res : [res],
+      })
+    } catch (e) {
+      console.log("Upload Document Error: ", e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSubmit = async () => {

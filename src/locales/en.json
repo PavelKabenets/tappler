@@ -1032,7 +1032,12 @@
     "interview_completed": "Interview completed",
     "you_have_passed_the_quality_interview_for_this_service": "You have passed the quality interview for this service",
 
-    "this_id_number_is_already_registered_in_our_system_descr": "This ID number is already registered in our system, please double check the number and try again. If you believe this information is not correct send email to {{email}}"
+    "this_id_number_is_already_registered_in_our_system_descr": "This ID number is already registered in our system, please double check the number and try again. If you believe this information is not correct send email to {{email}}",
+    "activation_failed": "Activation Failed",
+    "while_activating_your_account_descr":"While activating your account the following items were rejected on your profile",
+    "about_company": "About Company",
+    "go_to_my_profile_to_make_changes": "Go to “My Profile” to make changes",
+    "i_will_do_it_later": "I will do it later"
   }
 }
 

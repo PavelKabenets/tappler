@@ -32,6 +32,7 @@ export interface AuthState {
   isNotificationsAllowed: boolean
   isOnceServiceAllowed: boolean
   lastDoc?: DocType
+  isMyDocsUploaded?: boolean
 }
 
 const initialState: AuthState = {
@@ -73,6 +74,7 @@ export const authSlice = createSlice({
       state.isShowDeleteOpportunitiesModal = true
       state.documents = undefined
       state.listFoodMenuPositions = undefined
+      state.isMyDocsUploaded = undefined
     },
     setResultRegFlow: (
       state: AuthState,
@@ -238,6 +240,42 @@ export const authSlice = createSlice({
       api.endpoints.getMyDocument.matchFulfilled,
       (state, { payload }) => {
         state.lastDoc = payload?.map((item) => item).pop()
+      }
+    )
+    builder.addMatcher(
+      api.endpoints.getMyDocument.matchFulfilled,
+      (state, { payload }) => {
+        if (
+          state?.user?.proType === "individual" &&
+          !payload?.filter(
+            (item) =>
+              item.type === "id" &&
+              (item.status === "approved" || item.status === "pending")
+          ).length
+        ) {
+          state.isMyDocsUploaded = false
+          return state
+        }
+
+        if (
+          state?.user?.proType === "company" &&
+          (!payload?.filter(
+            (item) =>
+              item.type === "id" &&
+              (item.status === "approved" || item.status === "pending")
+          ).length ||
+            !payload?.filter(
+              (item) =>
+                item.type === "trust" &&
+                (item.status === "approved" || item.status === "pending")
+            ).length)
+        ) {
+          state.isMyDocsUploaded = false
+          return state
+        }
+
+        state.isMyDocsUploaded = true
+        return state
       }
     )
   },

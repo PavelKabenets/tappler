@@ -22,6 +22,7 @@ import clsx from "clsx"
 import styles from "./styles"
 import colors from "styles/colors"
 import {
+  useGetProsMyActivationQuery,
   usePatchProsMutation,
   usePostMultiPhotoMutation,
   usePostProfilePhotoMutation,
@@ -48,6 +49,10 @@ const MyProfileScreen: React.FC<Props> = ({ route, navigation }) => {
   const [patchPros] = usePatchProsMutation()
   const [postProfilePhoto] = usePostProfilePhotoMutation()
   const [postMultiPhoto] = usePostMultiPhotoMutation()
+  const { data: profileData } = useGetProsMyActivationQuery(undefined, {
+    pollingInterval: 60000,
+  })
+  const [isLoading, setLoading] = useState(false)
   // Refs
   // Methods
   // Handlers
@@ -108,6 +113,7 @@ const MyProfileScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const handleSubmit = async () => {
     try {
+      setLoading(true)
       let resPhoto
       if (photo) {
         resPhoto = await postProfilePhoto(photo).unwrap()
@@ -124,17 +130,37 @@ const MyProfileScreen: React.FC<Props> = ({ route, navigation }) => {
       }
 
       await patchPros({
-        businessName: profileParams.businessName,
-        proType: profileParams.proType,
-        paymentMethods: profileParams.payment,
-        photosOfWork: resPhotos?.map((item) => item.storageKey),
-        profilePhoto:
-          resPhoto?.storageKey || user?.profilePhoto?.split("/").pop(),
-        informationAbout: profileParams.informationAbout,
+        ...{
+          businessName: profileParams.businessName,
+          proType: profileParams.proType,
+          paymentMethods: profileParams.payment,
+        },
+        ...(user?.profilePhoto !== photo && resPhoto
+          ? {
+              profilePhoto: resPhoto?.storageKey,
+            }
+          : {}),
+        ...(user?.informationAbout !== profileParams.informationAbout
+          ? { informationAbout: profileParams.informationAbout }
+          : {}),
+        ...(profileParams.photosOfWorks?.some(
+          (item) => typeof item !== "string"
+        )
+          ? {
+              photosOfWork: [
+                ...(resPhotos?.map((item) => item.storageKey) || []),
+                ...(profileParams.photosOfWorks
+                  ?.filter((item) => typeof item === "string")
+                  .map((item) => (item as string).split("/").pop()) || []),
+              ] as string[],
+            }
+          : {}),
       }).unwrap()
       navigation.goBack()
     } catch (e) {
       console.log("Patch Pros Error: ", e)
+    } finally {
+      setLoading(false)
     }
   }
   // Listeners
@@ -156,6 +182,7 @@ const MyProfileScreen: React.FC<Props> = ({ route, navigation }) => {
         }
         onGoBackPress={handleOpenModalSaveData}
         onPressIcon={handleSubmit}
+        isRightIconDisable={isLoading}
       />
       <KeyboardAwareScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
@@ -168,6 +195,9 @@ const MyProfileScreen: React.FC<Props> = ({ route, navigation }) => {
           photo
           currentPhoto={photo}
           onPress={handleGoProfilePhotoScreen}
+          status={profileData?.profilePhoto?.status}
+          classNameBtn="mt-[4] ml-[0]"
+          titleWrapperClassName="flex-col"
         />
 
         <MyProfileSettingsComponent
@@ -182,6 +212,7 @@ const MyProfileScreen: React.FC<Props> = ({ route, navigation }) => {
           subtitle={profileParams?.informationAbout}
           Icon={true}
           onPress={handleGoAboutMeScreen}
+          status={profileData?.informationAbout?.status}
         />
         <MyProfileSettingsComponent
           title={t("photos_of_my_work")}
@@ -190,6 +221,11 @@ const MyProfileScreen: React.FC<Props> = ({ route, navigation }) => {
           subtitleArr={profileParams?.photosOfWorks}
           Icon={true}
           onPress={handleGoPhotosOfMyWorksScreen}
+          status={
+            profileData?.photosOfWork?.status || !profileData?.photosOfWork
+              ? "rejected"
+              : undefined
+          }
         />
         <MyProfileSettingsCheckboxComponent
           title={t("business_hours")}

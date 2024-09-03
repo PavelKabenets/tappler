@@ -22,6 +22,7 @@ interface Props {
   classNameDescrArr?: string
   classNameDescrArrItem?: string
   classNameDescrArrItemWrapper?: string
+  titleIcon?: React.ReactNode
 }
 
 const TitleRegistrationFlow: React.FC<Props> = ({
@@ -39,6 +40,7 @@ const TitleRegistrationFlow: React.FC<Props> = ({
   classNameDescrArr,
   classNameDescrArrItem,
   classNameDescrArrItemWrapper,
+  titleIcon,
 }) => {
   const { t, i18n } = useTranslation()
   const renderListItem = ({ item, index }: { item: string; index: number }) => {
@@ -68,47 +70,61 @@ const TitleRegistrationFlow: React.FC<Props> = ({
     <DmView className={clsx(className)} onPress={onPress}>
       <DmView className="flex-row items-center justify-between">
         <DmView className="flex-1">
-          {!!title && (
-            <DmText
-              className={clsx(
-                "text-16",
-                !classNameTitle?.match(/leading-/) && "leading-[19px]",
-                !classNameTitle?.match(/font-/) && "font-custom600",
-                classNameTitle
-              )}
-            >
-              {title}
-              {!!descrRight && (
-                <DmText
-                  className={clsx("ml-[5] text-16 leading-[19px] flex-1", classNameDescrRight)}
-                >
-                  {" "}
-                  {descrRight}
-                </DmText>
-              )}
-            </DmText>
-          )}
-          {!!descr && (
-            <DmView
-              className={clsx(
-                "mt-[5] flex-row items-center",
-                i18n.language === "ar" && "mt-[0]"
-              )}
-            >
-              {Icon}
+          <DmView className="flex-row items-center">
+            {!!titleIcon && <DmView className="mr-[8]">{titleIcon}</DmView>}
+
+            {!!title && (
               <DmText
                 className={clsx(
-                  "flex-1 text-12",
-                  !classNameDescr?.match(/leading-/) && "leading-[14px]",
-                  !classNameDescr?.match(/font-/) && "font-custom400",
-                  !!Icon && "ml-[5]",
-                  classNameDescr
+                  "text-16",
+                  !classNameTitle?.match(/leading-/) && "leading-[19px]",
+                  !classNameTitle?.match(/font-/) && "font-custom600",
+                  classNameTitle
                 )}
               >
-                {descr}
+                {title}
+                {!!descrRight && (
+                  <DmText
+                    className={clsx(
+                      "ml-[5] text-16 leading-[19px] flex-1",
+                      classNameDescrRight
+                    )}
+                  >
+                    {" "}
+                    {descrRight}
+                  </DmText>
+                )}
               </DmText>
-            </DmView>
-          )}
+            )}
+          </DmView>
+
+          <DmView className="flex-row items-center">
+            {!!titleIcon && (
+              <DmView className="mr-[8] opacity-0">{titleIcon}</DmView>
+            )}
+
+            {!!descr && (
+              <DmView
+                className={clsx(
+                  "mt-[5] flex-row items-center",
+                  i18n.language === "ar" && "mt-[0]"
+                )}
+              >
+                {Icon}
+                <DmText
+                  className={clsx(
+                    "flex-1 text-12",
+                    !classNameDescr?.match(/leading-/) && "leading-[14px]",
+                    !classNameDescr?.match(/font-/) && "font-custom400",
+                    !!Icon && "ml-[5]",
+                    classNameDescr
+                  )}
+                >
+                  {descr}
+                </DmText>
+              </DmView>
+            )}
+          </DmView>
         </DmView>
         {IconRight && <DmView className="pl-[12]">{IconRight}</DmView>}
       </DmView>

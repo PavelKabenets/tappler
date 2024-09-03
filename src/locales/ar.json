@@ -990,6 +990,11 @@
     "add_change_your_email_address": "اضافة او تغيير بريدك الالكتروني",
     "change_your_login_password": "تغيير كلمة السر",
     "location_photo": "صورة الموقع",
-    "upload_photos_of_your_business_location": "قم بتحميل صور لموقع عملك"
+    "upload_photos_of_your_business_location": "قم بتحميل صور لموقع عملك",
+    "activation_failed": "توجد مشكلة في التفعيل",
+    "while_activating_your_account_descr": "تم رفض البيانات التالية في روفايلك للاسباب الموضحة اسفلها. يرجى تصحيحها لتفعيل حسابك",
+    "about_company": "معلومات عن الشركة",
+    "go_to_my_profile_to_make_changes": "الذهاب إلى “بروفايلي” لإجراء التعديلات",
+    "i_will_do_it_later": "سأقوم بذلك لاحقا"
   }
 }

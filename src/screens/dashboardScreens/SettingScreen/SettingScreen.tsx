@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 
 // Components
 import { ActionBtn, DmText, DmView } from "components/UI"
@@ -37,6 +37,7 @@ import AboutAppIcon from "assets/icons/app.svg"
 import LogOutIcon from "assets/icons/sign-out.svg"
 import { useTypedSelector } from "store"
 import { ProfileSettingParamTypes } from "types"
+import { useGetProsMyActivationQuery } from "services/api"
 
 type Props = RootStackScreenProps<"setting">
 
@@ -49,8 +50,40 @@ const SettingScreen: React.FC<Props> = ({ navigation }) => {
   // Global Store
   const { user } = useTypedSelector((store) => store.auth)
   // Variables
+  const { data: profileData } = useGetProsMyActivationQuery(undefined, {
+    pollingInterval: 60000,
+  })
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
+  const btnStatus = useMemo(() => {
+    if (
+      profileData?.profilePhoto?.status === "approved" &&
+      profileData.informationAbout?.status === "approved" &&
+      profileData?.photosOfWork?.status === "approved"
+    ) {
+      return "approved"
+    }
+    if (
+      (profileData?.profilePhoto?.status === "pending" ||
+        profileData?.profilePhoto?.status === "approved") &&
+      (profileData.informationAbout?.status === "pending" ||
+        profileData.informationAbout?.status === "approved") &&
+      (profileData?.photosOfWork?.status === "pending" ||
+        profileData?.photosOfWork?.status === "approved")
+    ) {
+      return "pending"
+    }
+
+    if (
+      profileData?.profilePhoto?.status === "rejected" ||
+      profileData?.informationAbout?.status === "rejected" ||
+      profileData?.photosOfWork?.status === "rejected" ||
+      !profileData?.photosOfWork
+    ) {
+      return "rejected"
+    }
+    return ""
+  }, [profileData])
   // Refs
   // Methods
   // Handlers
@@ -162,6 +195,14 @@ const SettingScreen: React.FC<Props> = ({ navigation }) => {
           Icon={<IdCardIcon />}
           title={t("my_profile")}
           onPress={handleGoProfile}
+          btnTitle={btnStatus !== "approved" ? t(btnStatus) : ""}
+          btnVariant={
+            btnStatus === "pending"
+              ? "grey"
+              : btnStatus === "rejected"
+                ? "yellow"
+                : undefined
+          }
         />
         <SettingsItem
           Icon={<MyAccountIcon />}

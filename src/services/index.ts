@@ -40,6 +40,7 @@ import {
   NotificationsSettingItemType,
   SuspensionType,
   ProAdditionalDocumentsType,
+  ProsActivationInfoType,
 } from "types"
 
 export type ProsSignUpResponse = {
@@ -548,3 +549,12 @@ export type PostRegisterNotificationsDeviceResponse = {
   registrationToken: string
   createdAt: string
 }
+
+export type PostResendTrustResponse = DocType
+
+export type PostResendTrustRequest = {
+  id: number
+  fileKey: string
+}
+
+export type GetProsMyActivation = ProsActivationInfoType
